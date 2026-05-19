@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Home, CalendarDays, Camera, MoreHorizontal, LogIn } from 'lucide-react';
+import { Menu, X, Home, CalendarDays, Camera, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { useData } from '@/context/DataContext';
 import Image from 'next/image';
@@ -221,11 +221,11 @@ export const PublicNavbar = () => {
       </div>
 
       <div
-        className={`md:hidden fixed top-[4.75rem] left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-xl z-[60] transition-all duration-300 overflow-y-auto ${
+        className={`md:hidden fixed top-[4.75rem] left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-xl z-40 transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-[560px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
-        <div className="px-4 pt-4 pb-24 space-y-1 sm:px-3 flex flex-col">
+        <div className="px-4 pt-4 pb-6 space-y-1 sm:px-3 flex flex-col">
           {links.map((link) => (
             <Link
               key={link.name}
@@ -245,7 +245,7 @@ export const PublicNavbar = () => {
               <Button variant="outline" className="w-full transition-all duration-200 hover:scale-[1.02]">Team Login</Button>
             </Link>
             <Link href="/admin/login" onClick={() => setIsOpen(false)}>
-              <Button variant="primary" className="w-full bg-red-600 hover:bg-red-700 transition-all duration-200 hover:scale-[1.02]">Admin Login</Button>
+              <Button variant="primary" className="w-full bg-red-600 hover:bg-red-700 transition-all duration-200 hover:scale-[1.02]">Admin Portal</Button>
             </Link>
           </div>
         </div>
@@ -272,14 +272,6 @@ export const PublicNavbar = () => {
               </Link>
             );
           })}
-
-          <Link
-            href="/admin/login"
-            className={`flex flex-col items-center justify-center gap-1 px-3 py-2 text-[10px] font-medium transition-all duration-200 text-foreground/60 hover:text-foreground`}
-          >
-            <LogIn className="h-5 w-5" />
-            <span>Admin</span>
-          </Link>
 
           <button
             type="button"

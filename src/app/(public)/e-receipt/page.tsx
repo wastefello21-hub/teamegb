@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Download, Search, BadgeCheck, Clock3, ScanBarcode, Info } from 'lucide-react';
+import { Download, Search, BadgeCheck, Clock3, ScanBarcode } from 'lucide-react';
 
 type ReceiptRecord = {
   receipt_number: string;
@@ -24,10 +24,15 @@ export default function EReceiptPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
+  const autoDownloadTriggered = useRef(false);
 
-  const handleDownloadClick = () => {
-    setNotice('Our team is currently refining the receipt download experience. The feature will be available very soon.');
+  const triggerDownload = (url: string, number: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `receipt-${number}.png`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const lookupReceipt = async (number: string) => {
@@ -52,7 +57,9 @@ export default function EReceiptPage() {
       }
 
       setReceipt(data.receipt);
-      setNotice(null);
+      if (data.receipt?.receipt_url) {
+        triggerDownload(`/api/download-receipt?receiptNumber=${encodeURIComponent(data.receipt.receipt_number)}`, data.receipt.receipt_number);
+      }
     } catch (lookupError) {
       setError(lookupError instanceof Error ? lookupError.message : 'Failed to fetch receipt');
     } finally {
@@ -61,7 +68,7 @@ export default function EReceiptPage() {
   };
 
   useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (typeof window === 'undefined' || autoDownloadTriggered.current) {
       return;
     }
 
@@ -69,6 +76,7 @@ export default function EReceiptPage() {
     const receiptParam = params.get('receipt');
 
     if (receiptParam) {
+      autoDownloadTriggered.current = true;
       setReceiptNumber(receiptParam);
       lookupReceipt(receiptParam);
     }
@@ -92,7 +100,7 @@ export default function EReceiptPage() {
                 Find, open, and download your contribution receipt.
               </h1>
               <p className="max-w-xl text-base md:text-lg text-foreground/70">
-                Enter the 6-digit receipt number generated when the contribution was recorded. The matching receipt details will appear instantly, and download access will be available shortly.
+                Enter the 6-digit receipt number generated when the contribution was recorded. The exact matching receipt will open instantly and download automatically.
               </p>
             </motion.div>
 
@@ -138,30 +146,9 @@ export default function EReceiptPage() {
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-4 py-3">
                   <Clock3 className="h-5 w-5 text-orange-500" />
-                  Receipt preview after lookup
+                  Auto-download after lookup
                 </div>
               </div>
-
-              <AnimatePresence>
-                {notice && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="mt-5 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 px-4 py-4 text-sm text-foreground shadow-sm"
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                        <Info className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground">Download feature coming soon</p>
-                        <p className="mt-1 leading-6 text-foreground/75">{notice}</p>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
               <AnimatePresence>
                 {error && (
@@ -194,13 +181,13 @@ export default function EReceiptPage() {
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Matched Receipt</p>
                           <h2 className="mt-1 text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
                         </div>
-                        <button
-                          type="button"
-                          onClick={handleDownloadClick}
-                          className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-[1.01] hover:from-orange-600 hover:via-red-600 hover:to-orange-700"
+                        <a
+                          href={receipt.receipt_url}
+                          download={`receipt-${receipt.receipt_number}.png`}
+                          className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-600"
                         >
                           <Download className="mr-2 h-4 w-4" /> Download
-                        </button>
+                        </a>
                       </div>
                     </div>
 
@@ -232,13 +219,13 @@ export default function EReceiptPage() {
 
                       <div className="p-5 md:p-6">
                         <p className="text-sm text-foreground/65">
-                          The matching receipt details are ready. We are still finalizing the download experience for this feature.
+                          The matching receipt is ready. Download it or keep the receipt number safe for future lookup.
                         </p>
                         <div className="mt-5 rounded-3xl border border-dashed border-orange-500/25 bg-orange-500/5 p-4">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>
                           <div className="mt-3 space-y-2 text-sm text-foreground/75">
                             <p><span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}</p>
-                            <p><span className="font-semibold text-foreground">Download:</span> Coming soon</p>
+                            <p><span className="font-semibold text-foreground">Download:</span> Immediate on lookup</p>
                           </div>
                         </div>
                       </div>
@@ -263,37 +250,6 @@ export default function EReceiptPage() {
           </div>
         </div>
       </div>
-
-      <AnimatePresence>
-        {notice && (
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 24, scale: 0.98 }}
-            className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2"
-          >
-            <div className="rounded-3xl border border-amber-500/20 bg-white/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl dark:bg-neutral-950/95">
-              <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-700 dark:text-amber-300">
-                  <Info className="h-5 w-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-foreground">Download feature coming soon</p>
-                  <p className="mt-1 text-sm leading-6 text-foreground/70">{notice}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setNotice(null)}
-                  className="rounded-full px-3 py-1 text-sm font-semibold text-foreground/55 transition-colors hover:bg-foreground/5 hover:text-foreground"
-                  aria-label="Dismiss notice"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

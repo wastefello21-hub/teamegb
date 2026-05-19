@@ -1,21 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase, supabaseAdmin } from '@/lib/supabase';
-import { renderReceiptImage } from '@/lib/renderReceiptSafe';
-
-async function resolveCollectorName(collectorIdOrName: string) {
-  const dbClient = supabaseAdmin ?? supabase;
-  const { data, error } = await dbClient
-    .from('team_members')
-    .select('name')
-    .eq('id', collectorIdOrName)
-    .maybeSingle();
-
-  if (error) {
-    throw error;
-  }
-
-  return data?.name || collectorIdOrName;
-}
+import { supabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
@@ -30,37 +14,35 @@ export async function GET(request: NextRequest) {
 
     const { data, error } = await supabase
       .from('contributions')
-      .select('name, phone, amount, mode, collector, date, receipt_number, receipt_created_at')
+      .select('receipt_url')
       .eq('receipt_number', receiptNumber)
       .single();
 
-    if (error || !data) {
+    if (error || !data?.receipt_url) {
       return NextResponse.json(
         { error: 'Receipt not found' },
         { status: 404 }
       );
     }
 
-    const entryDate = data.receipt_created_at ? new Date(data.receipt_created_at) : new Date(data.date);
-    const collectorDisplayName = await resolveCollectorName(data.collector);
-    const buffer = await renderReceiptImage({
-      receiptNumber: data.receipt_number || receiptNumber,
-      entryDate: Number.isNaN(entryDate.getTime()) ? new Date() : entryDate,
-      name: data.name,
-      phone: data.phone,
-      amount: Number(data.amount),
-      mode: data.mode,
-      collector: collectorDisplayName,
-    });
+    const receiptResponse = await fetch(data.receipt_url);
 
-    return new NextResponse(new Uint8Array(buffer), {
+    if (!receiptResponse.ok) {
+      return NextResponse.json(
+        { error: 'Failed to load receipt file' },
+        { status: 502 }
+      );
+    }
+
+    const contentType = receiptResponse.headers.get('content-type') || 'image/png';
+    const buffer = Buffer.from(await receiptResponse.arrayBuffer());
+
+    return new NextResponse(buffer, {
       status: 200,
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="receipt-${receiptNumber}.png"`,
         'Cache-Control': 'no-store',
-        Pragma: 'no-cache',
-        Expires: '0',
       },
     });
   } catch (error) {

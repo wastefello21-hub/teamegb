@@ -3,58 +3,14 @@
 import React, { useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
-import { Search, Download, Filter, Trash2, X, RefreshCw } from 'lucide-react';
+import { Search, Download, Filter, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 
 export default function ManageContributionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [regeneratingReceipt, setRegeneratingReceipt] = useState<string | null>(null);
-  const [regenToast, setRegenToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const { contributions, deleteContribution } = useData();
-
-  const triggerDownload = (url: string, receiptNumber: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `receipt-${receiptNumber}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleRegenerateReceipt = async (receiptNumber?: string) => {
-    if (!receiptNumber) {
-      return;
-    }
-
-    try {
-      setRegeneratingReceipt(receiptNumber);
-      const response = await fetch('/api/regenerate-receipt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ receiptNumber }),
-      });
-
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error || 'Failed to regenerate receipt');
-      }
-
-      triggerDownload(payload.downloadUrl, receiptNumber);
-      setRegenToast({ type: 'success', message: `Receipt ${receiptNumber} regenerated successfully.` });
-      setTimeout(() => setRegenToast(null), 3000);
-    } catch (error) {
-      console.error(error);
-      const message = error instanceof Error ? error.message : 'Failed to regenerate receipt';
-      setRegenToast({ type: 'error', message });
-      setTimeout(() => setRegenToast(null), 3500);
-    } finally {
-      setRegeneratingReceipt(null);
-    }
-  };
 
   const confirmDelete = () => {
     if (deletingId) {
@@ -104,15 +60,6 @@ export default function ManageContributionsPage() {
       </div>
 
       <GlassCard className="p-4">
-        {regenToast && (
-          <div
-            className={`mb-4 rounded-xl border px-4 py-3 text-sm font-semibold ${regenToast.type === 'success'
-              ? 'border-green-500/30 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-              : 'border-red-500/30 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}
-          >
-            {regenToast.message}
-          </div>
-        )}
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 w-5 h-5" />
@@ -172,20 +119,9 @@ export default function ManageContributionsPage() {
                     <td className="p-4 text-sm text-foreground/70">{tx.collector}</td>
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {tx.receipt_number && (
-                          <button
-                            type="button"
-                            onClick={() => handleRegenerateReceipt(tx.receipt_number)}
-                            disabled={regeneratingReceipt === tx.receipt_number}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-blue-500/20 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/35"
-                            title="Regenerate this receipt"
-                          >
-                            <RefreshCw size={14} className={regeneratingReceipt === tx.receipt_number ? 'animate-spin' : ''} /> Regenerate
-                          </button>
-                        )}
-                        {tx.receipt_number && (
+                        {tx.receipt_url && (
                           <a
-                            href={`/api/download-receipt?receiptNumber=${tx.receipt_number}&ts=${Date.now()}`}
+                            href={`/api/download-receipt?receiptNumber=${tx.receipt_number}`}
                             download={tx.receipt_number ? `receipt-${tx.receipt_number}.png` : undefined}
                             className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/20 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/35"
                           >

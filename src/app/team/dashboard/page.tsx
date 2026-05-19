@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { CheckCircle2, LogOut, CreditCard, ChevronLeft, ScanSearch, Maximize2, X, RefreshCw } from 'lucide-react';
+import { CheckCircle2, LogOut, CreditCard, ChevronLeft, ScanSearch, Maximize2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
@@ -28,8 +28,6 @@ export default function TeamDashboard() {
   const [idCardUrl, setIdCardUrl] = useState<string | null>(null);
   const [idCardLoading, setIdCardLoading] = useState(false);
   const [idCardError, setIdCardError] = useState<string | null>(null);
-  const [isRegeneratingReceipt, setIsRegeneratingReceipt] = useState(false);
-  const [regenToast, setRegenToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [generatedReceipt, setGeneratedReceipt] = useState<{
     receipt_number: string;
     receipt_url: string;
@@ -64,14 +62,7 @@ export default function TeamDashboard() {
   }, [showFullscreenIdCard]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-
-    if (name === 'amount') {
-      setFormData({ ...formData, amount: value.replace(/\D/g, '') });
-      return;
-    }
-
-    setFormData({ ...formData, [name]: value });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
     if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
       setShowUpi(true);
     } else if (e.target.name === 'paymentMode') {
@@ -105,48 +96,6 @@ export default function TeamDashboard() {
     }
   };
 
-  const triggerReceiptDownload = (url: string, receiptNumber: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `receipt-${receiptNumber}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleRegenerateReceipt = async (receiptNumber?: string) => {
-    if (!receiptNumber || isRegeneratingReceipt) {
-      return;
-    }
-
-    try {
-      setIsRegeneratingReceipt(true);
-      const response = await fetch('/api/regenerate-receipt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ receiptNumber }),
-      });
-
-      const payload = await response.json();
-      if (!response.ok) {
-        throw new Error(payload.error || 'Failed to regenerate receipt');
-      }
-
-      triggerReceiptDownload(payload.downloadUrl, receiptNumber);
-      setRegenToast({ type: 'success', message: `Receipt ${receiptNumber} regenerated successfully.` });
-      setTimeout(() => setRegenToast(null), 3000);
-    } catch (error) {
-      console.error(error);
-      const message = error instanceof Error ? error.message : 'Failed to regenerate receipt';
-      setRegenToast({ type: 'error', message });
-      setTimeout(() => setRegenToast(null), 3500);
-    } finally {
-      setIsRegeneratingReceipt(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -155,17 +104,12 @@ export default function TeamDashboard() {
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
       const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
-      const contributionAmount = Number.parseInt(formData.amount, 10);
-
-      if (!Number.isFinite(contributionAmount) || contributionAmount <= 0) {
-        throw new Error('Enter a valid whole rupee amount.');
-      }
 
       const createdContribution = await addContribution({
         name: formData.contributorName,
         house: formData.houseNumber,
         phone: formData.phoneNumber,
-        amount: Math.floor(contributionAmount),
+        amount: Number(formData.amount),
         mode: formData.paymentMode,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         collector: collectorId
@@ -223,32 +167,12 @@ export default function TeamDashboard() {
             <p className="mt-2 text-sm text-foreground/70">
               The receipt has been stored in Supabase and can be opened from the public e-receipt page.
             </p>
-            {regenToast && (
-              <div
-                className={`mt-3 rounded-xl border px-3 py-2 text-xs font-semibold ${regenToast.type === 'success'
-                  ? 'border-green-500/30 bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300'
-                  : 'border-red-500/30 bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300'}`}
-              >
-                {regenToast.message}
-              </div>
-            )}
             <div className="mt-4 flex flex-col sm:flex-row gap-3">
               <a href={`/e-receipt?receipt=${generatedReceipt.receipt_number}`} className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600">
                 Open Receipt Page
               </a>
               {generatedReceipt.receipt_number ? (
-                <button
-                  type="button"
-                  onClick={() => handleRegenerateReceipt(generatedReceipt.receipt_number)}
-                  disabled={isRegeneratingReceipt}
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl border border-blue-500/25 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-900/20 dark:text-blue-300 dark:hover:bg-blue-900/35"
-                >
-                  <RefreshCw size={16} className={isRegeneratingReceipt ? 'animate-spin' : ''} />
-                  {isRegeneratingReceipt ? 'Regenerating...' : 'Regenerate'}
-                </button>
-              ) : null}
-              {generatedReceipt.receipt_number ? (
-                <a href={`/api/download-receipt?receiptNumber=${generatedReceipt.receipt_number}&ts=${Date.now()}`} download={`receipt-${generatedReceipt.receipt_number}.png`} className="inline-flex items-center justify-center rounded-2xl border border-border-color bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5">
+                <a href={`/api/download-receipt?receiptNumber=${generatedReceipt.receipt_number}`} download={`receipt-${generatedReceipt.receipt_number}.png`} className="inline-flex items-center justify-center rounded-2xl border border-border-color bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5">
                   Download Image
                 </a>
               ) : null}
@@ -488,12 +412,10 @@ export default function TeamDashboard() {
             <div>
               <label className="block text-xs font-semibold mb-1 uppercase tracking-wide text-foreground/70">Amount (₹)</label>
               <input 
-                type="text"
+                type="number" 
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
-                inputMode="numeric"
-                pattern="[0-9]*"
                 className="w-full px-3 py-2 rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-bold text-orange-600 dark:text-orange-400"
                 placeholder="0"
                 required

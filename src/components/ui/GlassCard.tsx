@@ -8,7 +8,7 @@ interface GlassCardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export const GlassCard = React.forwardRef<HTMLDivElement, GlassCardProps>(
   ({ className = '', children, variant = 'default', glow = false, ...props }, ref) => {
-    const baseStyles = 'glass rounded-2xl p-6 transition-all duration-500 ease-out';
+    const baseStyles = 'glass relative overflow-hidden rounded-2xl p-5 sm:p-6 transition-all duration-500 ease-out';
 
     const variants = {
       default: 'glass-hover',
