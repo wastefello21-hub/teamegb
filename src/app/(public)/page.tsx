@@ -624,7 +624,7 @@ export default function HomePage() {
             >
               {[
                 { 
-                  name: "Contact 1", 
+                  name: "Chetan", 
                   value: "+91 8183859491", 
                   href: "tel:+918183859491", 
                   icon: Phone, 
@@ -634,19 +634,9 @@ export default function HomePage() {
                   text: "text-green-700 dark:text-green-400"
                 },
                 { 
-                  name: "Contact 2", 
+                  name: "Prajwal", 
                   value: "+91 9380753581", 
                   href: "tel:+919380753581", 
-                  icon: Phone, 
-                  color: "from-green-500 to-emerald-600",
-                  bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
-                  border: "border-green-200 dark:border-green-800",
-                  text: "text-green-700 dark:text-green-400"
-                },
-                { 
-                  name: "Contact 3", 
-                  value: "+91 0000000000", 
-                  href: "tel:+910000000000", 
                   icon: Phone, 
                   color: "from-green-500 to-emerald-600",
                   bgHover: "hover:from-green-100 hover:to-emerald-100 dark:hover:from-green-900/30 dark:hover:to-emerald-900/30",
