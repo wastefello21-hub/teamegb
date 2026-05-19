@@ -656,7 +656,7 @@ export default function HomePage() {
                 { 
                   name: "Instagram", 
                   value: "@ekadanta_boys_gmp", 
-                  href: "https://www.instagram.com/ekadanta_boys_gmp?igsh=MXVqaGF2MHc5em5yNQ==", 
+                  href: "https://www.instagram.com/teamegb_official/", 
                   icon: InstagramIcon, 
                   color: "from-pink-500 to-purple-600",
                   bgHover: "hover:from-pink-100 hover:to-purple-100 dark:hover:from-pink-900/30 dark:hover:to-purple-900/30",

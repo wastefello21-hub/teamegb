@@ -26,11 +26,7 @@ export default function EReceiptPage() {
   const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const buildDownloadUrl = (number: string) =>
-    `/api/download-receipt?receiptNumber=${encodeURIComponent(number)}&ts=${Date.now()}`;
-
-  const handleDownloadClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
+  const handleDownloadClick = () => {
     setNotice('Our team is currently refining the receipt download experience. The feature will be available very soon.');
   };
 
@@ -152,15 +148,15 @@ export default function EReceiptPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="mt-5 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 px-4 py-4 text-sm text-foreground shadow-sm"
+                    className="mt-5 rounded-[1.5rem] border border-amber-500/20 bg-gradient-to-br from-white/95 via-amber-50/80 to-orange-50/80 px-5 py-5 text-center shadow-[0_18px_50px_rgba(251,146,60,0.12)] dark:from-neutral-950/95 dark:via-neutral-950/90 dark:to-neutral-900/80"
                   >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
-                        <Info className="h-4 w-4" />
+                    <div className="mx-auto flex max-w-md flex-col items-center gap-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500/15 to-orange-500/15 text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-300">
+                        <Info className="h-5 w-5" />
                       </div>
                       <div>
-                        <p className="font-semibold text-foreground">Download feature coming soon</p>
-                        <p className="mt-1 leading-6 text-foreground/75">{notice}</p>
+                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-700 dark:text-amber-300">Coming Soon</p>
+                        <p className="mt-2 text-base font-medium leading-7 text-foreground/80">{notice}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -198,13 +194,13 @@ export default function EReceiptPage() {
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Matched Receipt</p>
                           <h2 className="mt-1 text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
                         </div>
-                        <a
-                          href={buildDownloadUrl(receipt.receipt_number)}
+                        <button
+                          type="button"
                           onClick={handleDownloadClick}
                           className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-[1.01] hover:from-orange-600 hover:via-red-600 hover:to-orange-700"
                         >
                           <Download className="mr-2 h-4 w-4" /> Download
-                        </a>
+                        </button>
                       </div>
                     </div>
 
