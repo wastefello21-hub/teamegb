@@ -655,7 +655,7 @@ export default function HomePage() {
                 },
                 { 
                   name: "Instagram", 
-                  value: "@ekadanta_boys_gmp", 
+                  value: "@teamegb_official", 
                   href: "https://www.instagram.com/teamegb_official/", 
                   icon: InstagramIcon, 
                   color: "from-pink-500 to-purple-600",

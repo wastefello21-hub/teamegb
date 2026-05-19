@@ -148,15 +148,15 @@ export default function EReceiptPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 10 }}
-                    className="mt-5 rounded-[1.5rem] border border-amber-500/20 bg-gradient-to-br from-white/95 via-amber-50/80 to-orange-50/80 px-5 py-5 text-center shadow-[0_18px_50px_rgba(251,146,60,0.12)] dark:from-neutral-950/95 dark:via-neutral-950/90 dark:to-neutral-900/80"
+                    className="mt-5 rounded-2xl border border-amber-500/20 bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-red-500/10 px-4 py-4 text-sm text-foreground shadow-sm"
                   >
-                    <div className="mx-auto flex max-w-md flex-col items-center gap-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-amber-500/15 to-orange-500/15 text-amber-700 ring-1 ring-amber-500/20 dark:text-amber-300">
-                        <Info className="h-5 w-5" />
+                    <div className="flex items-start gap-3">
+                      <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-300">
+                        <Info className="h-4 w-4" />
                       </div>
                       <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-amber-700 dark:text-amber-300">Coming Soon</p>
-                        <p className="mt-2 text-base font-medium leading-7 text-foreground/80">{notice}</p>
+                        <p className="font-semibold text-foreground">Download feature coming soon</p>
+                        <p className="mt-1 leading-6 text-foreground/75">{notice}</p>
                       </div>
                     </div>
                   </motion.div>
@@ -263,6 +263,37 @@ export default function EReceiptPage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0, y: 24, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 24, scale: 0.98 }}
+            className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-1.5rem)] max-w-xl -translate-x-1/2"
+          >
+            <div className="rounded-3xl border border-amber-500/20 bg-white/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.22)] backdrop-blur-xl dark:bg-neutral-950/95">
+              <div className="flex items-start gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-700 dark:text-amber-300">
+                  <Info className="h-5 w-5" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-foreground">Download feature coming soon</p>
+                  <p className="mt-1 text-sm leading-6 text-foreground/70">{notice}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-full px-3 py-1 text-sm font-semibold text-foreground/55 transition-colors hover:bg-foreground/5 hover:text-foreground"
+                  aria-label="Dismiss notice"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
