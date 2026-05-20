@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Download, Search, BadgeCheck, Clock3, ScanBarcode } from 'lucide-react';
+import { Download, Search, BadgeCheck, Clock3, ScanBarcode, Info, X } from 'lucide-react';
 
 type ReceiptRecord = {
   receipt_number: string;
@@ -24,15 +24,10 @@ export default function EReceiptPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
-  const autoDownloadTriggered = useRef(false);
+  const [notice, setNotice] = useState<string | null>(null);
 
-  const triggerDownload = (url: string, number: string) => {
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `receipt-${number}.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadClick = () => {
+    setNotice('This feature is not yet ready. Our EGB developers are working hard to make it fully functional and available very soon.');
   };
 
   const lookupReceipt = async (number: string) => {
@@ -57,9 +52,7 @@ export default function EReceiptPage() {
       }
 
       setReceipt(data.receipt);
-      if (data.receipt?.receipt_url) {
-        triggerDownload(`/api/download-receipt?receiptNumber=${encodeURIComponent(data.receipt.receipt_number)}`, data.receipt.receipt_number);
-      }
+      setNotice(null);
     } catch (lookupError) {
       setError(lookupError instanceof Error ? lookupError.message : 'Failed to fetch receipt');
     } finally {
@@ -68,7 +61,7 @@ export default function EReceiptPage() {
   };
 
   useEffect(() => {
-    if (typeof window === 'undefined' || autoDownloadTriggered.current) {
+    if (typeof window === 'undefined') {
       return;
     }
 
@@ -76,7 +69,6 @@ export default function EReceiptPage() {
     const receiptParam = params.get('receipt');
 
     if (receiptParam) {
-      autoDownloadTriggered.current = true;
       setReceiptNumber(receiptParam);
       lookupReceipt(receiptParam);
     }
@@ -85,9 +77,9 @@ export default function EReceiptPage() {
   return (
     <div className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_top,_rgba(255,182,64,0.22),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(239,68,68,0.14),_transparent_34%),linear-gradient(180deg,_rgba(255,248,230,0.95),_rgba(255,255,255,0.72))] dark:bg-[radial-gradient(circle_at_top,_rgba(255,182,64,0.16),_transparent_30%),radial-gradient(circle_at_bottom_right,_rgba(239,68,68,0.1),_transparent_34%),linear-gradient(180deg,_rgba(15,15,15,0.96),_rgba(24,24,24,0.92))]" />
-      <div className="mx-auto max-w-7xl px-4 py-8 md:py-14">
-        <div className="grid gap-8 lg:grid-cols-[0.92fr_1.08fr] items-start">
-          <div className="space-y-6">
+      <div className="mx-auto max-w-7xl px-3 py-6 sm:px-4 sm:py-8 md:py-14">
+        <div className="grid gap-6 lg:grid-cols-[0.92fr_1.08fr] lg:gap-8 items-start">
+          <div className="space-y-5 sm:space-y-6">
             <motion.div
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
@@ -96,11 +88,11 @@ export default function EReceiptPage() {
               <div className="inline-flex items-center gap-2 rounded-full border border-orange-500/20 bg-orange-500/10 px-4 py-2 text-xs font-bold uppercase tracking-[0.28em] text-orange-700 dark:text-orange-300">
                 <ScanBarcode className="h-4 w-4" /> Public E-Receipt
               </div>
-              <h1 className="text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight">
+              <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight">
                 Find, open, and download your contribution receipt.
               </h1>
-              <p className="max-w-xl text-base md:text-lg text-foreground/70">
-                Enter the 6-digit receipt number generated when the contribution was recorded. The exact matching receipt will open instantly and download automatically.
+              <p className="max-w-xl text-sm sm:text-base md:text-lg text-foreground/70">
+                Enter the 6-digit receipt number generated when the contribution was recorded. The exact matching receipt details will open instantly.
               </p>
             </motion.div>
 
@@ -146,7 +138,7 @@ export default function EReceiptPage() {
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-4 py-3">
                   <Clock3 className="h-5 w-5 text-orange-500" />
-                  Auto-download after lookup
+                  Download feature in progress
                 </div>
               </div>
 
@@ -175,37 +167,37 @@ export default function EReceiptPage() {
                   exit={{ opacity: 0, y: 18, scale: 0.98 }}
                 >
                   <GlassCard className="overflow-hidden border border-orange-500/15 bg-white/85 dark:bg-neutral-950/90 shadow-[0_30px_100px_rgba(0,0,0,0.22)]">
-                    <div className="border-b border-border-color bg-gradient-to-r from-orange-500/10 via-transparent to-red-500/10 px-5 py-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
+                    <div className="border-b border-border-color bg-gradient-to-r from-orange-500/10 via-transparent to-red-500/10 px-4 py-4 sm:px-5">
+                      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="min-w-0">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Matched Receipt</p>
-                          <h2 className="mt-1 text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
+                          <h2 className="mt-1 break-words text-xl sm:text-2xl font-black text-foreground">No. {receipt.receipt_number}</h2>
                         </div>
-                        <a
-                          href={receipt.receipt_url}
-                          download={`receipt-${receipt.receipt_number}.png`}
-                          className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-colors hover:bg-orange-600"
+                        <button
+                          type="button"
+                          onClick={handleDownloadClick}
+                          className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-[1.01] hover:from-orange-600 hover:via-red-600 hover:to-orange-700 sm:w-auto"
                         >
                           <Download className="mr-2 h-4 w-4" /> Download
-                        </a>
+                        </button>
                       </div>
                     </div>
 
                     <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
-                      <div className="border-b lg:border-b-0 lg:border-r border-border-color bg-gradient-to-br from-orange-50/70 to-amber-50/30 dark:from-white/5 dark:to-white/[0.02] p-5">
+                      <div className="border-b lg:border-b-0 lg:border-r border-border-color bg-gradient-to-br from-orange-50/70 to-amber-50/30 dark:from-white/5 dark:to-white/[0.02] p-4 sm:p-5">
                         <div className="relative overflow-hidden rounded-3xl border border-white/60 dark:border-white/10 bg-[#f9f0d8] shadow-inner shadow-orange-500/5">
                           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(255,255,255,0.6),_transparent_35%)]" />
-                          <div className="p-5">
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="max-w-[55%]">
-                                <p className="text-sm font-semibold uppercase tracking-wide text-amber-800">TEAM EGB</p>
-                                <h3 className="mt-2 text-3xl font-extrabold text-amber-900 leading-tight">Contribution Receipt</h3>
+                          <div className="p-4 sm:p-5">
+                            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                              <div className="max-w-none sm:max-w-[55%]">
+                                <p className="text-xs sm:text-sm font-semibold uppercase tracking-wide text-amber-800">TEAM EGB</p>
+                                <h3 className="mt-2 text-2xl sm:text-3xl font-extrabold text-amber-900 leading-tight">Contribution Receipt</h3>
                               </div>
-                              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full border-4 border-foreground/10 shadow-lg">
+                              <div className="relative h-16 w-16 sm:h-20 sm:w-20 shrink-0 overflow-hidden rounded-full border-4 border-foreground/10 shadow-lg">
                                 <Image src="/logo_v2.jpg" alt="TEAM EGB logo" fill className="object-cover" />
                               </div>
                             </div>
-                            <div className="mt-5 space-y-3 text-base text-amber-900">
+                            <div className="mt-5 space-y-3 text-sm sm:text-base text-amber-900">
                               <div><span className="font-semibold text-amber-900">Name:</span> <span className="ml-2 font-medium text-amber-800">{receipt.name}</span></div>
                               <div><span className="font-semibold text-amber-900">Phone:</span> <span className="ml-2 font-medium text-amber-800">{receipt.phone}</span></div>
                               <div><span className="font-semibold text-amber-900">Amount:</span> <span className="ml-2 font-medium text-amber-800">₹ {receipt.amount.toLocaleString('en-IN')}</span></div>
@@ -217,15 +209,15 @@ export default function EReceiptPage() {
                         </div>
                       </div>
 
-                      <div className="p-5 md:p-6">
+                      <div className="p-4 sm:p-5 md:p-6">
                         <p className="text-sm text-foreground/65">
-                          The matching receipt is ready. Download it or keep the receipt number safe for future lookup.
+                          The matching receipt details are ready. Download is being finalized and will be available soon.
                         </p>
                         <div className="mt-5 rounded-3xl border border-dashed border-orange-500/25 bg-orange-500/5 p-4">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>
                           <div className="mt-3 space-y-2 text-sm text-foreground/75">
                             <p><span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}</p>
-                            <p><span className="font-semibold text-foreground">Download:</span> Immediate on lookup</p>
+                            <p><span className="font-semibold text-foreground">Download:</span> Coming soon</p>
                           </div>
                         </div>
                       </div>
@@ -237,7 +229,7 @@ export default function EReceiptPage() {
                   key="placeholder"
                   initial={{ opacity: 0, y: 12 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="rounded-[2rem] border border-dashed border-border-color/80 bg-white/40 dark:bg-white/5 p-10 text-center text-foreground/55 shadow-inner"
+                  className="rounded-[2rem] border border-dashed border-border-color/80 bg-white/40 dark:bg-white/5 p-6 sm:p-10 text-center text-foreground/55 shadow-inner"
                 >
                   <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-orange-500/10 text-orange-500">
                     <ScanBarcode className="h-9 w-9" />
@@ -250,6 +242,58 @@ export default function EReceiptPage() {
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {notice && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 px-4 backdrop-blur-sm"
+            onClick={() => setNotice(null)}
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.98 }}
+              onClick={(event) => event.stopPropagation()}
+              className="w-full max-w-lg rounded-3xl border border-orange-500/20 bg-white/95 p-6 shadow-[0_30px_80px_rgba(0,0,0,0.3)] dark:bg-neutral-950/95"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Download availability notice"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 text-amber-700 dark:text-amber-300">
+                    <Info className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-bold text-foreground">Download Feature Coming Soon</p>
+                    <p className="mt-2 text-sm leading-6 text-foreground/75">{notice}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-full p-1.5 text-foreground/60 transition-colors hover:bg-foreground/5 hover:text-foreground"
+                  aria-label="Close message"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="mt-6 flex justify-end">
+                <Button
+                  type="button"
+                  onClick={() => setNotice(null)}
+                  className="rounded-xl bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 px-5 py-2 text-white"
+                >
+                  Understood
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
