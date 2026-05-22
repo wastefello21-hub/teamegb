@@ -56,7 +56,12 @@ function auth(req, res, next) {
 }
 
 function normalizePhoneToChatId(phone) {
-  const digits = String(phone || '').replace(/[^\d]/g, '');
+  let digits = String(phone || '').replace(/[^\d]/g, '');
+  if (digits.length === 10) {
+    digits = `91${digits}`;
+  } else if (digits.length === 11 && digits.startsWith('0')) {
+    digits = `91${digits.slice(1)}`;
+  }
   return `${digits}@c.us`;
 }
 
