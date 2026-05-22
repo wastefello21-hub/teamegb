@@ -7,8 +7,28 @@ type OpenWaResult = {
 };
 
 const normalizePhoneToChatId = (phone: string) => {
-  const digits = phone.replace(/[^\d]/g, '');
+  let digits = phone.replace(/[^\d]/g, '');
+
+  // Most contributor numbers are entered as 10-digit Indian mobile numbers.
+  // Convert them to E.164-style country-code format before sending to WhatsApp.
+  if (digits.length === 10) {
+    digits = `91${digits}`;
+  } else if (digits.length === 11 && digits.startsWith('0')) {
+    digits = `91${digits.slice(1)}`;
+  }
+
   return `${digits}@c.us`;
+};
+
+const resolveSendTextEndpoint = (baseUrl: string, sendTextPath: string) => {
+  const trimmedBase = baseUrl.replace(/\/$/, '');
+  const normalizedPath = sendTextPath.startsWith('/') ? sendTextPath : `/${sendTextPath}`;
+
+  if (/\/sendText$/i.test(trimmedBase)) {
+    return trimmedBase;
+  }
+
+  return `${trimmedBase}${normalizedPath}`;
 };
 
 export const sendWhatsAppThankYouOpenWA = async (
@@ -27,7 +47,7 @@ export const sendWhatsAppThankYouOpenWA = async (
 
   const text = `Namaste ${name}, thank you for contributing ₹${amount} towards TEAM EGB Ganesha Festival. Your 6-digit e-receipt ID is ${receiptNumber}. Your support means a lot to us.`;
   const chatId = normalizePhoneToChatId(phone);
-  const endpoint = `${baseUrl.replace(/\/$/, '')}${sendTextPath.startsWith('/') ? sendTextPath : `/${sendTextPath}`}`;
+  const endpoint = resolveSendTextEndpoint(baseUrl, sendTextPath);
 
   try {
     const response = await fetch(endpoint, {

@@ -10,7 +10,8 @@ const client = hasRealTwilioCreds ? twilio(accountSid, authToken) : null;
 
 export const sendWhatsAppThankYou = async (phone: string, name: string, amount: number, receiptNumber: string) => {
   const isMock = !hasRealTwilioCreds || !client;
-  const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`; // Assuming Indian numbers
+  const digits = phone.replace(/[^\d]/g, '');
+  const formattedPhone = digits.length === 10 ? `+91${digits}` : digits.startsWith('91') ? `+${digits}` : `+${digits}`;
 
   const message = `Namaste ${name}, thank you for contributing ₹${amount} towards TEAM EGB Ganesha Festival. Your 6-digit e-receipt ID is ${receiptNumber}. Your support means a lot to us. Devotion • Faith • Trust.`;
 
