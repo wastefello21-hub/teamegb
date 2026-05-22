@@ -1,11 +1,10 @@
 import crypto from 'crypto'
 import { sendWhatsAppThankYou } from '@/lib/twilio'
+import { sendWhatsAppThankYouOpenWA } from '@/lib/openwa'
 import { NextResponse } from 'next/server'
 import { renderReceiptImage } from '@/lib/renderReceiptSafe'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
 import { format } from 'date-fns'
-import path from 'node:path'
-import fs from 'node:fs'
 
 // Wireweb webhook receiver for Next.js App Router
 // - Accepts POST JSON payloads from Wireweb
@@ -17,16 +16,58 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const secret = process.env.WIREWEB_SECRET
-  const sigHeader = req.headers.get('x-wireweb-signature') || req.headers.get('x-signature') || ''
+  const sigHeaderRaw = req.headers.get('x-wireweb-signature') || req.headers.get('x-signature') || req.headers.get('x-hub-signature') || ''
 
   const bodyText = await req.text()
 
-  if (secret && sigHeader) {
+  // Test bypass: set WIREWEB_ALLOW_TEST=true in your host and send header `x-wireweb-skip-verification: 1`
+  const allowTestBypass = process.env.WIREWEB_ALLOW_TEST === 'true'
+  const skipVerificationHeader = req.headers.get('x-wireweb-skip-verification') === '1'
+  if (allowTestBypass && skipVerificationHeader) {
+    console.warn('[Wireweb webhook] TEST MODE: skipping signature verification due to WIREWEB_ALLOW_TEST + x-wireweb-skip-verification header')
+  } else if (secret) {
+    // Normalize incoming signature and accept common formats:
+    // - Optional prefix like "sha256=..."
+    // - Hex (`hex`) or Base64 (`base64`) encodings
+    const sigHeader = (sigHeaderRaw || '').trim()
+    console.info('[Wireweb webhook] signature header:', sigHeader)
+
+    if (!sigHeader) {
+      return new Response('Missing signature', { status: 401 })
+    }
+
+    let incoming = sigHeader
+    if (incoming.startsWith('sha256=')) incoming = incoming.slice('sha256='.length)
+    if (incoming.startsWith('sha1=')) incoming = incoming.slice('sha1='.length)
+
     try {
-      const expected = crypto.createHmac('sha256', secret).update(bodyText).digest('hex')
-      const ok = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(sigHeader))
-      if (!ok) return new Response('Invalid signature', { status: 401 })
+      const hmacHex = crypto.createHmac('sha256', secret).update(bodyText).digest('hex')
+      const hmacBase64 = crypto.createHmac('sha256', secret).update(bodyText).digest('base64')
+
+      const incomingBufHex = (() => {
+        try { return Buffer.from(incoming, 'hex') } catch { return null }
+      })()
+      const incomingBufBase64 = (() => {
+        try { return Buffer.from(incoming, 'base64') } catch { return null }
+      })()
+
+      const expectedBufHex = Buffer.from(hmacHex, 'hex')
+      const expectedBufBase64 = Buffer.from(hmacBase64, 'base64')
+
+      let ok = false
+      if (incomingBufHex && incomingBufHex.length === expectedBufHex.length) {
+        ok = crypto.timingSafeEqual(incomingBufHex, expectedBufHex)
+      }
+      if (!ok && incomingBufBase64 && incomingBufBase64.length === expectedBufBase64.length) {
+        ok = crypto.timingSafeEqual(incomingBufBase64, expectedBufBase64)
+      }
+
+      if (!ok) {
+        console.warn('[Wireweb webhook] signature mismatch (expected hex/base64)')
+        return new Response('Invalid signature', { status: 401 })
+      }
     } catch (e) {
+      console.error('[Wireweb webhook] signature verification error', e)
       return new Response('Signature verification error', { status: 400 })
     }
   }
@@ -94,7 +135,6 @@ export async function POST(req: Request) {
         amount: Number(amount),
         mode: 'Wireweb',
         collector: 'wireweb',
-        house: 'N/A',
       })
 
       const fileName = `receipt-${receiptNumber}.png`
@@ -143,10 +183,15 @@ export async function POST(req: Request) {
         return new Response('Failed to save contribution', { status: 500 })
       }
 
-      // Send thank-you message (best-effort)
+      // Send thank-you message (best-effort): OpenWA first, Twilio fallback
       try {
-        const twRes = await sendWhatsAppThankYou(String(phone), String(name), Number(amount))
-        console.log('[Wireweb webhook] thank-you sent result:', twRes)
+        const openWaRes = await sendWhatsAppThankYouOpenWA(String(phone), String(name), Number(amount), receiptNumber)
+        console.log('[Wireweb webhook] OpenWA send result:', openWaRes)
+
+        if (!openWaRes.success) {
+          const twRes = await sendWhatsAppThankYou(String(phone), String(name), Number(amount), receiptNumber)
+          console.log('[Wireweb webhook] Twilio fallback send result:', twRes)
+        }
       } catch (twErr) {
         console.warn('[Wireweb webhook] failed to send thank-you:', twErr)
       }

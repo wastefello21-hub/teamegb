@@ -27,7 +27,7 @@ export default function EReceiptPage() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const handleDownloadClick = () => {
-    setNotice('This feature is not yet ready. Our EGB developers are working hard to make it fully functional and available very soon.');
+    setNotice('Our EGB developers are actively working to make the receipt download feature fully functional. It will be available soon. Thank you for your patience.');
   };
 
   const lookupReceipt = async (number: string) => {
@@ -89,7 +89,7 @@ export default function EReceiptPage() {
                 <ScanBarcode className="h-4 w-4" /> Public E-Receipt
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-6xl font-black tracking-tight text-foreground leading-tight">
-                Find, open, and download your contribution receipt.
+                Find and view your contribution receipt.
               </h1>
               <p className="max-w-xl text-sm sm:text-base md:text-lg text-foreground/70">
                 Enter the 6-digit receipt number generated when the contribution was recorded. The exact matching receipt details will open instantly.
@@ -138,7 +138,7 @@ export default function EReceiptPage() {
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-4 py-3">
                   <Clock3 className="h-5 w-5 text-orange-500" />
-                  Download feature in progress
+                  Download feature coming soon
                 </div>
               </div>
 
@@ -211,7 +211,7 @@ export default function EReceiptPage() {
 
                       <div className="p-4 sm:p-5 md:p-6">
                         <p className="text-sm text-foreground/65">
-                          The matching receipt details are ready. Download is being finalized and will be available soon.
+                          The matching receipt details are ready. You can review them now, and the download feature will be available soon.
                         </p>
                         <div className="mt-5 rounded-3xl border border-dashed border-orange-500/25 bg-orange-500/5 p-4">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>

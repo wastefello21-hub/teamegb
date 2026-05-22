@@ -4,6 +4,8 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { format } from 'date-fns';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { sendWhatsAppThankYouOpenWA } from '@/lib/openwa';
+import { sendWhatsAppThankYou } from '@/lib/twilio';
 
 export const runtime = 'nodejs';
 
@@ -258,6 +260,24 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    let whatsappNotification = { sent: false, provider: null as null | 'openwa' | 'twilio' };
+    if (phone && phone !== 'N/A') {
+      try {
+        const openWaRes = await sendWhatsAppThankYouOpenWA(phone, name, amount, receiptNumber);
+        console.log('[create-contribution] OpenWA send result:', openWaRes);
+
+        if (openWaRes.success) {
+          whatsappNotification = { sent: true, provider: 'openwa' };
+        } else {
+          const twilioRes = await sendWhatsAppThankYou(phone, name, amount, receiptNumber);
+          console.log('[create-contribution] Twilio fallback send result:', twilioRes);
+          whatsappNotification = { sent: Boolean(twilioRes.success), provider: twilioRes.success ? 'twilio' : null };
+        }
+      } catch (notifyError) {
+        console.warn('[create-contribution] failed to send WhatsApp notification:', notifyError);
+      }
+    }
+
     const { data: collectorMember } = await dbClient
       .from('team_members')
       .select('collections')
@@ -282,6 +302,7 @@ export async function POST(request: NextRequest) {
         contribution: insertedContribution ?? contributionRecord,
         receiptNumber,
         receiptUrl,
+        whatsappNotification,
       },
       { status: 200 }
     );
