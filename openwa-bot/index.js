@@ -267,13 +267,22 @@ async function bootstrap() {
       }
 
       const { chatId, phone, text } = req.body || {};
-      const finalChatId = chatId || normalizePhoneToChatId(phone);
-      if (!finalChatId || !text) {
+      const recipientInput = chatId || phone;
+      const digitsOnly = String(recipientInput || '').replace(/[^\d]/g, '');
+      if (!digitsOnly || !text) {
         return res.status(400).json({ ok: false, error: 'chatId (or phone) and text are required' });
       }
 
-      const result = await client.sendMessage(finalChatId, text);
-      return res.json({ ok: true, result: result ? { id: result.id?._serialized || null } : null });
+      const numberId = await client.getNumberId(digitsOnly);
+      if (!numberId || !numberId._serialized) {
+        return res.status(404).json({
+          ok: false,
+          error: `The number ${digitsOnly} is not registered on WhatsApp`,
+        });
+      }
+
+      const result = await client.sendMessage(numberId._serialized, text);
+      return res.json({ ok: true, result: result ? { id: result.id?._serialized || null } : null, recipient: numberId._serialized });
     } catch (error) {
       return res.status(500).json({ ok: false, error: String(error) });
     }
