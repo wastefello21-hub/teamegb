@@ -37,8 +37,8 @@ export const sendWhatsAppThankYouOpenWA = async (
   amount: number,
   receiptNumber: string
 ): Promise<OpenWaResult> => {
-  const baseUrl = process.env.OPENWA_API_URL;
-  const apiKey = process.env.OPENWA_API_KEY;
+  const baseUrl = process.env.OPENWA_API_URL || process.env.WHATSAPP_SERVICE_URL;
+  const apiKey = process.env.OPENWA_API_KEY || process.env.WHATSAPP_SERVICE_TOKEN;
   const sendTextPath = process.env.OPENWA_SENDTEXT_PATH || '/sendText';
 
   if (!baseUrl) {
@@ -57,7 +57,7 @@ export const sendWhatsAppThankYouOpenWA = async (
         ...(apiKey ? { key: apiKey } : {}),
         ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
       },
-      body: JSON.stringify({ chatId, text }),
+      body: JSON.stringify({ phone, text }),
     });
 
     const bodyText = await response.text();
