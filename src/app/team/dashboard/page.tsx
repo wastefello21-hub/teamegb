@@ -129,6 +129,8 @@ export default function TeamDashboard() {
       `E-Receipt No.: ${contribution.receipt_number || 'N/A'}`,
       '',
       'Website: team-egb.vercel.app',
+      'The website lets the public view events, contributors, gallery updates, e-receipts, analytics, and festival details in one place.',
+      'They can browse updates, check receipts, and stay informed about Team EGB activities from any device.',
       '',
       'Your support means a lot to us.',
     ].join('\n');
@@ -137,7 +139,7 @@ export default function TeamDashboard() {
   const shareMessage = savedContribution ? buildContributionMessage(savedContribution) : '';
   const whatsappNumber = savedContribution ? normalizeWhatsAppNumber(savedContribution.phone) : '';
   const whatsappUrl = whatsappNumber && shareMessage
-    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(shareMessage)}`
+    ? `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(shareMessage)}`
     : '';
 
   const handleCopyMessage = async () => {
@@ -255,7 +257,7 @@ export default function TeamDashboard() {
       const autoWhatsAppUrl = (() => {
         const phone = normalizeWhatsAppNumber(createdContribution.phone);
         const message = buildContributionMessage(createdContribution);
-        return phone && message ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}` : '';
+        return phone && message ? `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}` : '';
       })();
 
       if (autoWhatsAppUrl) {
