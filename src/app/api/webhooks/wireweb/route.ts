@@ -1,6 +1,4 @@
 import crypto from 'crypto'
-import { sendWhatsAppThankYou } from '@/lib/twilio'
-import { sendWhatsAppThankYouOpenWA } from '@/lib/openwa'
 import { NextResponse } from 'next/server'
 import { renderReceiptImage } from '@/lib/renderReceiptSafe'
 import { supabase, supabaseAdmin } from '@/lib/supabase'
@@ -183,36 +181,7 @@ export async function POST(req: Request) {
         return new Response('Failed to save contribution', { status: 500 })
       }
 
-      // Send thank-you message (best-effort): OpenWA first, Twilio fallback
-      let whatsappNotification = { sent: false, provider: null as null | 'openwa' | 'twilio', error: null as null | string }
-
-      try {
-        const openWaRes = await sendWhatsAppThankYouOpenWA(String(phone), String(name), Number(amount), receiptNumber)
-        console.log('[Wireweb webhook] OpenWA send result:', openWaRes)
-
-        if (!openWaRes.success) {
-          const twRes = await sendWhatsAppThankYou(String(phone), String(name), Number(amount), receiptNumber)
-          console.log('[Wireweb webhook] Twilio fallback send result:', twRes)
-          whatsappNotification = {
-            sent: Boolean(twRes.success),
-            provider: twRes.success ? 'twilio' : null,
-            error: !twRes.success
-              ? String((twRes as { error?: unknown }).error || (openWaRes as { error?: unknown }).error || 'Failed to send WhatsApp notification')
-              : null,
-          }
-        } else {
-          whatsappNotification = { sent: true, provider: 'openwa', error: null }
-        }
-      } catch (twErr) {
-        console.warn('[Wireweb webhook] failed to send thank-you:', twErr)
-        whatsappNotification = {
-          sent: false,
-          provider: null,
-          error: twErr instanceof Error ? twErr.message : String(twErr),
-        }
-      }
-
-      return NextResponse.json({ success: true, contribution: insertedContribution, receiptUrl, whatsappNotification }, { status: 200 })
+      return NextResponse.json({ success: true, contribution: insertedContribution, receiptUrl }, { status: 200 })
     } catch (err) {
       console.error('[Wireweb webhook] processing error:', err)
       return new Response('Failed to process', { status: 500 })

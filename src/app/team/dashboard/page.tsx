@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { CheckCircle2, LogOut, CreditCard, ChevronLeft, ScanSearch, Maximize2, X } from 'lucide-react';
+import { CheckCircle2, LogOut, CreditCard, ChevronLeft, ScanSearch, Maximize2, X, Copy, MessageCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useData } from '@/context/DataContext';
+import { useData, type Contribution } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 
 export default function TeamDashboard() {
@@ -32,11 +32,8 @@ export default function TeamDashboard() {
     receipt_number: string;
     receipt_url: string;
   } | null>(null);
-  const [whatsappStatus, setWhatsappStatus] = useState<{
-    sent: boolean;
-    provider: 'openwa' | 'twilio' | null;
-    error?: string | null;
-  } | null>(null);
+  const [savedContribution, setSavedContribution] = useState<Contribution | null>(null);
+  const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
   const { addContribution } = useData();
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
@@ -75,6 +72,50 @@ export default function TeamDashboard() {
     }
   };
 
+  const normalizeWhatsAppNumber = (phone: string) => {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) return `91${digits}`;
+    if (digits.length === 12 && digits.startsWith('91')) return digits;
+    return digits;
+  };
+
+  const buildContributionMessage = (contribution: Contribution) => {
+    const amountText = `₹${Number(contribution.amount).toLocaleString('en-IN')}`;
+    return [
+      `Thank you ${contribution.name} for contributing to Team EGB.`,
+      '',
+      'Contribution details:',
+      `Name: ${contribution.name}`,
+      `Amount Contributed: ${amountText}`,
+      `Date: ${contribution.date}`,
+      `E-Receipt No.: ${contribution.receipt_number || 'N/A'}`,
+      '',
+      'Website: team-egb.vercel.app',
+      '',
+      'Your support means a lot to us.',
+    ].join('\n');
+  };
+
+  const shareMessage = savedContribution ? buildContributionMessage(savedContribution) : '';
+  const whatsappNumber = savedContribution ? normalizeWhatsAppNumber(savedContribution.phone) : '';
+  const whatsappUrl = whatsappNumber && shareMessage
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(shareMessage)}`
+    : '';
+
+  const handleCopyMessage = async () => {
+    if (!shareMessage) return;
+
+    try {
+      await navigator.clipboard.writeText(shareMessage);
+      setCopyStatus('copied');
+      window.setTimeout(() => setCopyStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Failed to copy contribution message:', error);
+      setCopyStatus('failed');
+      window.setTimeout(() => setCopyStatus('idle'), 2000);
+    }
+  };
+
   const fetchIdCard = async () => {
     if (!user?.teamMemberId) return;
     
@@ -105,7 +146,7 @@ export default function TeamDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     setGeneratedReceipt(null);
-    setWhatsappStatus(null);
+    const whatsappPopup = window.open('', '_blank', 'noopener,noreferrer');
     
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
@@ -122,16 +163,35 @@ export default function TeamDashboard() {
       });
       
       if (!createdContribution) {
+        if (whatsappPopup) {
+          whatsappPopup.close();
+        }
         setIsSubmitting(false);
         return;
       }
 
-      setWhatsappStatus(createdContribution.whatsappNotification || null);
+      const autoWhatsAppUrl = (() => {
+        const phone = normalizeWhatsAppNumber(createdContribution.phone);
+        const message = buildContributionMessage(createdContribution);
+        return phone && message ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}` : '';
+      })();
+
+      if (autoWhatsAppUrl) {
+        if (whatsappPopup) {
+          whatsappPopup.location.href = autoWhatsAppUrl;
+          whatsappPopup.focus();
+        } else {
+          window.location.href = autoWhatsAppUrl;
+        }
+      } else if (whatsappPopup) {
+        whatsappPopup.close();
+      }
 
       setGeneratedReceipt({
         receipt_number: createdContribution.receipt_number || '------',
         receipt_url: createdContribution.receipt_url || ''
       });
+      setSavedContribution(createdContribution);
       setIsSubmitting(false);
       setSuccess(true);
       
@@ -139,7 +199,8 @@ export default function TeamDashboard() {
       setTimeout(() => {
         setSuccess(false);
         setGeneratedReceipt(null);
-        setWhatsappStatus(null);
+        setSavedContribution(null);
+        setCopyStatus('idle');
         setFormData({
           houseNumber: '',
           contributorName: '',
@@ -167,16 +228,44 @@ export default function TeamDashboard() {
         </div>
         <h2 className="text-3xl font-bold mb-2">Success!</h2>
         <p className="text-foreground/70 mb-8 max-w-xs">
-          Contribution of ₹{formData.amount} from {formData.contributorName} recorded. A WhatsApp thank you message has been triggered.
+          Contribution of ₹{formData.amount} from {formData.contributorName} recorded successfully.
         </p>
-        {whatsappStatus && (
-          <div className={`mb-6 w-full max-w-md rounded-3xl border p-4 text-left shadow-lg ${whatsappStatus.sent ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300' : 'border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-300'}`}>
-            <p className="text-xs uppercase tracking-[0.28em] font-semibold">WhatsApp Delivery</p>
-            <p className="mt-2 text-sm font-medium">
-              {whatsappStatus.sent
-                ? `Sent via ${whatsappStatus.provider || 'unknown'} to the contributor.`
-                : `Not sent${whatsappStatus.error ? `: ${whatsappStatus.error}` : ''}. Check the bot URL and API key.`}
-            </p>
+        {savedContribution && (
+          <div className="mb-6 w-full max-w-2xl rounded-3xl border border-border-color bg-background/80 p-5 text-left shadow-xl">
+            <div className="flex items-center justify-between gap-3 mb-3">
+              <div>
+                <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Copyable Message</p>
+                <h3 className="mt-2 text-lg font-bold text-foreground">Ready to share on WhatsApp</h3>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyMessage}
+                className="inline-flex items-center gap-2 rounded-2xl border border-border-color bg-background px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5"
+              >
+                <Copy size={14} /> {copyStatus === 'copied' ? 'Copied' : copyStatus === 'failed' ? 'Copy failed' : 'Copy Message'}
+              </button>
+            </div>
+
+            <textarea
+              readOnly
+              value={shareMessage}
+              rows={8}
+              className="w-full rounded-2xl border border-border-color bg-foreground/[0.03] px-4 py-3 text-sm leading-6 text-foreground outline-none"
+            />
+
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noreferrer"
+                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-colors ${whatsappUrl ? 'bg-green-600 hover:bg-green-700' : 'pointer-events-none bg-green-400/50'}`}
+              >
+                <MessageCircle size={16} /> Send on WhatsApp
+              </a>
+              {!whatsappNumber && (
+                <p className="text-xs text-foreground/50 self-center">Enter a valid contributor phone number to open WhatsApp.</p>
+              )}
+            </div>
           </div>
         )}
         {generatedReceipt && (

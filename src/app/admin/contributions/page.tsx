@@ -43,6 +43,7 @@ export default function ManageContributionsPage() {
     tx.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tx.house.toLowerCase().includes(searchTerm.toLowerCase()) ||
     tx.phone.includes(searchTerm) ||
+    (tx.receipt_number || '').includes(searchTerm) ||
     (tx.id || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -65,7 +66,7 @@ export default function ManageContributionsPage() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground/40 w-5 h-5" />
             <input 
               type="text"
-              placeholder="Search by name, house, phone, or ID..."
+              placeholder="Search by name, house, phone, receipt no., or ID..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -83,6 +84,7 @@ export default function ManageContributionsPage() {
               <tr className="border-b border-border-color text-sm text-foreground/60 uppercase tracking-wider">
                 <th className="p-4 font-semibold">Date</th>
                 <th className="p-4 font-semibold">Contributor Details</th>
+                <th className="p-4 font-semibold">Receipt No.</th>
                 <th className="p-4 font-semibold">Amount</th>
                 <th className="p-4 font-semibold">Payment Mode</th>
                 <th className="p-4 font-semibold">Collector ID</th>
@@ -104,10 +106,14 @@ export default function ManageContributionsPage() {
                       <p className="font-medium">{tx.name}</p>
                       <p className="text-xs text-foreground/60">{tx.house} • {tx.phone}</p>
                       <p className="text-[10px] text-foreground/40 mt-0.5">{tx.id}</p>
-                      {tx.receipt_number && (
-                        <p className="text-[10px] text-orange-600 dark:text-orange-300 mt-0.5 font-semibold tracking-wide">
-                          Receipt #{tx.receipt_number}
-                        </p>
+                    </td>
+                    <td className="p-4">
+                      {tx.receipt_number ? (
+                        <span className="inline-flex items-center rounded-full border border-orange-500/20 bg-orange-50 px-3 py-1 text-xs font-semibold tracking-wide text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                          {tx.receipt_number}
+                        </span>
+                      ) : (
+                        <span className="text-sm text-foreground/40">Not generated</span>
                       )}
                     </td>
                     <td className="p-4 font-bold text-green-600 dark:text-green-400">₹{tx.amount}</td>
@@ -143,7 +149,7 @@ export default function ManageContributionsPage() {
               
               {filteredContributions.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-foreground/50">
+                  <td colSpan={7} className="p-8 text-center text-foreground/50">
                     No contributions found.
                   </td>
                 </tr>

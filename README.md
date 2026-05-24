@@ -37,24 +37,6 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-## WhatsApp message delivery in production
+## Messaging
 
-The website does not keep a WhatsApp login by itself. Deploy the bot in `openwa-bot/` as a separate long-running service with persistent disk, then point the website at it.
-
-Required setup:
-
-1. Deploy `openwa-bot/` to a server/VPS that can keep Chrome running and store `.wwebjs_auth/` on persistent disk.
-2. Log into WhatsApp once in the bot terminal by scanning the QR.
-3. Set these production env vars on the Next.js deployment:
-
-```env
-OPENWA_API_URL=https://your-public-tunnel.example.com
-OPENWA_SENDTEXT_PATH=/sendText
-OPENWA_API_KEY=the_same_key_used_by_the_bot
-```
-
-4. Make sure your contribution routes send messages after a contribution is saved. The app already does this in `/api/create-contribution`.
-
-Your public website URL is `https://team-egb.vercel.app`. That is separate from the WhatsApp bot URL. The website points to the bot through `OPENWA_API_URL`; the bot itself must be reachable at its own public URL or tunnel.
-
-If you redeploy only the website but not the bot, WhatsApp sending will fail because the bot session lives in the separate service.
+This project no longer triggers WhatsApp messages from contribution saves.

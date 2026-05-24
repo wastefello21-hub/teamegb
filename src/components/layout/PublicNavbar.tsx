@@ -244,9 +244,6 @@ export const PublicNavbar = () => {
             <Link href="/team/login" onClick={() => setIsOpen(false)}>
               <Button variant="outline" className="w-full transition-all duration-200 hover:scale-[1.02]">Team Login</Button>
             </Link>
-            <Link href="/admin/login" onClick={() => setIsOpen(false)}>
-              <Button variant="primary" className="w-full bg-red-600 hover:bg-red-700 transition-all duration-200 hover:scale-[1.02]">Admin Portal</Button>
-            </Link>
           </div>
         </div>
       </div>
