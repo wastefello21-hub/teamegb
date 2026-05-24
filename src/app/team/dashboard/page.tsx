@@ -81,13 +81,51 @@ export default function TeamDashboard() {
 
   const buildContributionMessage = (contribution: Contribution) => {
     const amountText = `₹${Number(contribution.amount).toLocaleString('en-IN')}`;
+    const formatWhatsappDate = () => {
+      const sourceDate = contribution.receipt_created_at || contribution.date;
+
+      if (sourceDate) {
+        const parsedDate = new Date(sourceDate);
+        if (!Number.isNaN(parsedDate.getTime())) {
+          const day = String(parsedDate.getDate()).padStart(2, '0');
+          const month = String(parsedDate.getMonth() + 1).padStart(2, '0');
+          const year = parsedDate.getFullYear();
+          return `${day}/${month}/${year}`;
+        }
+      }
+
+      const monthMap: Record<string, string> = {
+        Jan: '01',
+        Feb: '02',
+        Mar: '03',
+        Apr: '04',
+        May: '05',
+        Jun: '06',
+        Jul: '07',
+        Aug: '08',
+        Sep: '09',
+        Oct: '10',
+        Nov: '11',
+        Dec: '12',
+      };
+
+      const fallbackMatch = contribution.date.match(/(\d{1,2})\s([A-Za-z]{3})\s(\d{4})/);
+      if (fallbackMatch) {
+        const [, day, monthName, year] = fallbackMatch;
+        const month = monthMap[monthName] || '01';
+        return `${day.padStart(2, '0')}/${month}/${year}`;
+      }
+
+      return contribution.date;
+    };
+
     return [
       `Thank you ${contribution.name} for contributing to Team EGB.`,
       '',
       'Contribution details:',
       `Name: ${contribution.name}`,
       `Amount Contributed: ${amountText}`,
-      `Date: ${contribution.date}`,
+      `Date: ${formatWhatsappDate()}`,
       `E-Receipt No.: ${contribution.receipt_number || 'N/A'}`,
       '',
       'Website: team-egb.vercel.app',
