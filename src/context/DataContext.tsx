@@ -16,6 +16,11 @@ export type Contribution = {
   receipt_number?: string;
   receipt_url?: string;
   receipt_created_at?: string;
+  whatsappNotification?: {
+    sent: boolean;
+    provider: 'openwa' | 'twilio' | null;
+    error?: string | null;
+  };
 };
 
 export type Expenditure = {
@@ -515,7 +520,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         throw new Error(errorMessage);
       }
 
-      const savedContribution: Contribution = result.contribution;
+      const savedContribution: Contribution = {
+        ...result.contribution,
+        whatsappNotification: result.whatsappNotification || undefined,
+      };
 
       setContributions(prev => [savedContribution, ...prev]);
       setTeamMembers(prev => prev.map(member => 

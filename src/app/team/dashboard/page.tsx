@@ -32,6 +32,11 @@ export default function TeamDashboard() {
     receipt_number: string;
     receipt_url: string;
   } | null>(null);
+  const [whatsappStatus, setWhatsappStatus] = useState<{
+    sent: boolean;
+    provider: 'openwa' | 'twilio' | null;
+    error?: string | null;
+  } | null>(null);
   const { addContribution } = useData();
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
@@ -100,6 +105,7 @@ export default function TeamDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     setGeneratedReceipt(null);
+    setWhatsappStatus(null);
     
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
@@ -120,6 +126,8 @@ export default function TeamDashboard() {
         return;
       }
 
+      setWhatsappStatus(createdContribution.whatsappNotification || null);
+
       setGeneratedReceipt({
         receipt_number: createdContribution.receipt_number || '------',
         receipt_url: createdContribution.receipt_url || ''
@@ -131,6 +139,7 @@ export default function TeamDashboard() {
       setTimeout(() => {
         setSuccess(false);
         setGeneratedReceipt(null);
+        setWhatsappStatus(null);
         setFormData({
           houseNumber: '',
           contributorName: '',
@@ -160,6 +169,16 @@ export default function TeamDashboard() {
         <p className="text-foreground/70 mb-8 max-w-xs">
           Contribution of ₹{formData.amount} from {formData.contributorName} recorded. A WhatsApp thank you message has been triggered.
         </p>
+        {whatsappStatus && (
+          <div className={`mb-6 w-full max-w-md rounded-3xl border p-4 text-left shadow-lg ${whatsappStatus.sent ? 'border-green-500/20 bg-green-500/10 text-green-700 dark:text-green-300' : 'border-red-500/20 bg-red-500/10 text-red-700 dark:text-red-300'}`}>
+            <p className="text-xs uppercase tracking-[0.28em] font-semibold">WhatsApp Delivery</p>
+            <p className="mt-2 text-sm font-medium">
+              {whatsappStatus.sent
+                ? `Sent via ${whatsappStatus.provider || 'unknown'} to the contributor.`
+                : `Not sent${whatsappStatus.error ? `: ${whatsappStatus.error}` : ''}. Check the bot URL and API key.`}
+            </p>
+          </div>
+        )}
         {generatedReceipt && (
           <div className="mb-6 w-full max-w-md rounded-3xl border border-orange-500/20 bg-gradient-to-br from-orange-500/10 via-white/70 to-amber-500/10 dark:from-orange-500/10 dark:via-black/20 dark:to-amber-500/5 p-5 text-left shadow-xl">
             <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">E-Receipt Generated</p>
