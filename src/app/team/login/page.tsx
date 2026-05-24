@@ -41,8 +41,10 @@ export default function TeamLogin() {
     // Validate against global context
     setTimeout(async () => {
       setIsLoading(false);
+      const normalizedTeamId = teamId.trim().toLowerCase();
+      const normalizedPassword = password.trim();
       
-      const member = teamMembers.find(m => m.id === teamId);
+      const member = teamMembers.find(m => m.id.trim().toLowerCase() === normalizedTeamId);
       
       if (member) {
         // Check if member is disabled
@@ -52,9 +54,9 @@ export default function TeamLogin() {
         }
         
         // If they have a custom password use it, else default to password123
-        const expectedPassword = member.password || 'password123';
+        const expectedPassword = (member.password || 'password123').trim();
         
-        if (password === expectedPassword) {
+        if (normalizedPassword === expectedPassword) {
           await login(member.id, member.role === 'Team Lead' ? 'admin' : 'team', member.name);
           router.push('/team/dashboard');
         } else {
