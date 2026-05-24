@@ -146,7 +146,51 @@ export default function TeamDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     setGeneratedReceipt(null);
-    const whatsappPopup = window.open('', '_blank', 'noopener,noreferrer');
+    const whatsappPopup = window.open('about:blank', '_blank');
+    if (whatsappPopup) {
+      whatsappPopup.document.write(`
+        <html>
+          <head>
+            <title>Opening WhatsApp...</title>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                display: grid;
+                place-items: center;
+                min-height: 100vh;
+                margin: 0;
+                background: #ffffff;
+                color: #1f2937;
+                text-align: center;
+              }
+              .card {
+                padding: 24px 28px;
+              }
+              .spinner {
+                width: 36px;
+                height: 36px;
+                border: 4px solid #fde68a;
+                border-top-color: #f97316;
+                border-radius: 9999px;
+                margin: 0 auto 16px;
+                animation: spin 0.9s linear infinite;
+              }
+              @keyframes spin {
+                to { transform: rotate(360deg); }
+              }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <div class="spinner"></div>
+              <h2>Preparing WhatsApp message...</h2>
+              <p>Please wait while we open the contribution message.</p>
+            </div>
+          </body>
+        </html>
+      `);
+      whatsappPopup.document.close();
+    }
     
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
@@ -178,10 +222,10 @@ export default function TeamDashboard() {
 
       if (autoWhatsAppUrl) {
         if (whatsappPopup) {
-          whatsappPopup.location.href = autoWhatsAppUrl;
+          whatsappPopup.location.replace(autoWhatsAppUrl);
           whatsappPopup.focus();
         } else {
-          window.location.href = autoWhatsAppUrl;
+          window.open(autoWhatsAppUrl, '_blank');
         }
       } else if (whatsappPopup) {
         whatsappPopup.close();
