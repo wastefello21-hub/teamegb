@@ -79,6 +79,20 @@ export default function TeamDashboard() {
     return digits;
   };
 
+  const isMobileDevice = () => {
+    if (typeof navigator === 'undefined') return false;
+    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  };
+
+  const buildWhatsAppUrl = (phone: string, message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    if (isMobileDevice()) {
+      return `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
+    }
+
+    return `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+  };
+
   const buildContributionMessage = (contribution: Contribution) => {
     const amountText = `₹${Number(contribution.amount).toLocaleString('en-IN')}`;
     const formatWhatsappDate = () => {
@@ -139,7 +153,7 @@ export default function TeamDashboard() {
   const shareMessage = savedContribution ? buildContributionMessage(savedContribution) : '';
   const whatsappNumber = savedContribution ? normalizeWhatsAppNumber(savedContribution.phone) : '';
   const whatsappUrl = whatsappNumber && shareMessage
-    ? `https://web.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(shareMessage)}`
+    ? buildWhatsAppUrl(whatsappNumber, shareMessage)
     : '';
 
   const handleCopyMessage = async () => {
@@ -257,7 +271,7 @@ export default function TeamDashboard() {
       const autoWhatsAppUrl = (() => {
         const phone = normalizeWhatsAppNumber(createdContribution.phone);
         const message = buildContributionMessage(createdContribution);
-        return phone && message ? `https://web.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(message)}` : '';
+        return phone && message ? buildWhatsAppUrl(phone, message) : '';
       })();
 
       if (autoWhatsAppUrl) {
