@@ -215,8 +215,11 @@ export default function EReceiptPage() {
                         </p>
                         <div className="mt-5 rounded-3xl border border-dashed border-orange-500/25 bg-orange-500/5 p-4">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>
-                          <div className="mt-3 space-y-2 text-sm text-foreground/75">
-                            <p><span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}</p>
+                            <div className="mt-3 space-y-2 text-sm text-foreground/75">
+                            <p>
+                              <span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}
+                              <span className="ml-2 text-sm text-foreground/60"> (Enter this number in our website under menu --&gt; E-Receipts to download you Receipt)</span>
+                            </p>
                             <p><span className="font-semibold text-foreground">Download:</span> Coming soon</p>
                           </div>
                         </div>

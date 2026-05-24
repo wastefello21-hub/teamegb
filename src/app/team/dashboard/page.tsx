@@ -131,7 +131,7 @@ export default function TeamDashboard() {
       `Name: ${contribution.name}`,
       `Amount Contributed: ${amountText}`,
       `Date: ${formatWhatsappDate()}`,
-      `E-Receipt No.: ${contribution.receipt_number || 'N/A'}`,
+      `E-Receipt No.: ${contribution.receipt_number || 'N/A'} (Enter this number in our website under menu --> E-Receipts to download you Receipt)`,
       '',
       'Website: team-egb.vercel.app',
       '',
@@ -139,6 +139,8 @@ export default function TeamDashboard() {
       'For more details visit our website.',
       '',
       'Your support means a lot to us.',
+      '',
+      '-TEAM EGB',
     ].join('\n');
   };
 
