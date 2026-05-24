@@ -184,6 +184,8 @@ export async function POST(req: Request) {
       }
 
       // Send thank-you message (best-effort): OpenWA first, Twilio fallback
+      let whatsappNotification = { sent: false, provider: null as null | 'openwa' | 'twilio', error: null as null | string }
+
       try {
         const openWaRes = await sendWhatsAppThankYouOpenWA(String(phone), String(name), Number(amount), receiptNumber)
         console.log('[Wireweb webhook] OpenWA send result:', openWaRes)
@@ -191,12 +193,26 @@ export async function POST(req: Request) {
         if (!openWaRes.success) {
           const twRes = await sendWhatsAppThankYou(String(phone), String(name), Number(amount), receiptNumber)
           console.log('[Wireweb webhook] Twilio fallback send result:', twRes)
+          whatsappNotification = {
+            sent: Boolean(twRes.success),
+            provider: twRes.success ? 'twilio' : null,
+            error: !twRes.success
+              ? String((twRes as { error?: unknown }).error || (openWaRes as { error?: unknown }).error || 'Failed to send WhatsApp notification')
+              : null,
+          }
+        } else {
+          whatsappNotification = { sent: true, provider: 'openwa', error: null }
         }
       } catch (twErr) {
         console.warn('[Wireweb webhook] failed to send thank-you:', twErr)
+        whatsappNotification = {
+          sent: false,
+          provider: null,
+          error: twErr instanceof Error ? twErr.message : String(twErr),
+        }
       }
 
-      return NextResponse.json({ success: true, contribution: insertedContribution, receiptUrl }, { status: 200 })
+      return NextResponse.json({ success: true, contribution: insertedContribution, receiptUrl, whatsappNotification }, { status: 200 })
     } catch (err) {
       console.error('[Wireweb webhook] processing error:', err)
       return new Response('Failed to process', { status: 500 })

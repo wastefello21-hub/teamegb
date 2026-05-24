@@ -48,11 +48,13 @@ Required setup:
 3. Set these production env vars on the Next.js deployment:
 
 ```env
-OPENWA_API_URL=https://your-bot-host.example.com
+OPENWA_API_URL=https://your-public-tunnel.example.com
 OPENWA_SENDTEXT_PATH=/sendText
 OPENWA_API_KEY=the_same_key_used_by_the_bot
 ```
 
 4. Make sure your contribution routes send messages after a contribution is saved. The app already does this in `/api/create-contribution`.
+
+Your public website URL is `https://team-egb.vercel.app`. That is separate from the WhatsApp bot URL. The website points to the bot through `OPENWA_API_URL`; the bot itself must be reachable at its own public URL or tunnel.
 
 If you redeploy only the website but not the bot, WhatsApp sending will fail because the bot session lives in the separate service.

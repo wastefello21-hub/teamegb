@@ -260,21 +260,32 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    let whatsappNotification = { sent: false, provider: null as null | 'openwa' | 'twilio' };
+    let whatsappNotification = { sent: false, provider: null as null | 'openwa' | 'twilio', error: null as null | string };
     if (phone && phone !== 'N/A') {
       try {
         const openWaRes = await sendWhatsAppThankYouOpenWA(phone, name, amount, receiptNumber);
         console.log('[create-contribution] OpenWA send result:', openWaRes);
 
         if (openWaRes.success) {
-          whatsappNotification = { sent: true, provider: 'openwa' };
+          whatsappNotification = { sent: true, provider: 'openwa', error: null };
         } else {
           const twilioRes = await sendWhatsAppThankYou(phone, name, amount, receiptNumber);
           console.log('[create-contribution] Twilio fallback send result:', twilioRes);
-          whatsappNotification = { sent: Boolean(twilioRes.success), provider: twilioRes.success ? 'twilio' : null };
+          whatsappNotification = {
+            sent: Boolean(twilioRes.success),
+            provider: twilioRes.success ? 'twilio' : null,
+            error: !twilioRes.success
+              ? String((twilioRes as { error?: unknown }).error || (openWaRes as { error?: unknown }).error || 'Failed to send WhatsApp notification')
+              : null,
+          };
         }
       } catch (notifyError) {
         console.warn('[create-contribution] failed to send WhatsApp notification:', notifyError);
+        whatsappNotification = {
+          sent: false,
+          provider: null,
+          error: notifyError instanceof Error ? notifyError.message : String(notifyError),
+        };
       }
     }
 

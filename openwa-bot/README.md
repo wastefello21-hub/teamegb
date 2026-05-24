@@ -68,6 +68,32 @@ This bot should not run on a short-lived serverless platform. Deploy it on a lon
 
 Use the same `WHATSAPP_SESSION_ID` on every restart, and keep `WHATSAPP_HEADLESS=false` until you finish the first QR login.
 
+## Use this laptop as the WhatsApp host after website deployment
+
+If the Next.js website is deployed somewhere else, the website must still be able to reach this bot service over the network. `http://localhost:8080` works only on this laptop, so expose the bot through a tunnel and point the deployed site at that public tunnel URL.
+
+Recommended setup on Windows:
+
+1. Keep this bot running on this laptop with `npm start`.
+2. Install a tunnel tool such as Cloudflare Tunnel or ngrok.
+3. Forward the local bot port:
+
+```powershell
+cloudflared tunnel --url http://localhost:8080
+```
+
+4. Copy the public tunnel URL into the deployed website env vars:
+
+```env
+OPENWA_API_URL=https://your-public-tunnel.example.com
+OPENWA_SENDTEXT_PATH=/sendText
+OPENWA_API_KEY=the_same_key_used_by_the_bot
+```
+
+5. Keep `.wwebjs_auth/` on this laptop so the WhatsApp login survives restarts.
+
+If you want the bot to come back automatically after reboot, use Windows Task Scheduler or a service wrapper such as `pm2` to run `npm start` in `openwa-bot/` on sign-in.
+
 For the Next.js site, set:
 
 ```env

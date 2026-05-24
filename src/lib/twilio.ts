@@ -7,9 +7,10 @@ const fromNumber = process.env.TWILIO_WHATSAPP_FROM_NUMBER || 'whatsapp:+1415523
 
 const hasRealTwilioCreds = accountSid.startsWith('AC') && authToken !== 'mock-auth-token';
 const client = hasRealTwilioCreds ? twilio(accountSid, authToken) : null;
+const allowMockTwilio = process.env.TWILIO_ALLOW_MOCK === 'true' || process.env.NODE_ENV !== 'production';
 
 export const sendWhatsAppThankYou = async (phone: string, name: string, amount: number, receiptNumber: string) => {
-  const isMock = !hasRealTwilioCreds || !client;
+  const isMock = (!hasRealTwilioCreds || !client) && allowMockTwilio;
   const digits = phone.replace(/[^\d]/g, '');
   const formattedPhone = digits.length === 10 ? `+91${digits}` : digits.startsWith('91') ? `+${digits}` : `+${digits}`;
 
@@ -19,6 +20,12 @@ export const sendWhatsAppThankYou = async (phone: string, name: string, amount: 
     console.log('[MOCK TWILIO] Sending WhatsApp message to', formattedPhone);
     console.log('[MOCK TWILIO] Message:', message);
     return { success: true, mock: true, messageId: 'mock-id' };
+  }
+
+  if (!hasRealTwilioCreds || !client) {
+    const error = 'TWILIO credentials are not configured';
+    console.error(error);
+    return { success: false, error };
   }
 
   try {

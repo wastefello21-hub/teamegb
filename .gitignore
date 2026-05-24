@@ -39,6 +39,7 @@ next-env.d.ts
 .wwebjs_cache/
 openwa-bot/.wwebjs_auth/
 openwa-bot/.wwebjs_cache/
+openwa-bot/_openwa_profile/
 openwa-bot/wwebjs_auth.zip
 openwa-bot/openwa-start.log
 openwa-bot/last-qr.txt
