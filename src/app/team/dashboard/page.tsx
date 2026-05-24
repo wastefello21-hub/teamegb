@@ -192,7 +192,6 @@ export default function TeamDashboard() {
     e.preventDefault();
     setIsSubmitting(true);
     setGeneratedReceipt(null);
-    const whatsappPopup = window.open('about:blank', '_blank');
     
     try {
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
@@ -209,9 +208,6 @@ export default function TeamDashboard() {
       });
       
       if (!createdContribution) {
-        if (whatsappPopup) {
-          whatsappPopup.close();
-        }
         setIsSubmitting(false);
         return;
       }
@@ -223,14 +219,7 @@ export default function TeamDashboard() {
       })();
 
       if (autoWhatsAppUrl) {
-        if (whatsappPopup) {
-          whatsappPopup.location.replace(autoWhatsAppUrl);
-          whatsappPopup.focus();
-        } else {
-          window.open(autoWhatsAppUrl, '_blank');
-        }
-      } else if (whatsappPopup) {
-        whatsappPopup.close();
+        window.location.href = autoWhatsAppUrl;
       }
 
       setGeneratedReceipt({
