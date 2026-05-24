@@ -218,7 +218,7 @@ export default function EReceiptPage() {
                             <div className="mt-3 space-y-2 text-sm text-foreground/75">
                             <p>
                               <span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}
-                              <span className="ml-2 text-sm text-foreground/60"> (Enter this number in our website under menu --&gt; E-Receipts to download you Receipt)</span>
+                              <span className="ml-2 text-sm text-foreground/60"> (Enter this number on our website: Menu → E-Receipt to download your receipt)</span>
                             </p>
                             <p><span className="font-semibold text-foreground">Download:</span> Coming soon</p>
                           </div>
