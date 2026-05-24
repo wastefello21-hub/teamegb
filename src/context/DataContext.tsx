@@ -170,6 +170,30 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [events, setEvents] = useState<Event[]>([]);
   const [eventApplications, setEventApplications] = useState<EventApplication[]>([]);
 
+  const persistMainCache = (nextContributions: Contribution[], nextTeamMembers: TeamMember[]) => {
+    try {
+      const cacheKey = 'egb_data_cache';
+      const cacheTimestamp = 'egb_data_timestamp';
+      const existingCacheRaw = localStorage.getItem(cacheKey);
+
+      if (!existingCacheRaw) {
+        return;
+      }
+
+      const existingCache = JSON.parse(existingCacheRaw);
+      const updatedCache = {
+        ...existingCache,
+        contributions: nextContributions,
+        teamMembers: nextTeamMembers,
+      };
+
+      localStorage.setItem(cacheKey, JSON.stringify(updatedCache));
+      localStorage.setItem(cacheTimestamp, Date.now().toString());
+    } catch (error) {
+      console.warn('Failed to persist main cache:', error);
+    }
+  };
+
   // Load from localStorage & Supabase on client side mount
   // Load from localStorage & Supabase on client side mount
   // Optimized: Batch API calls and add caching with improved performance
@@ -436,6 +460,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (isMounted) {
       try {
         localStorage.setItem('egb_contributions', JSON.stringify(contributions));
+        persistMainCache(contributions, teamMembers);
       } catch (e) {
         console.warn('Failed to save contributions to localStorage', e);
       }
@@ -456,6 +481,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (isMounted) {
       try {
         localStorage.setItem('egb_teamMembers', JSON.stringify(teamMembers));
+        persistMainCache(contributions, teamMembers);
       } catch (e) {
         console.warn('Failed to save teamMembers to localStorage', e);
       }
@@ -537,14 +563,18 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (!toDelete) return;
     
     // Update local state immediately
-    setContributions(prev => prev.filter(c => c.id !== id));
+    const nextContributions = contributions.filter(c => c.id !== id);
+    setContributions(nextContributions);
     
     const member = teamMembers.find(m => m.id === toDelete.collector);
     const newTotal = member ? Math.max(0, member.collections - Number(toDelete.amount)) : 0;
-    
-    setTeamMembers(prev => prev.map(m => 
+
+    const nextTeamMembers = teamMembers.map(m => 
       m.id === toDelete.collector ? { ...m, collections: newTotal } : m
-    ));
+    );
+
+    setTeamMembers(nextTeamMembers);
+    persistMainCache(nextContributions, nextTeamMembers);
 
     if (member) {
       await supabase
@@ -562,7 +592,13 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     if (error) {
       console.error('Failed to delete contribution from Supabase:', error);
       // Optionally restore local state on failure
-      setContributions(prev => [...prev, toDelete]);
+      const restoredContributions = [...nextContributions, toDelete];
+      const restoredTeamMembers = teamMembers.map(m => 
+        m.id === toDelete.collector ? { ...m, collections: member ? member.collections : m.collections } : m
+      );
+      setContributions(restoredContributions);
+      setTeamMembers(restoredTeamMembers);
+      persistMainCache(restoredContributions, restoredTeamMembers);
       alert('Failed to delete contribution. Please try again.');
     }
   };

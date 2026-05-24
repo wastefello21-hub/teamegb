@@ -79,18 +79,9 @@ export default function TeamDashboard() {
     return digits;
   };
 
-  const isMobileDevice = () => {
-    if (typeof navigator === 'undefined') return false;
-    return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-  };
-
   const buildWhatsAppUrl = (phone: string, message: string) => {
     const encodedMessage = encodeURIComponent(message);
-    if (isMobileDevice()) {
-      return `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
-    }
-
-    return `https://web.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+    return `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
   };
 
   const buildContributionMessage = (contribution: Contribution) => {
@@ -143,8 +134,9 @@ export default function TeamDashboard() {
       `E-Receipt No.: ${contribution.receipt_number || 'N/A'}`,
       '',
       'Website: team-egb.vercel.app',
-      'The website lets the public view events, contributors, gallery updates, e-receipts, analytics, and festival details in one place.',
-      'They can browse updates, check receipts, and stay informed about Team EGB activities from any device.',
+      '',
+      'Use this website to view the total amount collected, contributed, and all the expenses made as we believe in transparency.',
+      'For more details visit our website.',
       '',
       'Your support means a lot to us.',
     ].join('\n');
