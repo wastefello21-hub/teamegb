@@ -58,6 +58,11 @@ export default function TeamDashboard() {
   }, [showFullscreenIdCard]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    if (e.target.name === 'amount') {
+      setFormData({ ...formData, amount: e.target.value.replace(/\D/g, '') });
+      return;
+    }
+
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
       setShowUpi(true);
@@ -213,6 +218,14 @@ export default function TeamDashboard() {
     setGeneratedReceipt(null);
     
     try {
+      const enteredAmount = Number.parseInt(formData.amount, 10);
+
+      if (!Number.isInteger(enteredAmount) || enteredAmount <= 0) {
+        alert('Please enter a valid contribution amount.');
+        setIsSubmitting(false);
+        return;
+      }
+
       // Safely default to 'Admin' or 'EGB-01' if user ID is somehow stripped, but try to use live auth
       const collectorId = user?.teamMemberId || user?.uid || 'Unknown';
 
@@ -220,7 +233,7 @@ export default function TeamDashboard() {
         name: formData.contributorName,
         house: formData.houseNumber,
         phone: formData.phoneNumber,
-        amount: Number(formData.amount),
+        amount: enteredAmount,
         mode: formData.paymentMode,
         date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
         collector: collectorId
@@ -282,7 +295,7 @@ export default function TeamDashboard() {
         </div>
         <h2 className="text-3xl font-bold mb-2">Success!</h2>
         <p className="text-foreground/70 mb-8 max-w-xs">
-          Contribution of ₹{formData.amount} from {formData.contributorName} recorded successfully.
+          Contribution of ₹{Number.parseInt(formData.amount || '0', 10).toLocaleString('en-IN')} from {formData.contributorName} recorded successfully.
         </p>
         {savedContribution && (
           <div className="mb-6 w-full max-w-2xl rounded-3xl border border-border-color bg-background/80 p-5 text-left shadow-xl">
@@ -587,6 +600,9 @@ export default function TeamDashboard() {
                 name="amount"
                 value={formData.amount}
                 onChange={handleChange}
+                inputMode="numeric"
+                pattern="[0-9]*"
+                step="1"
                 className="w-full px-3 py-2 rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 text-lg font-bold text-orange-600 dark:text-orange-400"
                 placeholder="0"
                 required

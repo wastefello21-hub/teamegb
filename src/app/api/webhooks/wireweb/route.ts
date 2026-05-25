@@ -92,11 +92,18 @@ export async function POST(req: Request) {
   const name = payload.name || payload.senderName || (payload.contact && payload.contact.name) || null
 
   let amount: number | null = null
-  if (payload.amount) amount = Number(payload.amount)
+  if (payload.amount) {
+    const amountText = String(payload.amount).replace(/\D/g, '')
+    const parsedAmount = Number.parseInt(amountText, 10)
+    amount = Number.isInteger(parsedAmount) ? parsedAmount : null
+  }
   // Try to parse an amount from a message text like "donation 500" or "₹500"
   if (!amount && payload.message && typeof payload.message.text === 'string') {
     const m = payload.message.text.match(/\d{2,7}(?:\.\d{1,2})?/) // basic number matcher
-    if (m) amount = Number(m[0])
+    if (m) {
+      const parsedAmount = Number.parseInt(m[0].replace(/\D/g, ''), 10)
+      amount = Number.isInteger(parsedAmount) ? parsedAmount : null
+    }
   }
 
   if (phone && name && amount && Number.isFinite(amount) && amount > 0) {
