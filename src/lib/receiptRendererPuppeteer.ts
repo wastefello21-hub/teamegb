@@ -8,22 +8,26 @@ const BASE_RECEIPT_WIDTH = 1200;
 const BASE_RECEIPT_HEIGHT = 840;
 
 const FIELD_POSITIONS = {
-  receiptNumber: { left: 995, top: 136, size: 24 },
-  date: { left: 995, top: 212, size: 24 },
-  name: { left: 285, top: 378, size: 28 },
-  phone: { left: 411, top: 441, size: 28 },
-  amount: { left: 515, top: 502, size: 28 },
-  cashCheck: { left: 433, top: 561, size: 36 },
-  upiCheck: { left: 688, top: 561, size: 36 },
-  collector: { left: 231, top: 718, size: 28 },
+  receiptNumber: { left: 1112, top: 128, size: 22 },
+  dateDay: { left: 1050, top: 204, size: 20 },
+  dateMonth: { left: 1100, top: 204, size: 20 },
+  dateYear: { left: 1150, top: 204, size: 20 },
+  name: { left: 377, top: 378, size: 26 },
+  phone: { left: 428, top: 441, size: 26 },
+  amount: { left: 535, top: 502, size: 26 },
+  cashCheck: { left: 449, top: 561, size: 34 },
+  upiCheck: { left: 701, top: 561, size: 34 },
+  collector: { left: 272, top: 718, size: 26 },
 } as const;
 
 const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
+const handwritingStack = "'Segoe Print', 'Bradley Hand', 'Lucida Handwriting', 'Comic Sans MS', 'Segoe Script', 'Snell Roundhand', cursive, sans-serif";
+
 const getTextFontFamily = (text: string) =>
   hasDevanagariText(text)
-    ? "'ReceiptDevanagari', 'ReceiptLatin', 'DejaVu Sans', 'Noto Sans', sans-serif"
-    : "'ReceiptLatin', 'ReceiptDevanagari', 'DejaVu Sans', 'Noto Sans', sans-serif";
+    ? "'Noto Serif Devanagari', 'Mangal', 'Kokila', 'DejaVu Sans', 'Segoe Print', 'Bradley Hand', cursive, sans-serif"
+    : handwritingStack;
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -112,7 +116,9 @@ export async function renderReceiptImage({
   const templateBase64 = templateBuffer.toString('base64');
   const fontsCss = loadFontsCss();
 
-  const formattedDate = format(entryDate, 'dd / MM / yy');
+  const formattedDay = format(entryDate, 'dd');
+  const formattedMonth = format(entryDate, 'MM');
+  const formattedYear = format(entryDate, 'yy');
   const formattedAmount = amount.toLocaleString('en-IN');
   const checkedCash = mode?.toLowerCase() === 'cash';
 
@@ -124,26 +130,30 @@ export async function renderReceiptImage({
     <style>
       ${fontsCss}
       html,body{margin:0;padding:0}
-      .receipt{width:${receiptWidth}px;height:${receiptHeight}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:'Liberation Sans', 'DejaVu Sans', Arial, Helvetica, sans-serif}
+      .receipt{width:${receiptWidth}px;height:${receiptHeight}px;position:relative;background-image:url(data:image/png;base64,${templateBase64});background-size:cover;font-family:${handwritingStack}}
       .field{position:absolute;color:#000;line-height:1}
-      .receipt-number{left:${scaleLeft(FIELD_POSITIONS.receiptNumber.left)}px;top:${scaleTop(FIELD_POSITIONS.receiptNumber.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.receiptNumber.size)}px}
-      .date{left:${scaleLeft(FIELD_POSITIONS.date.left)}px;top:${scaleTop(FIELD_POSITIONS.date.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.date.size)}px}
-      .name{left:${scaleLeft(FIELD_POSITIONS.name.left)}px;top:${scaleTop(FIELD_POSITIONS.name.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.name.size)}px}
-      .phone{left:${scaleLeft(FIELD_POSITIONS.phone.left)}px;top:${scaleTop(FIELD_POSITIONS.phone.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.phone.size)}px}
-      .amount{left:${scaleLeft(FIELD_POSITIONS.amount.left)}px;top:${scaleTop(FIELD_POSITIONS.amount.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.amount.size)}px}
+      .receipt-number{left:${scaleLeft(FIELD_POSITIONS.receiptNumber.left)}px;top:${scaleTop(FIELD_POSITIONS.receiptNumber.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.receiptNumber.size)}px}
+      .date-day{left:${scaleLeft(FIELD_POSITIONS.dateDay.left)}px;top:${scaleTop(FIELD_POSITIONS.dateDay.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.dateDay.size)}px}
+      .date-month{left:${scaleLeft(FIELD_POSITIONS.dateMonth.left)}px;top:${scaleTop(FIELD_POSITIONS.dateMonth.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.dateMonth.size)}px}
+      .date-year{left:${scaleLeft(FIELD_POSITIONS.dateYear.left)}px;top:${scaleTop(FIELD_POSITIONS.dateYear.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.dateYear.size)}px}
+      .name{left:${scaleLeft(FIELD_POSITIONS.name.left)}px;top:${scaleTop(FIELD_POSITIONS.name.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.name.size)}px}
+      .phone{left:${scaleLeft(FIELD_POSITIONS.phone.left)}px;top:${scaleTop(FIELD_POSITIONS.phone.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.phone.size)}px}
+      .amount{left:${scaleLeft(FIELD_POSITIONS.amount.left)}px;top:${scaleTop(FIELD_POSITIONS.amount.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.amount.size)}px}
       .check-cash{left:${scaleLeft(FIELD_POSITIONS.cashCheck.left)}px;top:${scaleTop(FIELD_POSITIONS.cashCheck.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.cashCheck.size)}px}
       .check-upi{left:${scaleLeft(FIELD_POSITIONS.upiCheck.left)}px;top:${scaleTop(FIELD_POSITIONS.upiCheck.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.upiCheck.size)}px}
-      .collector{left:${scaleLeft(FIELD_POSITIONS.collector.left)}px;top:${scaleTop(FIELD_POSITIONS.collector.top)}px;font-weight:700;font-size:${scaleSize(FIELD_POSITIONS.collector.size)}px}
+      .collector{left:${scaleLeft(FIELD_POSITIONS.collector.left)}px;top:${scaleTop(FIELD_POSITIONS.collector.top)}px;font-weight:400;font-size:${scaleSize(FIELD_POSITIONS.collector.size)}px}
     </style>
   </head>
   <body>
     <div id="receipt" class="receipt">
-      <div class="field receipt-number" style="font-family:${getTextFontFamily(receiptNumber)}">${escapeHtml(receiptNumber)}</div>
-      <div class="field date" style="font-family:${getTextFontFamily(formattedDate)}">${escapeHtml(formattedDate)}</div>
+      <div class="field receipt-number" style="font-family:${getTextFontFamily(receiptNumber)};text-anchor:middle">${escapeHtml(receiptNumber)}</div>
+      <div class="field date-day" style="font-family:${getTextFontFamily(formattedDay)};text-align:center">${escapeHtml(formattedDay)}</div>
+      <div class="field date-month" style="font-family:${getTextFontFamily(formattedMonth)};text-align:center">${escapeHtml(formattedMonth)}</div>
+      <div class="field date-year" style="font-family:${getTextFontFamily(formattedYear)};text-align:center">${escapeHtml(formattedYear)}</div>
       <div class="field name" style="font-family:${getTextFontFamily(name)}">${escapeHtml(name)}</div>
       <div class="field phone" style="font-family:${getTextFontFamily(phone)}">${escapeHtml(phone)}</div>
       <div class="field amount" style="font-family:${getTextFontFamily(formattedAmount)}">${escapeHtml(formattedAmount)}</div>
-      ${checkedCash ? `<div class="field check-cash" style="font-family:${getTextFontFamily('✓')}">✓</div>` : (mode?.toLowerCase() === 'upi' ? `<div class="field check-upi" style="font-family:${getTextFontFamily('✓')}">✓</div>` : '')}
+      ${checkedCash ? `<div class="field check-cash" style="font-family:Arial, 'DejaVu Sans', sans-serif">✓</div>` : (mode?.toLowerCase() === 'upi' ? `<div class="field check-upi" style="font-family:Arial, 'DejaVu Sans', sans-serif">✓</div>` : '')}
       <div class="field collector" style="font-family:${getTextFontFamily(collector)}">${escapeHtml(collector)}</div>
     </div>
   </body>

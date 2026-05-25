@@ -7,24 +7,29 @@ const BASE_RECEIPT_WIDTH = 1200;
 const BASE_RECEIPT_HEIGHT = 840;
 
 const FIELD_POSITIONS = {
-  receiptNumber: { x: 995, y: 136, size: 24 },
-  date: { x: 995, y: 212, size: 24 },
-  name: { x: 285, y: 378, size: 28 },
-  phone: { x: 411, y: 441, size: 28 },
-  amount: { x: 515, y: 502, size: 28 },
-  cashCheck: { x: 433, y: 561, size: 36 },
-  upiCheck: { x: 688, y: 561, size: 36 },
-  collector: { x: 231, y: 718, size: 28 },
+  receiptNumber: { x: 1112, y: 128, size: 22 },
+  dateDay: { x: 1050, y: 204, size: 20 },
+  dateMonth: { x: 1100, y: 204, size: 20 },
+  dateYear: { x: 1150, y: 204, size: 20 },
+  name: { x: 377, y: 378, size: 26 },
+  phone: { x: 428, y: 441, size: 26 },
+  amount: { x: 535, y: 502, size: 26 },
+  cashCheck: { x: 449, y: 561, size: 34 },
+  upiCheck: { x: 701, y: 561, size: 34 },
+  collector: { x: 272, y: 718, size: 26 },
 } as const;
 
 let embeddedFontCss: string | null = null;
 
 const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
 
-const getTextFontFamily = (text: string) =>
-  hasDevanagariText(text)
-    ? "'ReceiptDevanagari', 'ReceiptLatin', 'DejaVu Sans', 'Noto Sans', sans-serif"
-    : "'ReceiptLatin', 'ReceiptDevanagari', 'DejaVu Sans', 'Noto Sans', sans-serif";
+const getTextFontFamily = (text: string) => {
+  const handwritingStack = "'Segoe Print', 'Bradley Hand', 'Lucida Handwriting', 'Comic Sans MS', 'Segoe Script', 'Snell Roundhand', cursive, sans-serif";
+
+  return hasDevanagariText(text)
+    ? "'Noto Serif Devanagari', 'Mangal', 'Kokila', 'DejaVu Sans', 'Segoe Print', 'Bradley Hand', cursive, sans-serif"
+    : handwritingStack;
+};
 
 const loadTemplateBuffer = () => {
   const templatePath = path.join(process.cwd(), 'public', 'receipt-template.png');
@@ -132,7 +137,9 @@ export async function renderReceiptImage({
     const scaleX = receiptWidth / BASE_RECEIPT_WIDTH;
     const scaleY = receiptHeight / BASE_RECEIPT_HEIGHT;
     const fontScale = Math.min(scaleX, scaleY);
-    const formattedDate = format(entryDate, 'dd / MM / yy');
+    const formattedDay = format(entryDate, 'dd');
+    const formattedMonth = format(entryDate, 'MM');
+    const formattedYear = format(entryDate, 'yy');
     const formattedAmount = amount.toLocaleString('en-IN');
     const checkedCash = mode.toLowerCase() === 'cash';
 
@@ -157,8 +164,9 @@ export async function renderReceiptImage({
 
       // NOTE: Sharp cannot execute CSS @font-face or use embedded fonts.
       // Use system fonts only. For custom Noto fonts, rely on Puppeteer (primary renderer).
+      const isTick = encoded === '✓';
       const svg = `<?xml version="1.0" encoding="UTF-8"?>\n<svg width="${receiptWidth}" height="${receiptHeight}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${receiptWidth} ${receiptHeight}">
-        <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.max(12, Math.round(size * fontScale))}" font-weight="${weight}" text-anchor="${textAnchor}" dominant-baseline="hanging" font-family="Arial, Liberation Serif, DejaVu Sans, sans-serif" fill="#000000">${encoded}</text>
+        <text x="${Math.round(x * scaleX)}" y="${Math.round(y * scaleY)}" font-size="${Math.max(12, Math.round(size * fontScale))}" font-weight="${isTick ? 700 : 400}" text-anchor="${textAnchor}" dominant-baseline="${isTick ? 'middle' : 'hanging'}" font-family="${isTick ? "Arial, 'DejaVu Sans', sans-serif" : getTextFontFamily(text)}" fill="#000000">${encoded}</text>
       </svg>`;
 
       return Buffer.from(svg);
@@ -166,35 +174,47 @@ export async function renderReceiptImage({
 
     // Receipt number
     textOverlays.push({
-      input: createTextSvg(receiptNumber, FIELD_POSITIONS.receiptNumber.size, 700, FIELD_POSITIONS.receiptNumber.x, FIELD_POSITIONS.receiptNumber.y),
+      input: createTextSvg(receiptNumber, FIELD_POSITIONS.receiptNumber.size, 400, FIELD_POSITIONS.receiptNumber.x, FIELD_POSITIONS.receiptNumber.y, 'middle'),
       top: 0,
       left: 0,
     });
 
     // Date
     textOverlays.push({
-      input: createTextSvg(formattedDate, FIELD_POSITIONS.date.size, 700, FIELD_POSITIONS.date.x, FIELD_POSITIONS.date.y),
+      input: createTextSvg(formattedDay, FIELD_POSITIONS.dateDay.size, 400, FIELD_POSITIONS.dateDay.x, FIELD_POSITIONS.dateDay.y, 'middle'),
+      top: 0,
+      left: 0,
+    });
+
+    textOverlays.push({
+      input: createTextSvg(formattedMonth, FIELD_POSITIONS.dateMonth.size, 400, FIELD_POSITIONS.dateMonth.x, FIELD_POSITIONS.dateMonth.y, 'middle'),
+      top: 0,
+      left: 0,
+    });
+
+    textOverlays.push({
+      input: createTextSvg(formattedYear, FIELD_POSITIONS.dateYear.size, 400, FIELD_POSITIONS.dateYear.x, FIELD_POSITIONS.dateYear.y, 'middle'),
       top: 0,
       left: 0,
     });
 
     // Name
     textOverlays.push({
-      input: createTextSvg(name, FIELD_POSITIONS.name.size, 700, FIELD_POSITIONS.name.x, FIELD_POSITIONS.name.y),
+      input: createTextSvg(name, FIELD_POSITIONS.name.size, 400, FIELD_POSITIONS.name.x, FIELD_POSITIONS.name.y),
       top: 0,
       left: 0,
     });
 
     // Phone
     textOverlays.push({
-      input: createTextSvg(phone, FIELD_POSITIONS.phone.size, 700, FIELD_POSITIONS.phone.x, FIELD_POSITIONS.phone.y),
+      input: createTextSvg(phone, FIELD_POSITIONS.phone.size, 400, FIELD_POSITIONS.phone.x, FIELD_POSITIONS.phone.y),
       top: 0,
       left: 0,
     });
 
     // Amount
     textOverlays.push({
-      input: createTextSvg(formattedAmount, FIELD_POSITIONS.amount.size, 700, FIELD_POSITIONS.amount.x, FIELD_POSITIONS.amount.y),
+      input: createTextSvg(formattedAmount, FIELD_POSITIONS.amount.size, 400, FIELD_POSITIONS.amount.x, FIELD_POSITIONS.amount.y),
       top: 0,
       left: 0,
     });
@@ -202,7 +222,7 @@ export async function renderReceiptImage({
     // Cash checkbox
     if (checkedCash) {
       textOverlays.push({
-        input: createTextSvg('✓', FIELD_POSITIONS.cashCheck.size, 700, FIELD_POSITIONS.cashCheck.x, FIELD_POSITIONS.cashCheck.y),
+        input: createTextSvg('✓', FIELD_POSITIONS.cashCheck.size, 700, FIELD_POSITIONS.cashCheck.x, FIELD_POSITIONS.cashCheck.y, 'middle'),
         top: 0,
         left: 0,
       });
@@ -211,7 +231,7 @@ export async function renderReceiptImage({
     // UPI checkbox
     if (!checkedCash && mode.toLowerCase() === 'upi') {
       textOverlays.push({
-        input: createTextSvg('✓', FIELD_POSITIONS.upiCheck.size, 700, FIELD_POSITIONS.upiCheck.x, FIELD_POSITIONS.upiCheck.y),
+        input: createTextSvg('✓', FIELD_POSITIONS.upiCheck.size, 700, FIELD_POSITIONS.upiCheck.x, FIELD_POSITIONS.upiCheck.y, 'middle'),
         top: 0,
         left: 0,
       });
@@ -219,7 +239,7 @@ export async function renderReceiptImage({
 
     // Collector
     textOverlays.push({
-      input: createTextSvg(collector, FIELD_POSITIONS.collector.size, 700, FIELD_POSITIONS.collector.x, FIELD_POSITIONS.collector.y),
+      input: createTextSvg(collector, FIELD_POSITIONS.collector.size, 400, FIELD_POSITIONS.collector.x, FIELD_POSITIONS.collector.y),
       top: 0,
       left: 0,
     });

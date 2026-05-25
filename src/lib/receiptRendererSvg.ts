@@ -7,14 +7,16 @@ const BASE_RECEIPT_WIDTH = 1200;
 const BASE_RECEIPT_HEIGHT = 840;
 
 const FIELD_POSITIONS = {
-  receiptNumber: { x: 995, y: 136, size: 24 },
-  date: { x: 995, y: 212, size: 24 },
-  name: { x: 285, y: 378, size: 28 },
-  phone: { x: 411, y: 441, size: 28 },
-  amount: { x: 515, y: 502, size: 28 },
-  cashCheck: { x: 433, y: 561, size: 36 },
-  upiCheck: { x: 688, y: 561, size: 36 },
-  collector: { x: 231, y: 718, size: 28 },
+  receiptNumber: { x: 1112, y: 128, size: 22 },
+  dateDay: { x: 1050, y: 204, size: 20 },
+  dateMonth: { x: 1100, y: 204, size: 20 },
+  dateYear: { x: 1150, y: 204, size: 20 },
+  name: { x: 377, y: 378, size: 26 },
+  phone: { x: 428, y: 441, size: 26 },
+  amount: { x: 535, y: 502, size: 26 },
+  cashCheck: { x: 449, y: 561, size: 34 },
+  upiCheck: { x: 701, y: 561, size: 34 },
+  collector: { x: 272, y: 718, size: 26 },
 } as const;
 
 const escapeXml = (s: string) =>
@@ -76,28 +78,34 @@ export async function renderReceiptImage({
   const templateBase64 = loadTemplateBase64();
   const templateBuffer = Buffer.from(templateBase64, 'base64');
 
-  const formattedDate = format(entryDate, 'dd / MM / yy');
+  const formattedDay = format(entryDate, 'dd');
+  const formattedMonth = format(entryDate, 'MM');
+  const formattedYear = format(entryDate, 'yy');
   const formattedAmount = amount.toLocaleString('en-IN');
   const checkedCash = (mode || '').toLowerCase() === 'cash';
 
   // Build CSS with embedded fonts
   const fontCss = buildEmbeddedFontCss();
+  const handwritingStack = "'Segoe Print', 'Bradley Hand', 'Lucida Handwriting', 'Comic Sans MS', 'Segoe Script', 'Snell Roundhand', cursive, sans-serif";
 
   // Create SVG with background image and positioned text
   const svg = `<?xml version="1.0" encoding="UTF-8"?>
   <svg xmlns="http://www.w3.org/2000/svg" width="${BASE_RECEIPT_WIDTH}" height="${BASE_RECEIPT_HEIGHT}" viewBox="0 0 ${BASE_RECEIPT_WIDTH} ${BASE_RECEIPT_HEIGHT}">
     <style><![CDATA[
       ${fontCss}
-      .t{fill:#000;font-family:ReceiptLatin,ReceiptDevanagari,DejaVu Sans, Noto Sans, serif}
+      .t{fill:#000;font-family:${handwritingStack};font-weight:400}
+      .tick{fill:#000;font-family:Arial, 'DejaVu Sans', sans-serif;font-weight:700}
     ]]></style>
     <image href="data:image/png;base64,${templateBase64}" x="0" y="0" width="${BASE_RECEIPT_WIDTH}" height="${BASE_RECEIPT_HEIGHT}" />
-    <text x="${FIELD_POSITIONS.receiptNumber.x}" y="${FIELD_POSITIONS.receiptNumber.y}" font-size="${FIELD_POSITIONS.receiptNumber.size}" font-weight="700" class="t">${escapeXml(receiptNumber)}</text>
-    <text x="${FIELD_POSITIONS.date.x}" y="${FIELD_POSITIONS.date.y}" font-size="${FIELD_POSITIONS.date.size}" font-weight="700" class="t">${escapeXml(formattedDate)}</text>
-    <text x="${FIELD_POSITIONS.name.x}" y="${FIELD_POSITIONS.name.y}" font-size="${FIELD_POSITIONS.name.size}" font-weight="700" class="t">${escapeXml(name)}</text>
-    <text x="${FIELD_POSITIONS.phone.x}" y="${FIELD_POSITIONS.phone.y}" font-size="${FIELD_POSITIONS.phone.size}" font-weight="700" class="t">${escapeXml(phone)}</text>
-    <text x="${FIELD_POSITIONS.amount.x}" y="${FIELD_POSITIONS.amount.y}" font-size="${FIELD_POSITIONS.amount.size}" font-weight="700" class="t">${escapeXml(formattedAmount)}</text>
-    ${checkedCash ? `<text x="${FIELD_POSITIONS.cashCheck.x}" y="${FIELD_POSITIONS.cashCheck.y}" font-size="${FIELD_POSITIONS.cashCheck.size}" font-weight="700" class="t">✓</text>` : (mode?.toLowerCase() === 'upi' ? `<text x="${FIELD_POSITIONS.upiCheck.x}" y="${FIELD_POSITIONS.upiCheck.y}" font-size="${FIELD_POSITIONS.upiCheck.size}" font-weight="700" class="t">✓</text>` : '')}
-    <text x="${FIELD_POSITIONS.collector.x}" y="${FIELD_POSITIONS.collector.y}" font-size="${FIELD_POSITIONS.collector.size}" font-weight="700" class="t">${escapeXml(collector)}</text>
+    <text x="${FIELD_POSITIONS.receiptNumber.x}" y="${FIELD_POSITIONS.receiptNumber.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.receiptNumber.size}" class="t">${escapeXml(receiptNumber)}</text>
+    <text x="${FIELD_POSITIONS.dateDay.x}" y="${FIELD_POSITIONS.dateDay.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.dateDay.size}" class="t">${escapeXml(formattedDay)}</text>
+    <text x="${FIELD_POSITIONS.dateMonth.x}" y="${FIELD_POSITIONS.dateMonth.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.dateMonth.size}" class="t">${escapeXml(formattedMonth)}</text>
+    <text x="${FIELD_POSITIONS.dateYear.x}" y="${FIELD_POSITIONS.dateYear.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.dateYear.size}" class="t">${escapeXml(formattedYear)}</text>
+    <text x="${FIELD_POSITIONS.name.x}" y="${FIELD_POSITIONS.name.y}" font-size="${FIELD_POSITIONS.name.size}" class="t">${escapeXml(name)}</text>
+    <text x="${FIELD_POSITIONS.phone.x}" y="${FIELD_POSITIONS.phone.y}" font-size="${FIELD_POSITIONS.phone.size}" class="t">${escapeXml(phone)}</text>
+    <text x="${FIELD_POSITIONS.amount.x}" y="${FIELD_POSITIONS.amount.y}" font-size="${FIELD_POSITIONS.amount.size}" class="t">${escapeXml(formattedAmount)}</text>
+    ${checkedCash ? `<text x="${FIELD_POSITIONS.cashCheck.x}" y="${FIELD_POSITIONS.cashCheck.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.cashCheck.size}" class="tick">✓</text>` : (mode?.toLowerCase() === 'upi' ? `<text x="${FIELD_POSITIONS.upiCheck.x}" y="${FIELD_POSITIONS.upiCheck.y}" text-anchor="middle" dominant-baseline="middle" font-size="${FIELD_POSITIONS.upiCheck.size}" class="tick">✓</text>` : '')}
+    <text x="${FIELD_POSITIONS.collector.x}" y="${FIELD_POSITIONS.collector.y}" font-size="${FIELD_POSITIONS.collector.size}" class="t">${escapeXml(collector)}</text>
   </svg>`;
 
   // Rasterize with sharp at template size

@@ -4,6 +4,7 @@ import path from 'node:path';
 import sharp from 'sharp';
 import { format } from 'date-fns';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
+import { renderReceiptImage as renderSharedReceiptImage } from '@/lib/renderReceiptSafe';
 
 export const runtime = 'nodejs';
 
@@ -190,7 +191,7 @@ export async function POST(request: NextRequest) {
 
     const entryDate = new Date();
     const receiptNumber = await generateUniqueReceiptNumber();
-    const receiptImage = await renderReceiptImage({
+    const receiptImage = await renderSharedReceiptImage({
       receiptNumber,
       entryDate,
       name,
