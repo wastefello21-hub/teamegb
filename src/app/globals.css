@@ -467,8 +467,10 @@ img {
   transform: translateZ(0);
 }
 
-/* Stronger styling for large headings and brand (apply only when class is present) */
-.gradient-heading, h1.gradient-heading {
+/* Stronger styling for large headings and brand */
+.gradient-heading,
+h1.gradient-heading,
+h1, h2, h3 {
   background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-mid), var(--gradient-text-end));
   -webkit-background-clip: text;
   background-clip: text;
@@ -476,21 +478,12 @@ img {
   color: transparent;
   font-weight: 800;
   letter-spacing: -0.02em;
-  /* Thin complementary maroon outline for contrast */
-  -webkit-text-stroke: 0.6px rgba(127,29,29,0.92);
-  /* Layered text-shadow to create a subtle outer stroke and depth */
-  text-shadow:
-    0 0 0 rgba(0,0,0,0),
-    0 1px 0 rgba(0,0,0,0.35),
-    1px 0 0 rgba(0,0,0,0.35),
-    -1px 0 0 rgba(0,0,0,0.35),
-    0 -1px 0 rgba(0,0,0,0.35),
-    0 6px 18px rgba(2,6,23,0.55),
-    0 1px 0 rgba(255,255,255,0.02);
+  -webkit-text-stroke: 0.2px rgba(0,0,0,0.18);
+  text-shadow: 0 6px 18px rgba(2,6,23,0.55), 0 1px 0 rgba(255,255,255,0.02);
 }
 
-/* Slightly subtler for smaller headings when applied explicitly */
-.gradient-subheading {
+/* Slightly subtler for smaller headings */
+h4, h5, h6 {
   background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-end));
   -webkit-background-clip: text;
   background-clip: text;
@@ -505,51 +498,50 @@ img {
 }
 
 /* Dark theme tweak: keep vibrancy but increase contrast */
-.dark .gradient-heading, .dark .gradient-text {
+.dark .gradient-heading, .dark .gradient-text, .dark h1, .dark h2, .dark h3 {
   text-shadow: 0 6px 22px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.02);
-}
-
-/* Light theme tweak: improve legibility on pale backgrounds */
-html:not(.dark) .gradient-heading,
-body:not(.dark) .gradient-heading {
-  -webkit-text-stroke: 0.8px rgba(0,0,0,0.36);
-  text-shadow: 0 6px 20px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.02);
-  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.14));
-}
-
-/* Add a subtle translucent backdrop behind gradient headings for legibility */
-.gradient-heading {
-  position: relative;
-  z-index: 1;
-  display: inline-block;
-}
-
-.gradient-heading::before {
-  content: "";
-  position: absolute;
-  left: -0.28em;
-  right: -0.28em;
-  top: -0.18em;
-  bottom: -0.18em;
-  background: rgba(0,0,0,0.18);
-  border-radius: 0.45rem;
-  filter: blur(6px);
-  z-index: -1;
-  transition: background 160ms ease, opacity 160ms ease;
-}
-
-/* Lighter/darker tweaks per theme */
-html:not(.dark) .gradient-heading::before {
-  background: rgba(0,0,0,0.32);
-}
-.dark .gradient-heading::before {
-  background: rgba(0,0,0,0.12);
 }
 
 /* Accessibility fallback for print or older browsers */
 @supports not (-webkit-background-clip: text) {
-  .gradient-text, .gradient-heading {
+  .gradient-text, .gradient-heading, h1, h2, h3 {
     color: var(--gradient-text-start);
     -webkit-text-fill-color: initial;
   }
+}
+
+/* Specific festival heading highlight (orange-yellow) to override site gradients */
+.festival-highlight {
+  /* Saffron gradient text with slight emboss + inner glow */
+  background: linear-gradient(90deg, #ffd57a 0%, #ffcf56 20%, #ffb020 45%, #ff8a00 75%, #ff5200 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 0.35px rgba(0,0,0,0.18);
+  text-shadow:
+    0 -1px 0 rgba(255,255,255,0.22), /* subtle top highlight for emboss */
+    0 1px 0 rgba(0,0,0,0.28),        /* thin base shadow */
+    0 6px 16px rgba(0,0,0,0.32),     /* depth shadow */
+    0 0 18px rgba(255,140,0,0.28);   /* saffron glow */
+  filter: drop-shadow(0 6px 16px rgba(255,140,0,0.06));
+  position: relative;
+}
+
+.dark .festival-highlight {
+  /* Slightly brighter saffron for dark theme with stronger glow */
+  background: linear-gradient(90deg, #fff7e6 0%, #ffe7b3 20%, #ffd57a 45%, #ffb020 75%, #ff8a00 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
+  -webkit-text-stroke: 0.4px rgba(0,0,0,0.22);
+  text-shadow:
+    0 -1px 0 rgba(255,255,255,0.18),
+    0 1px 0 rgba(0,0,0,0.36),
+    0 8px 26px rgba(0,0,0,0.62),
+    0 0 26px rgba(255,160,0,0.36);
+  filter: drop-shadow(0 8px 20px rgba(255,160,0,0.08));
 }

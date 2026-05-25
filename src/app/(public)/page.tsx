@@ -202,7 +202,7 @@ export default function HomePage() {
           <h1 className="text-5xl md:text-8xl font-extrabold mb-4 tracking-tight leading-[0.92] text-slate-950 dark:text-white">
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
-            <span className="text-4xl md:text-6xl block mt-3 font-semibold gradient-heading">
+            <span className="text-4xl md:text-6xl block mt-3 font-semibold festival-highlight">
               {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi Celebrations'}
             </span>
           </h1>
