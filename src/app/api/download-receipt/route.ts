@@ -1,17 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { supabaseAdmin } from '@/lib/supabase';
+
+const RECEIPT_DISABLED_MESSAGE = 'Our EGB developers are currently working on this feature and it will be available very soon.';
 
 export async function GET(request: NextRequest) {
   try {
-    const { data: settings, error: settingsError } = await supabase
+    const db = supabaseAdmin || supabase;
+
+    const { data: settings, error: settingsError } = await db
       .from('app_settings')
       .select('allow_receipt_download')
       .eq('id', 'default')
       .maybeSingle();
 
-    if (!settingsError && settings?.allow_receipt_download === false) {
+    // Fail closed: if we cannot verify settings, do not allow download.
+    if (settingsError || !settings || settings.allow_receipt_download === false) {
+      if (settingsError) {
+        console.error('Failed to read app settings in download-receipt:', settingsError.message);
+      }
       return NextResponse.json(
-        { error: 'Our team EGB is currently working on this feature.' },
+        { error: RECEIPT_DISABLED_MESSAGE },
         { status: 403 }
       );
     }
@@ -25,7 +34,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await db
       .from('contributions')
       .select('receipt_url')
       .eq('receipt_number', receiptNumber)

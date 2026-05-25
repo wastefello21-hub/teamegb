@@ -9,6 +9,8 @@ import { CheckCircle2 } from 'lucide-react';
 export default function SettingsPage() {
   const { settings, updateSettings } = useData();
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const [festivalNameInput, setFestivalNameInput] = useState(settings.festivalName);
 
   // Sync festival name input when settings load from localStorage
@@ -16,14 +18,30 @@ export default function SettingsPage() {
     setFestivalNameInput(settings.festivalName);
   }, [settings.festivalName]);
 
-  const handleToggle = (key: 'showNamesPublicly' | 'showAmountsPublicly' | 'showExpenditurePublicly' | 'allowReceiptDownload') => {
-    updateSettings({ [key]: !settings[key] });
-    showSavedFeedback();
+  const handleToggle = async (key: 'showNamesPublicly' | 'showAmountsPublicly' | 'showExpenditurePublicly' | 'allowReceiptDownload') => {
+    setSaveError(null);
+    setIsSaving(true);
+    const success = await updateSettings({ [key]: !settings[key] });
+    setIsSaving(false);
+
+    if (success) {
+      showSavedFeedback();
+    } else {
+      setSaveError('Unable to save this setting right now. Please try again in a few seconds.');
+    }
   };
 
-  const handleSaveGeneral = () => {
-    updateSettings({ festivalName: festivalNameInput.trim() || 'TEAM EGB Ganesha Festival' });
-    showSavedFeedback();
+  const handleSaveGeneral = async () => {
+    setSaveError(null);
+    setIsSaving(true);
+    const success = await updateSettings({ festivalName: festivalNameInput.trim() || 'TEAM EGB Ganesha Festival' });
+    setIsSaving(false);
+
+    if (success) {
+      showSavedFeedback();
+    } else {
+      setSaveError('Unable to save this setting right now. Please try again in a few seconds.');
+    }
   };
 
   const showSavedFeedback = () => {
@@ -33,7 +51,11 @@ export default function SettingsPage() {
 
   const ToggleSwitch = ({ enabled, onToggle }: { enabled: boolean; onToggle: () => void }) => (
     <button 
+      type="button"
       onClick={onToggle}
+      disabled={isSaving}
+      aria-pressed={enabled}
+      aria-label={enabled ? 'Enabled' : 'Disabled'}
       className={`relative w-14 h-7 rounded-full transition-colors duration-300 ${enabled ? 'bg-orange-500' : 'bg-gray-300 dark:bg-gray-600'}`}
     >
       <div 
@@ -49,13 +71,26 @@ export default function SettingsPage() {
           <h2 className="text-2xl font-bold text-orange-600 dark:text-orange-400">System Settings</h2>
           <p className="text-sm text-foreground/60">Configure public visibility and general app settings.</p>
         </div>
-        {saved && (
-          <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
-            <CheckCircle2 size={16} />
-            Settings Saved!
-          </div>
-        )}
+        <div className="flex items-center gap-3">
+          {isSaving && (
+            <div className="px-4 py-2 rounded-lg text-sm font-medium bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+              Saving...
+            </div>
+          )}
+          {saved && (
+            <div className="flex items-center gap-2 px-4 py-2 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 rounded-lg text-sm font-medium">
+              <CheckCircle2 size={16} />
+              Settings Saved!
+            </div>
+          )}
+        </div>
       </div>
+
+      {saveError && (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-900/20 dark:text-red-300">
+          {saveError}
+        </div>
+      )}
 
       <GlassCard className="p-6">
         <h3 className="text-lg font-semibold mb-4 border-b border-border-color pb-2">Public Visibility Controls</h3>
@@ -91,7 +126,7 @@ export default function SettingsPage() {
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">Allow E-Receipt Download</p>
-            <p className="text-sm text-foreground/60">Turn this on to let users download e-receipts. If it is off, they will see a message that our team EGB is currently working on this feature.</p>
+            <p className="text-sm text-foreground/60">Turn this on to let users download e-receipts. When disabled, users will see: &quot;Our EGB developers are currently working on this feature and it will be available very soon.&quot;</p>
           </div>
           <ToggleSwitch enabled={settings.allowReceiptDownload} onToggle={() => handleToggle('allowReceiptDownload')} />
         </div>
@@ -109,7 +144,7 @@ export default function SettingsPage() {
               className="w-full px-4 py-2 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
-          <Button onClick={handleSaveGeneral} className="mt-4">Save General Settings</Button>
+          <Button onClick={handleSaveGeneral} className="mt-4" disabled={isSaving}>Save General Settings</Button>
         </div>
       </GlassCard>
     </div>

@@ -28,18 +28,49 @@ export default function EReceiptPage() {
   const [notice, setNotice] = useState<string | null>(null);
   const { settings } = useData();
   const canDownloadReceipt = settings.allowReceiptDownload !== false;
+  const unavailableMessage = 'Our EGB developers are currently working on this feature and it will be available very soon.';
 
-  const handleDownloadClick = () => {
+  const handleDownloadClick = async () => {
     if (!receipt) {
       return;
     }
 
     if (!canDownloadReceipt) {
-      setNotice('Our team EGB is currently working on this feature.');
+      setNotice(unavailableMessage);
       return;
     }
 
-    window.location.href = `/api/download-receipt?receiptNumber=${encodeURIComponent(receipt.receipt_number)}`;
+    try {
+      const response = await fetch(`/api/download-receipt?receiptNumber=${encodeURIComponent(receipt.receipt_number)}`, {
+        method: 'GET',
+        cache: 'no-store',
+      });
+
+      if (!response.ok) {
+        let message = unavailableMessage;
+        try {
+          const payload = await response.json();
+          if (payload?.error) message = payload.error;
+        } catch {
+          // Ignore parse failures and fall back to default message.
+        }
+        setNotice(message);
+        return;
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = blobUrl;
+      anchor.download = `receipt-${receipt.receipt_number}.png`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error('Receipt download failed:', error);
+      setNotice(unavailableMessage);
+    }
   };
 
   const lookupReceipt = async (number: string) => {

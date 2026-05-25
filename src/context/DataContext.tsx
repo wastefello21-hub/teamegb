@@ -149,7 +149,7 @@ interface DataContextType {
   applyForEvent: (application: Omit<EventApplication, 'id' | 'created_at'>) => Promise<void>;
   deleteEventApplication: (id: string) => Promise<void>;
   
-  updateSettings: (updates: Partial<AppSettings>) => void;
+  updateSettings: (updates: Partial<AppSettings>) => Promise<boolean>;
 
   addVlog: (vlog: Omit<Vlog, 'id' | 'created_at'>) => Promise<void>;
   deleteVlog: (id: string) => Promise<void>;
@@ -962,8 +962,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const updateSettings = async (updates: Partial<AppSettings>) => {
+    const previousSettings = settings;
+    const nextSettings = { ...settings, ...updates };
+
     // Optimistically update local state
-    setSettings(prev => ({ ...prev, ...updates }));
+    setSettings(nextSettings);
 
     // Sync to Supabase
     const supabaseUpdates = {
@@ -981,7 +984,29 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     if (error) {
       console.error('Supabase Update Error (app_settings):', error.message);
+      setSettings(previousSettings);
+      return false;
     }
+
+    // Keep both setting-specific and main cache snapshots aligned.
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('egb_settings', JSON.stringify(nextSettings));
+
+        const cacheKey = 'egb_data_cache';
+        const cacheTimestamp = 'egb_data_timestamp';
+        const existingCacheRaw = localStorage.getItem(cacheKey);
+        if (existingCacheRaw) {
+          const existingCache = JSON.parse(existingCacheRaw);
+          localStorage.setItem(cacheKey, JSON.stringify({ ...existingCache, settings: nextSettings }));
+          localStorage.setItem(cacheTimestamp, Date.now().toString());
+        }
+      } catch (cacheError) {
+        console.warn('Failed to cache settings update:', cacheError);
+      }
+    }
+
+    return true;
   };
 
   // Event Actions
