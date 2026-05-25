@@ -199,7 +199,6 @@ export async function POST(request: NextRequest) {
       amount,
       mode,
       collector,
-      house,
     });
 
     const fileName = `receipt-${receiptNumber}.png`;
