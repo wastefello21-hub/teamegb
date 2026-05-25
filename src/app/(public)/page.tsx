@@ -190,15 +190,15 @@ export default function HomePage() {
             src="/logo_v2.jpg" 
             alt="Festival Background" 
             fill
-            className="object-cover opacity-60 md:opacity-70 scale-105"
+            className="object-cover opacity-70 md:opacity-80 scale-110 saturate-125 contrast-110"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/35 to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.25),transparent_40%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/88 via-slate-900/48 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.24),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.16),transparent_38%),radial-gradient(circle_at_left,rgba(59,130,246,0.08),transparent_28%)]" />
         </div>
 
         <div 
-          className="surface-panel text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] glass-hover dark:bg-slate-950/45"
+          className="surface-panel text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] glass-hover dark:bg-slate-950/60"
         >
           <div
             className="section-kicker mb-6"
@@ -218,7 +218,7 @@ export default function HomePage() {
           </h1>
           
           <p
-            className="text-lg md:text-2xl font-medium mb-12 text-slate-700 dark:text-slate-200 max-w-2xl mx-auto"
+            className="text-lg md:text-2xl font-medium mb-12 text-slate-800 dark:text-slate-100 max-w-2xl mx-auto"
           >
             Celebrating devotion, faith, and youth unity.
           </p>
@@ -230,7 +230,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="gradient"
-                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-amber-500/20 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 View Contributions
               </Button>
@@ -239,7 +239,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-slate-950/10 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]"
+                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/10 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 View Gallery
               </Button>
@@ -270,12 +270,12 @@ export default function HomePage() {
         >
           <div>
             <Link href="/analytics" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-orange-200/70 bg-gradient-to-br from-white/95 to-orange-50/80 shadow-sm dark:from-slate-950/70 dark:to-orange-950/10 dark:border-orange-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 dark:bg-amber-500/10 dark:border-amber-400/20">
+                  <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-200 rounded-xl border border-orange-200 dark:bg-orange-500/15 dark:border-orange-300/20">
                     <Wallet className="w-6 h-6 text-amber-700 dark:text-amber-300" />
                   </div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Total Collection</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-100">Total Collection</h3>
                 </div>
                 <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.totalContributions}
@@ -286,12 +286,12 @@ export default function HomePage() {
 
           <div>
             <Link href="/contributors" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-sky-200/70 bg-gradient-to-br from-white/95 to-sky-50/80 shadow-sm dark:from-slate-950/70 dark:to-sky-950/10 dark:border-sky-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-sky-50 rounded-xl border border-sky-100 dark:bg-sky-500/10 dark:border-sky-400/20">
+                  <div className="p-3 bg-gradient-to-br from-sky-100 to-cyan-200 rounded-xl border border-sky-200 dark:bg-sky-500/15 dark:border-sky-300/20">
                     <Users className="w-6 h-6 text-sky-700 dark:text-sky-300" />
                   </div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Contributors</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-100">Contributors</h3>
                 </div>
                 <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.contributors}
@@ -302,12 +302,12 @@ export default function HomePage() {
 
           <div>
             <Link href="/expenditure" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-rose-200/70 bg-gradient-to-br from-white/95 to-rose-50/80 shadow-sm dark:from-slate-950/70 dark:to-rose-950/10 dark:border-rose-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-rose-50 rounded-xl border border-rose-100 dark:bg-rose-500/10 dark:border-rose-400/20">
+                  <div className="p-3 bg-gradient-to-br from-rose-100 to-orange-200 rounded-xl border border-rose-200 dark:bg-rose-500/15 dark:border-rose-300/20">
                     <TrendingUp className="w-6 h-6 text-rose-700 dark:text-rose-300" />
                   </div>
-                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Expenditure</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-100">Expenditure</h3>
                 </div>
                 <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.expenditure}
@@ -317,12 +317,12 @@ export default function HomePage() {
           </div>
 
           <div>
-            <GlassCard variant="default" className="relative overflow-hidden border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
+            <GlassCard variant="default" className="relative overflow-hidden border border-emerald-200/70 bg-gradient-to-br from-white/95 to-emerald-50/80 shadow-sm dark:from-slate-950/70 dark:to-emerald-950/10 dark:border-emerald-500/20">
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-400/20">
+                <div className="p-3 bg-gradient-to-br from-emerald-100 to-lime-200 rounded-xl border border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-300/20">
                   <Heart className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                 </div>
-                <h3 className="font-semibold text-slate-700 dark:text-slate-200">Balance</h3>
+                <h3 className="font-semibold text-slate-700 dark:text-slate-100">Balance</h3>
               </div>
               <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                 {analytics.balance}

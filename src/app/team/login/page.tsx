@@ -33,6 +33,27 @@ export default function TeamLogin() {
     router.push('/');
   };
 
+  const normalizeTeamId = (value: string) => {
+    const compact = value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+    return compact
+      .split('-')
+      .filter(Boolean)
+      .map((segment) => {
+        if (/^\d+$/.test(segment)) {
+          return String(Number(segment));
+        }
+
+        const match = segment.match(/^(\D+)(\d+)$/);
+        if (match) {
+          return `${match[1]}${String(Number(match[2]))}`;
+        }
+
+        return segment;
+      })
+      .join('-');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -42,10 +63,10 @@ export default function TeamLogin() {
     // Validate against global context
     setTimeout(async () => {
       setIsLoading(false);
-      const normalizedTeamId = teamId.trim().toLowerCase();
+      const normalizedTeamId = normalizeTeamId(teamId);
       const normalizedPassword = password.trim();
       
-      let member = teamMembers.find(m => m.id.trim().toLowerCase() === normalizedTeamId);
+      let member = teamMembers.find(m => normalizeTeamId(m.id) === normalizedTeamId);
 
       // If not found in local cache, fetch directly from Supabase to avoid
       // race conditions when DataContext hasn't populated teamMembers yet.
@@ -53,12 +74,11 @@ export default function TeamLogin() {
         try {
           const { data, error } = await supabase
             .from('team_members')
-            .select('*')
-            .ilike('id', normalizedTeamId)
-            .limit(1)
-            .single();
+            .select('*');
 
-          if (!error && data) member = data as any;
+          if (!error && data) {
+            member = (data as any[]).find((entry) => normalizeTeamId(entry.id) === normalizedTeamId) || null;
+          }
         } catch (err) {
           console.error('team login lookup error', err);
         }
@@ -112,7 +132,7 @@ export default function TeamLogin() {
             value={teamId}
             onChange={(e) => setTeamId(e.target.value)}
             className="w-full px-4 py-3 rounded-lg bg-background border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 transition-all"
-            placeholder="e.g. EGB-001"
+            placeholder="e.g. EGB-01"
             required
           />
         </div>
