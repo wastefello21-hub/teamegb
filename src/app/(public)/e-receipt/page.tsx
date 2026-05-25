@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Download, Search, BadgeCheck, Clock3, ScanBarcode, Info, X } from 'lucide-react';
+import { useData } from '@/context/DataContext';
 
 type ReceiptRecord = {
   receipt_number: string;
@@ -25,9 +26,20 @@ export default function EReceiptPage() {
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<ReceiptRecord | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
+  const { settings } = useData();
+  const canDownloadReceipt = settings.allowReceiptDownload !== false;
 
   const handleDownloadClick = () => {
-    setNotice('Our EGB developers are actively working to make the receipt download feature fully functional. It will be available soon. Thank you for your patience.');
+    if (!receipt) {
+      return;
+    }
+
+    if (!canDownloadReceipt) {
+      setNotice('Our team EGB is currently working on this feature.');
+      return;
+    }
+
+    window.location.href = `/api/download-receipt?receiptNumber=${encodeURIComponent(receipt.receipt_number)}`;
   };
 
   const lookupReceipt = async (number: string) => {
@@ -138,7 +150,7 @@ export default function EReceiptPage() {
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 px-4 py-3">
                   <Clock3 className="h-5 w-5 text-orange-500" />
-                  Download feature coming soon
+                  {canDownloadReceipt ? 'Download feature is available' : 'Download feature disabled by admin'}
                 </div>
               </div>
 
@@ -176,6 +188,8 @@ export default function EReceiptPage() {
                         <button
                           type="button"
                           onClick={handleDownloadClick}
+                          aria-disabled={!canDownloadReceipt}
+                          disabled={!receipt}
                           className="inline-flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-orange-500 via-red-500 to-orange-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition-all duration-200 hover:scale-[1.01] hover:from-orange-600 hover:via-red-600 hover:to-orange-700 sm:w-auto"
                         >
                           <Download className="mr-2 h-4 w-4" /> Download
@@ -211,7 +225,7 @@ export default function EReceiptPage() {
 
                       <div className="p-4 sm:p-5 md:p-6">
                         <p className="text-sm text-foreground/65">
-                          The matching receipt details are ready. You can review them now, and the download feature will be available soon.
+                          The matching receipt details are ready. You can review them now, and {canDownloadReceipt ? 'download the receipt image immediately.' : 'our team EGB is currently working on the download feature.'}
                         </p>
                         <div className="mt-5 rounded-3xl border border-dashed border-orange-500/25 bg-orange-500/5 p-4">
                           <p className="text-xs uppercase tracking-[0.3em] text-orange-600 dark:text-orange-300 font-semibold">Stored Record</p>
@@ -220,7 +234,9 @@ export default function EReceiptPage() {
                               <span className="font-semibold text-foreground">Receipt Number:</span> {receipt.receipt_number}
                               <span className="ml-2 text-sm text-foreground/60"> (Enter this number on our website: Menu → E-Receipt to download your receipt)</span>
                             </p>
-                            <p><span className="font-semibold text-foreground">Download:</span> Coming soon</p>
+                            <p>
+                              <span className="font-semibold text-foreground">Download:</span> {canDownloadReceipt ? 'Available now' : 'Our team EGB is currently working on this feature.'}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -271,7 +287,7 @@ export default function EReceiptPage() {
                     <Info className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-lg font-bold text-foreground">Download Feature Coming Soon</p>
+                    <p className="text-lg font-bold text-foreground">Download Feature Unavailable</p>
                     <p className="mt-2 text-sm leading-6 text-foreground/75">{notice}</p>
                   </div>
                 </div>

@@ -50,6 +50,7 @@ export type AppSettings = {
   showNamesPublicly: boolean;
   showAmountsPublicly: boolean;
   showExpenditurePublicly: boolean;
+  allowReceiptDownload: boolean;
   festivalName: string;
 };
 
@@ -57,6 +58,7 @@ export const defaultSettings: AppSettings = {
   showNamesPublicly: true,
   showAmountsPublicly: false,
   showExpenditurePublicly: true,
+  allowReceiptDownload: true,
   festivalName: 'TEAM EGB - Ganesha Chaturthi Celebrations',
 };
 
@@ -227,7 +229,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           if (parsed.suggestions) setSuggestions(parsed.suggestions);
           if (parsed.events) setEvents(parsed.events);
           if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
-          if (parsed.settings) setSettings(parsed.settings);
+          if (parsed.settings) setSettings({ ...defaultSettings, ...parsed.settings });
           
           // If gallery cache is stale, fetch it fresh
           if (!parsed.gallery || !isGalleryCacheFresh) {
@@ -316,6 +318,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             showNamesPublicly: settingsResult.value.data.show_names_publicly,
             showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
             showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
+            allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
             festivalName: settingsResult.value.data.festival_name
           };
           setSettings(newSettings);
@@ -335,6 +338,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               showNamesPublicly: settingsResult.value.data?.show_names_publicly,
               showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
               showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
+              allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
               festivalName: settingsResult.value.data?.festival_name
             } : defaultSettings
           };
@@ -826,10 +830,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
 
     // Sync to Supabase
     const supabaseUpdates = {
-      show_names_publicly: updates.showNamesPublicly,
-      show_amounts_publicly: updates.showAmountsPublicly,
-      show_expenditure_publicly: updates.showExpenditurePublicly,
-      festival_name: updates.festivalName,
+      ...(typeof updates.showNamesPublicly === 'boolean' ? { show_names_publicly: updates.showNamesPublicly } : {}),
+      ...(typeof updates.showAmountsPublicly === 'boolean' ? { show_amounts_publicly: updates.showAmountsPublicly } : {}),
+      ...(typeof updates.showExpenditurePublicly === 'boolean' ? { show_expenditure_publicly: updates.showExpenditurePublicly } : {}),
+      ...(typeof updates.allowReceiptDownload === 'boolean' ? { allow_receipt_download: updates.allowReceiptDownload } : {}),
+      ...(typeof updates.festivalName === 'string' ? { festival_name: updates.festivalName } : {}),
       updated_at: new Date().toISOString()
     };
 

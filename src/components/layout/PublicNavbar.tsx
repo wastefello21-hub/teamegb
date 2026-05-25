@@ -144,6 +144,9 @@ export const PublicNavbar = () => {
                 <Link href="/team/login">
                   <Button variant="outline" size="sm">Team Login</Button>
                 </Link>
+                <Link href="/admin/login">
+                  <Button variant="primary" size="sm" className="ml-2">Admin Portal</Button>
+                </Link>
               </div>
             </div>
 

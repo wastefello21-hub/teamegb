@@ -16,7 +16,7 @@ export default function SettingsPage() {
     setFestivalNameInput(settings.festivalName);
   }, [settings.festivalName]);
 
-  const handleToggle = (key: 'showNamesPublicly' | 'showAmountsPublicly' | 'showExpenditurePublicly') => {
+  const handleToggle = (key: 'showNamesPublicly' | 'showAmountsPublicly' | 'showExpenditurePublicly' | 'allowReceiptDownload') => {
     updateSettings({ [key]: !settings[key] });
     showSavedFeedback();
   };
@@ -83,6 +83,17 @@ export default function SettingsPage() {
             </div>
             <ToggleSwitch enabled={settings.showExpenditurePublicly} onToggle={() => handleToggle('showExpenditurePublicly')} />
           </div>
+        </div>
+      </GlassCard>
+
+      <GlassCard className="p-6">
+        <h3 className="text-lg font-semibold mb-4 border-b border-border-color pb-2">E-Receipt Controls</h3>
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <p className="font-medium">Allow E-Receipt Download</p>
+            <p className="text-sm text-foreground/60">Turn this on to let users download e-receipts. If it is off, they will see a message that our team EGB is currently working on this feature.</p>
+          </div>
+          <ToggleSwitch enabled={settings.allowReceiptDownload} onToggle={() => handleToggle('allowReceiptDownload')} />
         </div>
       </GlassCard>
 

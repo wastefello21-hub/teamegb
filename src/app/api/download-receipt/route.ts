@@ -3,6 +3,19 @@ import { supabase } from '@/lib/supabase';
 
 export async function GET(request: NextRequest) {
   try {
+    const { data: settings, error: settingsError } = await supabase
+      .from('app_settings')
+      .select('allow_receipt_download')
+      .eq('id', 'default')
+      .maybeSingle();
+
+    if (!settingsError && settings?.allow_receipt_download === false) {
+      return NextResponse.json(
+        { error: 'Our team EGB is currently working on this feature.' },
+        { status: 403 }
+      );
+    }
+
     const receiptNumber = request.nextUrl.searchParams.get('receiptNumber')?.trim();
 
     if (!receiptNumber || !/^\d{6}$/.test(receiptNumber)) {

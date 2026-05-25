@@ -34,7 +34,8 @@ export default function TeamDashboard() {
   } | null>(null);
   const [savedContribution, setSavedContribution] = useState<Contribution | null>(null);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
-  const { addContribution } = useData();
+  const { addContribution, settings } = useData();
+  const canDownloadReceipt = settings.allowReceiptDownload !== false;
   const { user, logout, loading } = useAuth(); // Import the logged-in user
 
   useEffect(() => {
@@ -317,12 +318,21 @@ export default function TeamDashboard() {
               <a href={`/e-receipt?receipt=${generatedReceipt.receipt_number}`} className="inline-flex items-center justify-center rounded-2xl bg-orange-500 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-orange-600">
                 Open Receipt Page
               </a>
-              {generatedReceipt.receipt_number ? (
+              {generatedReceipt.receipt_number && canDownloadReceipt ? (
                 <a href={`/api/download-receipt?receiptNumber=${generatedReceipt.receipt_number}`} download={`receipt-${generatedReceipt.receipt_number}.png`} className="inline-flex items-center justify-center rounded-2xl border border-border-color bg-background px-4 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-foreground/5">
                   Download Image
                 </a>
+              ) : generatedReceipt.receipt_number ? (
+                <span className="inline-flex items-center justify-center rounded-2xl border border-border-color bg-background px-4 py-3 text-sm font-semibold text-foreground/55">
+                  Download currently unavailable
+                </span>
               ) : null}
             </div>
+            {!canDownloadReceipt && (
+              <p className="mt-3 text-sm text-foreground/65">
+                Our team EGB is currently working on this feature.
+              </p>
+            )}
           </div>
         )}
         <Button onClick={() => setSuccess(false)}>Add Another</Button>

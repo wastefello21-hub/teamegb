@@ -10,7 +10,8 @@ import { useData } from '@/context/DataContext';
 export default function ManageContributionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const { contributions, deleteContribution } = useData();
+  const { contributions, deleteContribution, settings } = useData();
+  const canDownloadReceipt = settings.allowReceiptDownload !== false;
 
   const confirmDelete = () => {
     if (deletingId) {
@@ -126,13 +127,19 @@ export default function ManageContributionsPage() {
                     <td className="p-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {tx.receipt_url && (
-                          <a
-                            href={`/api/download-receipt?receiptNumber=${tx.receipt_number}`}
-                            download={tx.receipt_number ? `receipt-${tx.receipt_number}.png` : undefined}
-                            className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/20 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/35"
-                          >
-                            <Download size={14} /> Receipt
-                          </a>
+                          canDownloadReceipt ? (
+                            <a
+                              href={`/api/download-receipt?receiptNumber=${tx.receipt_number}`}
+                              download={tx.receipt_number ? `receipt-${tx.receipt_number}.png` : undefined}
+                              className="inline-flex items-center gap-1.5 rounded-lg border border-orange-500/20 bg-orange-50 px-3 py-2 text-xs font-semibold text-orange-700 transition-colors hover:bg-orange-100 dark:bg-orange-900/20 dark:text-orange-300 dark:hover:bg-orange-900/35"
+                            >
+                              <Download size={14} /> Receipt
+                            </a>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 rounded-lg border border-border-color bg-background px-3 py-2 text-xs font-semibold text-foreground/55">
+                              <Download size={14} /> Receipt download disabled
+                            </span>
+                          )
                         )}
                         <button 
                           onClick={() => tx.id && setDeletingId(tx.id)}
