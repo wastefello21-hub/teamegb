@@ -262,7 +262,7 @@ export default function HomePage() {
             <Link href="/analytics" className="block">
               <GlassCard variant="default" className="relative overflow-hidden h-full border border-orange-200/70 bg-gradient-to-br from-white/95 to-orange-50/90 shadow-sm dark:from-slate-950/70 dark:to-orange-950/12 dark:border-orange-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-200 rounded-xl border border-orange-200 dark:bg-orange-500/15 dark:border-orange-300/20">
+                  <div className="p-3 icon-badge">
                     <Wallet className="w-6 h-6 text-amber-700 dark:text-amber-300" />
                   </div>
                   <h3 className="font-semibold text-slate-700 dark:text-slate-100">Total Collection</h3>
@@ -278,7 +278,7 @@ export default function HomePage() {
             <Link href="/contributors" className="block">
               <GlassCard variant="default" className="relative overflow-hidden h-full border border-sky-200/70 bg-gradient-to-br from-white/95 to-sky-50/90 shadow-sm dark:from-slate-950/70 dark:to-sky-950/12 dark:border-sky-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-gradient-to-br from-sky-100 to-cyan-200 rounded-xl border border-sky-200 dark:bg-sky-500/15 dark:border-sky-300/20">
+                  <div className="p-3 icon-badge">
                     <Users className="w-6 h-6 text-sky-700 dark:text-sky-300" />
                   </div>
                   <h3 className="font-semibold text-slate-700 dark:text-slate-100">Contributors</h3>
@@ -294,7 +294,7 @@ export default function HomePage() {
             <Link href="/expenditure" className="block">
               <GlassCard variant="default" className="relative overflow-hidden h-full border border-rose-200/70 bg-gradient-to-br from-white/95 to-rose-50/90 shadow-sm dark:from-slate-950/70 dark:to-rose-950/12 dark:border-rose-500/20">
                 <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-gradient-to-br from-rose-100 to-orange-200 rounded-xl border border-rose-200 dark:bg-rose-500/15 dark:border-rose-300/20">
+                  <div className="p-3 icon-badge">
                     <TrendingUp className="w-6 h-6 text-rose-700 dark:text-rose-300" />
                   </div>
                   <h3 className="font-semibold text-slate-700 dark:text-slate-100">Expenditure</h3>
@@ -309,7 +309,7 @@ export default function HomePage() {
           <div>
             <GlassCard variant="default" className="relative overflow-hidden border border-emerald-200/70 bg-gradient-to-br from-white/95 to-emerald-50/90 shadow-sm dark:from-slate-950/70 dark:to-emerald-950/12 dark:border-emerald-500/20">
               <div className="flex items-center gap-4 mb-4">
-                <div className="p-3 bg-gradient-to-br from-emerald-100 to-lime-200 rounded-xl border border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-300/20">
+                <div className="p-3 icon-badge">
                   <Heart className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                 </div>
                 <h3 className="font-semibold text-slate-700 dark:text-slate-100">Balance</h3>

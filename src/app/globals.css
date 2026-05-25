@@ -545,3 +545,47 @@ h4, h5, h6 {
     0 0 26px rgba(255,160,0,0.36);
   filter: drop-shadow(0 8px 20px rgba(255,160,0,0.08));
 }
+
+/* Enhanced button gloss and hover sheen */
+.btn-enhanced {
+  position: relative;
+  overflow: hidden;
+}
+.btn-enhanced::after {
+  content: '';
+  position: absolute;
+  left: -40%;
+  top: -50%;
+  width: 80%;
+  height: 200%;
+  transform: rotate(25deg);
+  background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.18), rgba(255,255,255,0.06));
+  transition: transform 0.7s ease, opacity 0.5s ease;
+  opacity: 0.15;
+  pointer-events: none;
+}
+.btn-enhanced:hover::after {
+  transform: translateX(120%) rotate(25deg);
+  opacity: 0.28;
+}
+.btn-enhanced:active::after {
+  transform: translateX(140%) rotate(25deg) scale(0.98);
+  opacity: 0.14;
+}
+
+/* Icon badge used across the site for lucide icons */
+.icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.88), rgba(255,245,230,0.9));
+  box-shadow: 0 10px 20px rgba(15,23,42,0.08), inset 0 1px 0 rgba(255,255,255,0.6);
+  border: 1px solid rgba(249,115,22,0.08);
+}
+.icon-badge svg { width: 20px; height: 20px; color: #c2410c; }
+.icon-badge:hover { transform: translateY(-3px) scale(1.03); box-shadow: 0 18px 34px rgba(249,115,22,0.12); }
+.dark .icon-badge { background: linear-gradient(135deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border-color: rgba(251,191,36,0.08); box-shadow: 0 12px 22px rgba(2,6,23,0.48); }
+.dark .icon-badge svg { color: #ffd580; }

@@ -9,7 +9,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className = '', variant = 'primary', size = 'md', glow = false, sparkle = false, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-xl font-semibold tracking-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none';
+    const baseStyles = 'inline-flex items-center justify-center gap-2 rounded-2xl font-semibold tracking-tight transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none relative overflow-hidden';
 
     const variants = {
       primary: 'bg-gradient-to-r from-slate-950 via-orange-700 to-rose-600 text-white shadow-lg shadow-orange-500/20 hover:-translate-y-0.5 hover:brightness-105 dark:from-white dark:via-amber-200 dark:to-orange-200 dark:text-slate-950',
@@ -26,12 +26,13 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const glowClass = glow ? 'shadow-[0_0_0_1px_rgba(251,191,36,0.2),0_18px_40px_rgba(249,115,22,0.22)]' : '';
+    const enhancedClass = 'btn-enhanced';
     const sparkleClass = sparkle ? '' : '';
 
     return (
       <button
         ref={ref}
-        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${glowClass} ${sparkleClass} ${className}`}
+        className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${glowClass} ${sparkleClass} ${enhancedClass} ${className}`}
         {...props}
       >
         <span>{props.children}</span>
