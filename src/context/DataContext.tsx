@@ -387,11 +387,12 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             }
           }
         } else {
-          // Public pages: only fetch gallery, vlogs, events, and settings to reduce payload and speed up loading
-          const [galleryResult, vlogsResult, eventsResult, settingsResult] = await Promise.allSettled([
+          // Public pages: fetch the public-facing content, including suggestions so submissions are visible site-wide
+          const [galleryResult, vlogsResult, eventsResult, suggestionsResult, settingsResult] = await Promise.allSettled([
             supabase.from('gallery').select('*').order('created_at', { ascending: false }),
             supabase.from('vlogs').select('*').order('created_at', { ascending: false }),
             supabase.from('events').select('*').order('created_at', { ascending: false }),
+            supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
             supabase.from('app_settings').select('*').eq('id', 'default').single()
           ]);
 
@@ -406,6 +407,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           }
           if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
             setEvents(eventsResult.value.data || []);
+            hasNewData = true;
+          }
+          if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
+            setSuggestions(suggestionsResult.value.data || []);
             hasNewData = true;
           }
           if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
@@ -425,6 +430,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
               vlogs: vlogsResult.status === 'fulfilled' ? vlogsResult.value.data : [],
               events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
+              suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
               settings: settingsResult.status === 'fulfilled' ? {
                 showNamesPublicly: settingsResult.value.data?.show_names_publicly,
                 showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,

@@ -191,6 +191,8 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchEndX, setTouchEndX] = useState<number | null>(null);
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -265,6 +267,64 @@ export default function GalleryPage() {
     [selectedYear, availableYears]
   );
 
+  const galleryItemsInView = useMemo(() => {
+    if (selectedYear === 'All') {
+      return gallery;
+    }
+
+    return gallery.filter(item => item.year === selectedYear);
+  }, [gallery, selectedYear]);
+
+  const selectedMediaIndex = useMemo(
+    () => (selectedMedia ? galleryItemsInView.findIndex(item => item.id === selectedMedia.id) : -1),
+    [galleryItemsInView, selectedMedia]
+  );
+
+  const goToMediaIndex = useCallback(
+    (nextIndex: number) => {
+      if (galleryItemsInView.length === 0) return;
+
+      const wrappedIndex = (nextIndex + galleryItemsInView.length) % galleryItemsInView.length;
+      setSelectedMedia(galleryItemsInView[wrappedIndex]);
+    },
+    [galleryItemsInView]
+  );
+
+  const goToNextMedia = useCallback(() => {
+    if (selectedMediaIndex < 0) return;
+    goToMediaIndex(selectedMediaIndex + 1);
+  }, [goToMediaIndex, selectedMediaIndex]);
+
+  const goToPreviousMedia = useCallback(() => {
+    if (selectedMediaIndex < 0) return;
+    goToMediaIndex(selectedMediaIndex - 1);
+  }, [goToMediaIndex, selectedMediaIndex]);
+
+  const handleTouchStart = (event: React.TouchEvent) => {
+    setTouchEndX(null);
+    setTouchStartX(event.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    setTouchEndX(event.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX === null || touchEndX === null) return;
+
+    const deltaX = touchStartX - touchEndX;
+    const swipeThreshold = 60;
+
+    if (deltaX > swipeThreshold) {
+      goToNextMedia();
+    } else if (deltaX < -swipeThreshold) {
+      goToPreviousMedia();
+    }
+
+    setTouchStartX(null);
+    setTouchEndX(null);
+  };
+
   const hasAnyMore = useMemo(
     () => yearsToDisplay.some(year => hasMoreForYear(year)),
     [yearsToDisplay, hasMoreForYear]
@@ -300,6 +360,23 @@ export default function GalleryPage() {
       observer.disconnect();
     };
   }, [hasAnyMore, isLoadingMore, yearsToDisplay, hasMoreForYear, loadMoreForYear]);
+
+  useEffect(() => {
+    if (!selectedMedia) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setSelectedMedia(null);
+      } else if (event.key === 'ArrowRight') {
+        goToNextMedia();
+      } else if (event.key === 'ArrowLeft') {
+        goToPreviousMedia();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [goToNextMedia, goToPreviousMedia, selectedMedia]);
 
   if ((!gallery || gallery.length === 0) && publicVlogs.length === 0) {
     return (
@@ -441,12 +518,39 @@ export default function GalleryPage() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-xl"
           onClick={() => setSelectedMedia(null)}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <button 
             className="absolute top-6 right-6 text-white hover:text-orange-500 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors z-[110]"
             onClick={() => setSelectedMedia(null)}
           >
             <X size={24} />
+          </button>
+
+          <button
+            type="button"
+            aria-label="Previous photo"
+            onClick={(event) => {
+              event.stopPropagation();
+              goToPreviousMedia();
+            }}
+            className="absolute left-4 top-1/2 z-[110] hidden -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20 md:inline-flex"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </button>
+
+          <button
+            type="button"
+            aria-label="Next photo"
+            onClick={(event) => {
+              event.stopPropagation();
+              goToNextMedia();
+            }}
+            className="absolute right-4 top-1/2 z-[110] hidden -translate-y-1/2 rounded-full bg-white/10 p-3 text-white transition-colors hover:bg-white/20 md:inline-flex"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
           </button>
           
           <div 
@@ -485,6 +589,7 @@ export default function GalleryPage() {
             <div className="text-center max-w-2xl">
               <span className="text-orange-500 font-black tracking-widest uppercase text-sm mb-2 block">{selectedMedia.year}</span>
               <h3 className="text-white text-2xl md:text-3xl font-bold">{selectedMedia.caption}</h3>
+              <p className="mt-3 text-xs uppercase tracking-[0.2em] text-white/55 md:hidden">Swipe left or right to browse</p>
             </div>
           </div>
         </div>

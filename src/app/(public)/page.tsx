@@ -198,10 +198,10 @@ export default function HomePage() {
         </div>
 
         <div 
-          className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-white/75 backdrop-blur-xl border border-white/40 shadow-[0_24px_80px_rgba(15,23,42,0.16)] glass-hover dark:bg-slate-950/35 dark:border-white/10"
+          className="surface-panel text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] glass-hover dark:bg-slate-950/45"
         >
           <div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-slate-950/5 dark:bg-white/10 border border-slate-900/10 dark:border-white/10 text-xs md:text-sm font-semibold uppercase tracking-[0.28em] text-slate-700 dark:text-slate-200 backdrop-blur-md"
+            className="section-kicker mb-6"
           >
             Ganesha Chaturthi Celebration
           </div>
@@ -229,7 +229,8 @@ export default function HomePage() {
             <Link href="#contributions" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-slate-950 text-white hover:bg-slate-800 shadow-lg shadow-slate-950/15 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] font-semibold"
+                variant="gradient"
+                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-amber-500/20 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]"
               >
                 View Contributions
               </Button>
@@ -237,7 +238,8 @@ export default function HomePage() {
             <Link href="/gallery" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-lg shadow-amber-500/20 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] font-semibold"
+                variant="outline"
+                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-slate-950/10 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]"
               >
                 View Gallery
               </Button>

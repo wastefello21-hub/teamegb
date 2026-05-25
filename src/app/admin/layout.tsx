@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: any) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900 dark:border-amber-400"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-2 border-slate-200 border-t-amber-500 dark:border-white/15 dark:border-t-amber-400"></div>
       </div>
     );
   }
@@ -118,8 +118,9 @@ export default function AdminLayout({ children }: any) {
 
   return (
     <div className="flex h-[100dvh] bg-background overflow-hidden relative">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(251,191,36,0.12),transparent_28%),radial-gradient(circle_at_bottom_left,rgba(59,130,246,0.08),transparent_28%)]" />
       {/* Desktop Sidebar */}
-      <aside className="w-64 flex-shrink-0 glass border-r border-slate-200/80 dark:border-white/10 hidden md:flex flex-col z-20">
+      <aside className="w-64 flex-shrink-0 surface-panel border-r border-slate-200/80 dark:border-white/10 hidden md:flex flex-col z-20">
         <SidebarContent />
       </aside>
 
@@ -139,7 +140,7 @@ export default function AdminLayout({ children }: any) {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="md:hidden fixed inset-y-0 left-0 w-64 glass border-r border-slate-200/80 dark:border-white/10 flex flex-col z-50"
+              className="md:hidden fixed inset-y-0 left-0 w-64 surface-panel border-r border-slate-200/80 dark:border-white/10 flex flex-col z-50"
             >
               <SidebarContent />
             </motion.aside>
@@ -150,7 +151,7 @@ export default function AdminLayout({ children }: any) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Mobile Header */}
-        <header className="md:hidden glass h-16 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-white/10 shrink-0 z-30">
+        <header className="md:hidden surface-panel h-16 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-white/10 shrink-0 z-30">
           <div className="flex items-center gap-3">
             <div className="relative w-10 h-10 rounded-full overflow-hidden border border-amber-500/30">
               <Image 
@@ -173,7 +174,7 @@ export default function AdminLayout({ children }: any) {
           </div>
         </header>
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50/70 p-4 md:p-8 dark:bg-slate-950/20">
+        <main className="relative flex-1 overflow-x-hidden overflow-y-auto bg-slate-50/70 p-4 md:p-8 dark:bg-slate-950/20">
           {children}
         </main>
       </div>

@@ -177,14 +177,19 @@ export default function AdminEventsPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-4">
-      {/* Header - Always visible */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-950 dark:text-slate-50">Events</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Create and manage festival events</p>
-        </div>
-        <div className="flex flex-wrap gap-2 w-full sm:w-auto">
+    <div className="section-shell relative px-4 py-2 sm:px-6 lg:px-8">
+      <div className="mb-8 overflow-hidden rounded-[2rem] border border-white/20 bg-white/80 p-6 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/70">
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-2xl space-y-3">
+            <span className="section-kicker">Festival management</span>
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">
+              Events
+            </h1>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">
+              Create and manage event listings, registrations, and application timelines from one polished dashboard.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
           <Button 
             variant="outline" 
             size="sm"
@@ -194,13 +199,14 @@ export default function AdminEventsPage() {
             {showApplications ? 'Back' : `Applications (${eventApplications.length})`}
           </Button>
           {!showApplications && (
-            <Button onClick={() => setShowForm(!showForm)} size="sm">
+            <Button onClick={() => setShowForm(!showForm)} size="sm" variant="gradient">
               <Plus size={16} className="mr-1" />
               <span className="sm:hidden">Add</span>
               <span className="hidden sm:inline">Add Event</span>
             </Button>
           )}
         </div>
+      </div>
       </div>
 
       {showApplications ? (
@@ -252,7 +258,7 @@ export default function AdminEventsPage() {
                   
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {eventsList.map((eventData, index) => (
-                      <div key={index} className="relative p-4 bg-slate-50/80 rounded-lg border border-slate-200/80 dark:bg-white/5 dark:border-white/10">
+                      <div key={index} className="relative rounded-2xl border border-slate-200/80 bg-slate-50/80 p-4 shadow-sm dark:border-white/10 dark:bg-white/5">
                         {eventsList.length > 1 && (
                           <button
                             type="button"
@@ -269,21 +275,21 @@ export default function AdminEventsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Event Name *</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Event Name *</label>
                             <input 
                               type="text" 
                               name="name"
                               value={eventData.name}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                               placeholder="e.g. Fancy Dress Competition"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Poster Image</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Poster Image</label>
                             <div className="flex items-center gap-2">
-                              <label className={`flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 transition-colors flex items-center justify-center gap-2 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 ${uploadingPoster === index ? 'opacity-50 cursor-wait' : ''}`}>
+                              <label className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm transition hover:border-amber-300 hover:bg-amber-50 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10 ${uploadingPoster === index ? 'cursor-wait opacity-50' : ''}`}>
                                 {uploadingPoster === index ? (
                                   <>
                                     <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
@@ -336,12 +342,12 @@ export default function AdminEventsPage() {
                         </div>
 
                         <div className="mt-3">
-                          <label className="block text-xs font-semibold mb-1">Description *</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Description *</label>
                           <textarea 
                             name="description"
                             value={eventData.description}
                             onChange={(e) => handleChange(index, e)}
-                            className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[60px] dark:bg-white/5 dark:border-white/10"
+                            className="min-h-[60px] w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                             placeholder="Describe the event details..."
                             required
                           />
@@ -349,37 +355,37 @@ export default function AdminEventsPage() {
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Date *</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Date *</label>
                             <input 
                               type="text" 
                               name="date"
                               value={eventData.date}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                               placeholder="e.g. Sep 7"
                               required
                             />
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Time *</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Time *</label>
                             <input 
                               type="text" 
                               name="time"
                               value={eventData.time}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                               placeholder="e.g. 4:00 PM"
                               required
                             />
                           </div>
                           <div className="col-span-2 sm:col-span-1">
-                            <label className="block text-xs font-semibold mb-1">Venue *</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Venue *</label>
                             <input 
                               type="text" 
                               name="venue"
                               value={eventData.venue}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                               placeholder="e.g. Hall"
                               required
                             />
@@ -388,13 +394,13 @@ export default function AdminEventsPage() {
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
                           <div>
-                            <label className="block text-xs font-semibold mb-1">Application Last Date</label>
+                            <label className="mb-1 block text-xs font-semibold text-slate-700 dark:text-slate-200">Application Last Date</label>
                             <input 
                               type="text" 
                               name="application_last_date"
                               value={eventData.application_last_date}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
+                              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm shadow-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-400/30 dark:border-white/10 dark:bg-white/5"
                               placeholder="e.g. Sep 5"
                             />
                           </div>
@@ -456,7 +462,7 @@ export default function AdminEventsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {events.map((event) => (
-                <GlassCard key={event.id} className="overflow-hidden border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+                <GlassCard key={event.id} className="group overflow-hidden border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
                   <div className="aspect-[4/3] relative bg-background">
                     {event.poster_url ? (
                       <img 
@@ -472,13 +478,13 @@ export default function AdminEventsPage() {
                     {/* Delete button always visible on mobile */}
                     <button 
                       onClick={() => handleDelete(event.id)}
-                      className="absolute top-2 right-2 p-2 bg-red-500/80 text-white rounded-full hover:bg-red-600 transition-colors sm:opacity-0 sm:group-hover:opacity-100"
+                      className="absolute right-2 top-2 rounded-full bg-red-500/85 p-2 text-white transition-colors hover:bg-red-600 sm:opacity-0 sm:group-hover:opacity-100"
                     >
                       <Trash2 size={16} />
                     </button>
                     {/* Registration status badge */}
                     {!event.is_registration_open && (
-                      <div className="absolute top-2 left-2 px-2 py-1 bg-red-500 text-white text-xs font-semibold rounded">
+                      <div className="absolute left-2 top-2 rounded-full bg-red-500 px-2 py-1 text-xs font-semibold text-white shadow-sm">
                         Closed
                       </div>
                     )}
@@ -509,10 +515,10 @@ export default function AdminEventsPage() {
                     {/* Toggle Registration Button */}
                     <button
                       onClick={() => handleToggleRegistration(event)}
-                      className={`mt-3 w-full py-2 px-3 rounded-lg text-xs font-semibold transition-colors ${
+                      className={`mt-3 w-full rounded-xl px-3 py-2 text-xs font-semibold transition-colors ${
                         event.is_registration_open 
-                          ? 'bg-green-500/20 text-green-600 hover:bg-green-500/30 dark:text-green-400' 
-                          : 'bg-red-500/20 text-red-600 hover:bg-red-500/30 dark:text-red-400'
+                          ? 'bg-emerald-500/15 text-emerald-700 hover:bg-emerald-500/25 dark:text-emerald-300' 
+                          : 'bg-red-500/15 text-red-700 hover:bg-red-500/25 dark:text-red-300'
                       }`}
                     >
                       {event.is_registration_open ? '🟢 Registrations Open - Click to Close' : '🔴 Registrations Closed - Click to Open'}

@@ -56,7 +56,7 @@ export const PublicNavbar = () => {
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="hidden md:block fixed top-0 w-full z-50 glass border-b border-border-color shadow-lg shadow-black/5 backdrop-blur-xl"
+        className="hidden md:block fixed top-0 w-full z-50 border-b border-white/20 bg-white/75 shadow-[0_18px_60px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:bg-slate-950/70 dark:border-white/10"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
@@ -75,7 +75,7 @@ export const PublicNavbar = () => {
                   className="flex-shrink-0 flex items-center gap-3 text-left focus:outline-none group"
                   aria-label="Open festival logo photo"
                 >
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/40 shadow-lg shadow-orange-500/15 transition-all duration-300 group-hover:scale-105">
+                    <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400/45 shadow-lg shadow-amber-500/15 transition-all duration-300 group-hover:scale-105">
                     <Image
                       src="/logo_v2.jpg"
                       alt="TEAM EGB Logo"
@@ -85,13 +85,13 @@ export const PublicNavbar = () => {
                   </div>
                   <div>
                     <motion.h1
-                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
+                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-950 via-amber-700 to-rose-600 dark:from-white dark:via-amber-300 dark:to-rose-300"
                       whileHover={{ scale: 1.01 }}
                     >
                       {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
                     </motion.h1>
                     <motion.p
-                      className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] transition-colors duration-300"
+                      className="text-[10px] font-bold text-slate-600 dark:text-amber-300 uppercase tracking-[0.2em] transition-colors duration-300"
                       whileHover={{ scale: 1.01 }}
                     >
                       {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
@@ -100,7 +100,7 @@ export const PublicNavbar = () => {
                 </motion.button>
               ) : (
                 <Link href="/" className="flex-shrink-0 flex items-center gap-3 group">
-                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-orange-500/40 shadow-lg shadow-orange-500/15 transition-all duration-300 group-hover:scale-105">
+                  <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-amber-400/45 shadow-lg shadow-amber-500/15 transition-all duration-300 group-hover:scale-105">
                     <Image
                       src="/logo_v2.jpg"
                       alt="TEAM EGB Logo"
@@ -110,13 +110,13 @@ export const PublicNavbar = () => {
                   </div>
                   <div>
                     <motion.h1
-                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
+                      className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-950 via-amber-700 to-rose-600 dark:from-white dark:via-amber-300 dark:to-rose-300"
                       whileHover={{ scale: 1.01 }}
                     >
                       {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
                     </motion.h1>
                     <motion.p
-                      className="text-[10px] font-bold text-orange-800 dark:text-yellow-500 uppercase tracking-[0.2em] transition-colors duration-300"
+                      className="text-[10px] font-bold text-slate-600 dark:text-amber-300 uppercase tracking-[0.2em] transition-colors duration-300"
                       whileHover={{ scale: 1.01 }}
                     >
                       {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi'}
@@ -131,12 +131,12 @@ export const PublicNavbar = () => {
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`text-sm font-medium transition-all duration-300 hover:text-orange-600 dark:hover:text-orange-400 relative group ${
-                    pathname === link.href ? 'text-orange-600 dark:text-orange-400' : 'text-foreground/80'
+                  className={`text-sm font-medium transition-all duration-300 hover:text-amber-700 dark:hover:text-amber-300 relative group ${
+                    pathname === link.href ? 'text-amber-700 dark:text-amber-300' : 'text-foreground/75'
                   }`}
                 >
                   {link.name}
-                  <span className={`absolute -bottom-1 left-0 h-0.5 bg-orange-500 transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                  <span className={`absolute -bottom-1 left-0 h-0.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 transition-all duration-300 ${pathname === link.href ? 'w-full' : 'w-0 group-hover:w-full'}`} />
                 </Link>
               ))}
               <div className="flex gap-3 items-center">
@@ -145,7 +145,7 @@ export const PublicNavbar = () => {
                   <Button variant="outline" size="sm">Team Login</Button>
                 </Link>
                 <Link href="/admin/login">
-                  <Button variant="primary" size="sm" className="ml-2">Admin Portal</Button>
+                  <Button variant="gradient" size="sm" className="ml-2">Admin Portal</Button>
                 </Link>
               </div>
             </div>
@@ -155,7 +155,7 @@ export const PublicNavbar = () => {
               <button
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-200"
+                className="text-foreground hover:text-amber-700 focus:outline-none transition-transform duration-200"
                 aria-label="Toggle mobile menu"
               >
                 {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -165,7 +165,7 @@ export const PublicNavbar = () => {
         </div>
       </motion.nav>
 
-      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/90 dark:bg-neutral-950/90 backdrop-blur-xl border-b border-border-color shadow-sm">
+      <div className="md:hidden fixed top-0 left-0 w-full z-50 bg-white/85 dark:bg-slate-950/85 backdrop-blur-2xl border-b border-white/20 dark:border-white/10 shadow-[0_12px_40px_rgba(15,23,42,0.08)]">
         <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
           {isHomePage ? (
             <motion.button
@@ -176,7 +176,7 @@ export const PublicNavbar = () => {
               className="flex items-center gap-3 focus:outline-none group transition-all duration-200"
               aria-label="Open festival logo photo"
             >
-              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10 group-hover:border-orange-500/60 transition-colors duration-200">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-amber-400/30 shadow-md bg-white/10 group-hover:border-amber-400/60 transition-colors duration-200">
                 <Image
                   src="/logo_v2.jpg"
                   alt="TEAM EGB Logo"
@@ -185,13 +185,13 @@ export const PublicNavbar = () => {
                 />
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">TEAM EGB</span>
+                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">TEAM EGB</span>
                 <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
               </div>
             </motion.button>
           ) : (
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-orange-500/30 shadow-md bg-white/10 group-hover:border-orange-500/60 transition-colors duration-200">
+              <div className="relative w-11 h-11 rounded-full overflow-hidden border border-amber-400/30 shadow-md bg-white/10 group-hover:border-amber-400/60 transition-colors duration-200">
                 <Image
                   src="/logo_v2.jpg"
                   alt="TEAM EGB Logo"
@@ -200,7 +200,7 @@ export const PublicNavbar = () => {
                 />
               </div>
               <div className="flex flex-col leading-tight">
-                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors duration-200">TEAM EGB</span>
+                <span className="text-sm font-bold text-foreground dark:text-white group-hover:text-amber-700 dark:group-hover:text-amber-300 transition-colors duration-200">TEAM EGB</span>
                 <span className="text-[11px] uppercase tracking-[0.2em] text-foreground/70">Ganesha Chaturthi</span>
               </div>
             </Link>
@@ -211,7 +211,7 @@ export const PublicNavbar = () => {
             <button
               type="button"
               onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground hover:text-orange-600 focus:outline-none transition-transform duration-200"
+              className="text-foreground hover:text-amber-700 focus:outline-none transition-transform duration-200"
               aria-label="Open navigation menu"
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -221,7 +221,7 @@ export const PublicNavbar = () => {
       </div>
 
       <div
-        className={`md:hidden fixed top-[4.75rem] left-0 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-2xl border-b border-border-color shadow-xl z-40 transition-all duration-300 overflow-hidden ${
+        className={`md:hidden fixed top-[4.75rem] left-0 w-full bg-white/95 dark:bg-slate-950/95 backdrop-blur-2xl border-b border-white/20 dark:border-white/10 shadow-xl z-40 transition-all duration-300 overflow-hidden ${
           isOpen ? 'max-h-[560px] opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
@@ -233,8 +233,8 @@ export const PublicNavbar = () => {
               onClick={() => setIsOpen(false)}
               className={`block px-3 py-3 rounded-md text-base font-medium transition-all duration-300 hover:translate-x-1 ${
                 pathname === link.href
-                  ? 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-yellow-400'
-                  : 'text-neutral-700 dark:text-neutral-200 hover:bg-orange-50 dark:hover:bg-orange-900/20'
+                  ? 'bg-amber-100 dark:bg-amber-400/15 text-amber-800 dark:text-amber-300'
+                  : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10'
               }`}
             >
               {link.name}
@@ -245,13 +245,13 @@ export const PublicNavbar = () => {
               <Button variant="outline" className="w-full flex-1 transition-all duration-200 hover:scale-[1.02]">Team Login</Button>
             </Link>
             <Link href="/admin/login" onClick={() => setIsOpen(false)}>
-              <Button variant="primary" className="w-full flex-1 bg-red-600 hover:bg-red-700 transition-all duration-200 hover:scale-[1.02]">Admin Portal</Button>
+              <Button variant="gradient" className="w-full flex-1 transition-all duration-200 hover:scale-[1.02]">Admin Portal</Button>
             </Link>
           </div>
         </div>
       </div>
 
-      <div className="fixed bottom-0 left-0 z-50 w-full bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl border-t border-border-color md:hidden">
+      <div className="fixed bottom-0 left-0 z-50 w-full bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl border-t border-white/20 dark:border-white/10 md:hidden shadow-[0_-12px_40px_rgba(15,23,42,0.08)]">
         <div className="flex justify-around items-center h-16 px-2">
           {quickLinks.map((link) => {
             const Icon = link.icon;

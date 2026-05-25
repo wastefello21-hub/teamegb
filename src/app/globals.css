@@ -1,13 +1,13 @@
 @import "tailwindcss";
 
 :root {
-  --color-saffron-500: #f47f16;
-  --color-saffron-600: #e06c00;
-  --color-gold-400: #fbc02d;
-  --color-gold-500: #f9a825;
-  --color-maroon-800: #800000;
-  --color-maroon-900: #4a0000;
-  --color-festive-red: #d32f2f;
+  --color-saffron-500: #f59e0b;
+  --color-saffron-600: #d97706;
+  --color-gold-400: #facc15;
+  --color-gold-500: #eab308;
+  --color-maroon-800: #7f1d1d;
+  --color-maroon-900: #450a0a;
+  --color-festive-red: #dc2626;
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -16,17 +16,17 @@
 }
 
 :root {
-  --background: #fffdf5; /* Off-white silk */
-  --foreground: #2d1b00;
-  --card: rgba(255, 255, 255, 0.96);
-  --border-color: rgba(184, 134, 11, 0.12); /* Dark Goldenrod */
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: rgba(255, 255, 255, 0.88);
+  --border-color: rgba(148, 163, 184, 0.18);
 }
 
 .dark {
-  --background: #0a0a0a; /* Deep black */
-  --foreground: #f0e68c; /* Khaki/Gold */
-  --card: rgba(20, 20, 20, 0.8);
-  --border-color: rgba(218, 165, 32, 0.3); /* Goldenrod */
+  --background: #020617;
+  --foreground: #e2e8f0;
+  --card: rgba(15, 23, 42, 0.76);
+  --border-color: rgba(148, 163, 184, 0.16);
 }
 
 body {
@@ -35,18 +35,18 @@ body {
   font-family: var(--font-sans), sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-image:
-    radial-gradient(circle at top left, rgba(244, 127, 22, 0.08), transparent 24%),
-    radial-gradient(circle at top right, rgba(251, 192, 45, 0.06), transparent 22%),
-    radial-gradient(circle at bottom center, rgba(208, 47, 47, 0.04), transparent 30%),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.36) 36%, rgba(255, 252, 244, 0.96));
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.09), transparent 24%),
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.08), transparent 22%),
+    radial-gradient(circle at bottom center, rgba(59, 130, 246, 0.05), transparent 30%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.82), rgba(248, 250, 252, 0.7) 34%, rgba(241, 245, 249, 0.96));
 }
 
 .dark body {
   background-image:
-    radial-gradient(circle at top left, rgba(244, 127, 22, 0.16), transparent 30%),
-    radial-gradient(circle at top right, rgba(251, 192, 45, 0.12), transparent 28%),
-    radial-gradient(circle at bottom center, rgba(208, 47, 47, 0.1), transparent 35%),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent 30%),
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.16), transparent 30%),
+    radial-gradient(circle at top right, rgba(251, 191, 36, 0.12), transparent 28%),
+    radial-gradient(circle at bottom center, rgba(59, 130, 246, 0.12), transparent 35%),
+    linear-gradient(to bottom, rgba(15, 23, 42, 0.7), transparent 30%),
     url("https://www.transparenttextures.com/patterns/silk.png");
   background-attachment: fixed;
 }
@@ -58,7 +58,7 @@ html {
 .glass {
   background: var(--card);
   backdrop-filter: blur(16px);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 18px 60px rgba(15, 23, 42, 0.08);
   border: 1px solid var(--border-color);
   border-radius: 1.25rem;
 }
@@ -69,7 +69,7 @@ html {
 
 .glass-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.12);
 }
 
 /* Skeleton shimmer animation for loading */
@@ -329,7 +329,7 @@ html {
 }
 
 .animate-shimmer-border {
-  background: linear-gradient(90deg, transparent, rgba(244, 127, 22, 0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.3), transparent);
   background-size: 200% 100%;
   animation: shimmer-border 2s infinite;
 }
@@ -371,16 +371,16 @@ html {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(to bottom, #f47f16, #e06c00);
+  background: linear-gradient(to bottom, #f59e0b, #d97706);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(to bottom, #f9a825, #f47f16);
+  background: linear-gradient(to bottom, #fbbf24, #f59e0b);
 }
 
 ::selection {
-  background: rgba(244, 127, 22, 0.24);
+  background: rgba(245, 158, 11, 0.2);
   color: inherit;
 }
 
@@ -405,8 +405,44 @@ img {
   max-width: 80rem;
   margin-left: auto;
   margin-right: auto;
+  position: relative;
 }
 
 .section-title {
-  letter-spacing: -0.03em;
+  letter-spacing: -0.035em;
+}
+
+.section-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: rgba(255, 255, 255, 0.72);
+  color: rgb(51 65 85);
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  backdrop-filter: blur(16px);
+}
+
+.dark .section-kicker {
+  background: rgba(15, 23, 42, 0.66);
+  color: rgb(226 232 240);
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.surface-panel {
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(22px);
+}
+
+.dark .surface-panel {
+  background: rgba(15, 23, 42, 0.72);
+  border-color: rgba(148, 163, 184, 0.14);
+  box-shadow: 0 28px 80px rgba(2, 6, 23, 0.38);
 }
