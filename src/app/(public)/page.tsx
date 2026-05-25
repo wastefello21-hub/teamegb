@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { Cormorant_Garamond } from 'next/font/google';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Image as ImageIcon } from 'lucide-react';
@@ -12,11 +11,6 @@ import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 import { AnimatePresence } from 'framer-motion';
-
-const headingFont = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['500', '600', '700'],
-});
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -162,7 +156,7 @@ export default function HomePage() {
 
   const showcaseItems = [...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8);
   const showcaseKey = showcaseItems.map(item => item.id).join('|');
-  const sectionTitleClass = `${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50`;
+  const sectionTitleClass = 'text-3xl md:text-4xl font-bold tracking-tight text-slate-950 dark:text-slate-50';
   const sectionSubtitleClass = 'text-sm md:text-base text-slate-600 dark:text-slate-300';
 
   useEffect(() => {
@@ -193,8 +187,8 @@ export default function HomePage() {
             className="object-cover opacity-70 md:opacity-80 scale-110 saturate-125 contrast-110"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/88 via-slate-900/48 to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.24),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.16),transparent_38%),radial-gradient(circle_at_left,rgba(59,130,246,0.08),transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/54 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.28),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.18),transparent_38%),radial-gradient(circle_at_left,rgba(251,191,36,0.1),transparent_28%)]" />
         </div>
 
         <div 
@@ -205,20 +199,16 @@ export default function HomePage() {
           >
             Ganesha Chaturthi Celebration
           </div>
-          <h1
-            className={`${headingFont.className} text-5xl md:text-8xl font-semibold mb-4 tracking-tight leading-[0.92] text-slate-950 dark:text-white`}
-          >
+          <h1 className="text-5xl md:text-8xl font-extrabold mb-4 tracking-tight leading-[0.92] text-slate-950 dark:text-white">
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
-            <span
-              className={`${headingFont.className} text-4xl md:text-6xl block mt-3 font-medium text-amber-700 dark:text-amber-300`}
-            >
+            <span className="text-4xl md:text-6xl block mt-3 font-semibold text-orange-700 dark:text-orange-300">
               {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi Celebrations'}
             </span>
           </h1>
           
           <p
-            className="text-lg md:text-2xl font-medium mb-12 text-slate-800 dark:text-slate-100 max-w-2xl mx-auto"
+            className="text-lg md:text-2xl font-medium mb-12 text-slate-700 dark:text-slate-100 max-w-2xl mx-auto"
           >
             Celebrating devotion, faith, and youth unity.
           </p>
@@ -230,7 +220,7 @@ export default function HomePage() {
               <Button
                 size="lg"
                 variant="gradient"
-                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full text-lg px-8 py-4 rounded-2xl shadow-lg shadow-orange-500/30 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               >
                 View Contributions
               </Button>
@@ -270,7 +260,7 @@ export default function HomePage() {
         >
           <div>
             <Link href="/analytics" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-orange-200/70 bg-gradient-to-br from-white/95 to-orange-50/80 shadow-sm dark:from-slate-950/70 dark:to-orange-950/10 dark:border-orange-500/20">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-orange-200/70 bg-gradient-to-br from-white/95 to-orange-50/90 shadow-sm dark:from-slate-950/70 dark:to-orange-950/12 dark:border-orange-500/20">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-gradient-to-br from-orange-100 to-amber-200 rounded-xl border border-orange-200 dark:bg-orange-500/15 dark:border-orange-300/20">
                     <Wallet className="w-6 h-6 text-amber-700 dark:text-amber-300" />
@@ -286,7 +276,7 @@ export default function HomePage() {
 
           <div>
             <Link href="/contributors" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-sky-200/70 bg-gradient-to-br from-white/95 to-sky-50/80 shadow-sm dark:from-slate-950/70 dark:to-sky-950/10 dark:border-sky-500/20">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-sky-200/70 bg-gradient-to-br from-white/95 to-sky-50/90 shadow-sm dark:from-slate-950/70 dark:to-sky-950/12 dark:border-sky-500/20">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-gradient-to-br from-sky-100 to-cyan-200 rounded-xl border border-sky-200 dark:bg-sky-500/15 dark:border-sky-300/20">
                     <Users className="w-6 h-6 text-sky-700 dark:text-sky-300" />
@@ -302,7 +292,7 @@ export default function HomePage() {
 
           <div>
             <Link href="/expenditure" className="block">
-              <GlassCard variant="default" className="relative overflow-hidden h-full border border-rose-200/70 bg-gradient-to-br from-white/95 to-rose-50/80 shadow-sm dark:from-slate-950/70 dark:to-rose-950/10 dark:border-rose-500/20">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-rose-200/70 bg-gradient-to-br from-white/95 to-rose-50/90 shadow-sm dark:from-slate-950/70 dark:to-rose-950/12 dark:border-rose-500/20">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="p-3 bg-gradient-to-br from-rose-100 to-orange-200 rounded-xl border border-rose-200 dark:bg-rose-500/15 dark:border-rose-300/20">
                     <TrendingUp className="w-6 h-6 text-rose-700 dark:text-rose-300" />
@@ -317,7 +307,7 @@ export default function HomePage() {
           </div>
 
           <div>
-            <GlassCard variant="default" className="relative overflow-hidden border border-emerald-200/70 bg-gradient-to-br from-white/95 to-emerald-50/80 shadow-sm dark:from-slate-950/70 dark:to-emerald-950/10 dark:border-emerald-500/20">
+            <GlassCard variant="default" className="relative overflow-hidden border border-emerald-200/70 bg-gradient-to-br from-white/95 to-emerald-50/90 shadow-sm dark:from-slate-950/70 dark:to-emerald-950/12 dark:border-emerald-500/20">
               <div className="flex items-center gap-4 mb-4">
                 <div className="p-3 bg-gradient-to-br from-emerald-100 to-lime-200 rounded-xl border border-emerald-200 dark:bg-emerald-500/15 dark:border-emerald-300/20">
                   <Heart className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
@@ -340,7 +330,7 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
             <div className="text-center">
               <h2
-                className={`${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 leading-tight`}
+                className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50 leading-tight"
               >
                 Glimpses of Devotion
               </h2>
@@ -391,7 +381,7 @@ export default function HomePage() {
       {/* Recent Contributions */}
       <section className="w-full max-w-7xl px-4 pb-20">
         <GlassCard className="max-w-3xl mx-auto border-t-4 border-t-amber-500 bg-white/90 dark:bg-slate-950/55">
-          <h3 className={`${headingFont.className} text-2xl md:text-3xl font-semibold mb-6 text-center text-slate-900 dark:text-slate-50`}>Recent Devotees</h3>
+          <h3 className="text-2xl md:text-3xl font-bold mb-6 text-center text-slate-900 dark:text-slate-50">Recent Devotees</h3>
           <div className="space-y-4">
             {recentContributions.map((contribution, index) => (
               <div
@@ -427,7 +417,7 @@ export default function HomePage() {
         <div className="mb-10 px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className={`${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50`}>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
                 Community Voice
               </h2>
               <p className={sectionSubtitleClass}>See what others are suggesting for the festival.</p>
@@ -506,7 +496,7 @@ export default function HomePage() {
         >
           <GlassCard className="border-t-4 border-t-amber-500 shadow-2xl relative overflow-hidden bg-white/90 dark:bg-slate-950/55">
             
-            <h3 className={`${headingFont.className} text-3xl md:text-4xl font-semibold mb-10 text-center text-slate-900 dark:text-slate-50`}>
+            <h3 className="text-3xl md:text-4xl font-bold mb-10 text-center text-slate-900 dark:text-slate-50">
               Get In Touch
             </h3>
             
