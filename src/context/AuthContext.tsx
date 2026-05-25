@@ -38,7 +38,7 @@ const AuthContext = createContext<AuthContextType>({
   markAsOffline: () => {},
 });
 
-export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const AuthProvider = ({ children }: { children: any }) => {
   const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeMembers, setActiveMembers] = useState<string[]>([]);

@@ -34,6 +34,17 @@ export type Photo = {
   type: 'image' | 'video';
 };
 
+export type Vlog = {
+  id: string;
+  title: string;
+  youtube_url: string;
+  description?: string;
+  thumbnail_url?: string;
+  published_at?: string;
+  created_at?: string;
+  is_public?: boolean;
+};
+
 export type TeamMember = {
   id: string;
   name: string;
@@ -109,6 +120,7 @@ interface DataContextType {
   gallery: Photo[];
   suggestions: Suggestion[];
   events: Event[];
+  vlogs: Vlog[];
   eventApplications: EventApplication[];
   userVotes: Record<string, 'like' | 'dislike'>;
   settings: AppSettings;
@@ -138,6 +150,9 @@ interface DataContextType {
   deleteEventApplication: (id: string) => Promise<void>;
   
   updateSettings: (updates: Partial<AppSettings>) => void;
+
+  addVlog: (vlog: Omit<Vlog, 'id' | 'created_at'>) => Promise<void>;
+  deleteVlog: (id: string) => Promise<void>;
   
   // Derived Data
   totalCollection: number;
@@ -160,12 +175,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   ];
 
   const defaultGallery: Photo[] = [];
+  const defaultVlogs: Vlog[] = [];
   const defaultSuggestions: Suggestion[] = [];
 
   const [contributions, setContributions] = useState<Contribution[]>(defaultContributions);
   const [expenditures, setExpenditures] = useState<Expenditure[]>(defaultExpenditures);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultTeam);
   const [gallery, setGallery] = useState<Photo[]>(defaultGallery);
+  const [vlogs, setVlogs] = useState<Vlog[]>(defaultVlogs);
   const [suggestions, setSuggestions] = useState<Suggestion[]>(defaultSuggestions);
   const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike'>>({});
   const [settings, setSettings] = useState<AppSettings>(defaultSettings);
@@ -249,107 +266,175 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           return;
         }
 
-        // Fetch all data in parallel with Promise.allSettled for better error handling
-        const [
-          contributionsResult,
-          teamMembersResult,
-          galleryResult,
-          suggestionsResult,
-          userVotesResult,
-          eventsResult,
-          eventApplicationsResult,
-          settingsResult
-        ] = await Promise.allSettled([
-          supabase.from('contributions').select('*').order('date', { ascending: false }),
-          supabase.from('team_members').select('*'),
-          supabase.from('gallery').select('*').order('created_at', { ascending: false }),
-          supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
-          (async () => {
-            const userId = localStorage.getItem('egb_user_id');
-            if (!userId) return { data: null, error: null };
-            return await supabase.from('suggestion_votes').select('*').eq('user_id', userId);
-          })(),
-          supabase.from('events').select('*').order('created_at', { ascending: false }),
-          supabase.from('event_applications').select('*').order('created_at', { ascending: false }),
-          supabase.from('app_settings').select('*').eq('id', 'default').single()
-        ]);
+        // Determine whether we are on an admin route — avoid heavy queries for public pages
+        const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 
-        // Process results with early returns for better performance
-        let hasNewData = false;
-        if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
-          const newData = contributionsResult.value.data || [];
-          setContributions(newData);
-          hasNewData = true;
-        }
-        if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
-          const newData = teamMembersResult.value.data || [];
-          setTeamMembers(newData);
-          hasNewData = true;
-        }
-        if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
-          const newData = galleryResult.value.data || [];
-          setGallery(newData);
-          hasNewData = true;
-        }
-        if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
-          const newData = suggestionsResult.value.data || [];
-          setSuggestions(newData);
-          hasNewData = true;
-        }
-        if (userVotesResult.status === 'fulfilled' && !userVotesResult.value.error && userVotesResult.value.data) {
-          const votesMap: Record<string, 'like' | 'dislike'> = {};
-          userVotesResult.value.data.forEach((vote: any) => {
-            votesMap[vote.suggestion_id] = vote.vote_type;
-          });
-          setUserVotes(votesMap);
-        }
-        if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
-          const newData = eventsResult.value.data || [];
-          setEvents(newData);
-          hasNewData = true;
-        }
-        if (eventApplicationsResult.status === 'fulfilled' && !eventApplicationsResult.value.error) {
-          const newData = eventApplicationsResult.value.data || [];
-          setEventApplications(newData);
-          hasNewData = true;
-        }
-        if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
-          const newSettings = {
-            showNamesPublicly: settingsResult.value.data.show_names_publicly,
-            showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
-            showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
-            allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
-            festivalName: settingsResult.value.data.festival_name
-          };
-          setSettings(newSettings);
-          hasNewData = true;
-        }
+        if (isAdmin) {
+          // Full data fetch for admin users
+          const [
+            contributionsResult,
+            teamMembersResult,
+            galleryResult,
+            vlogsResult,
+            suggestionsResult,
+            userVotesResult,
+            eventsResult,
+            eventApplicationsResult,
+            settingsResult
+          ] = await Promise.allSettled([
+            supabase.from('contributions').select('*').order('date', { ascending: false }),
+            supabase.from('team_members').select('*'),
+            supabase.from('gallery').select('*').order('created_at', { ascending: false }),
+            supabase.from('vlogs').select('*').order('created_at', { ascending: false }),
+            supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
+            (async () => {
+              const userId = localStorage.getItem('egb_user_id');
+              if (!userId) return { data: null, error: null };
+              return await supabase.from('suggestion_votes').select('*').eq('user_id', userId);
+            })(),
+            supabase.from('events').select('*').order('created_at', { ascending: false }),
+            supabase.from('event_applications').select('*').order('created_at', { ascending: false }),
+            supabase.from('app_settings').select('*').eq('id', 'default').single()
+          ]);
 
-        // Cache only if we have new data
-        if (hasNewData) {
-          const dataToCache = {
-            contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
-            teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
-            gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
-            suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
-            events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
-            eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
-            settings: settingsResult.status === 'fulfilled' ? {
-              showNamesPublicly: settingsResult.value.data?.show_names_publicly,
-              showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
-              showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
-              allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
-              festivalName: settingsResult.value.data?.festival_name
-            } : defaultSettings
-          };
-          try {
-            localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-            localStorage.setItem(cacheTimestamp, Date.now().toString());
-            // Set gallery cache freshness to 2 minutes
-            localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
-          } catch (e) {
-            // Handle quota exceeded gracefully
-            console.warn('Failed to cache data:', e);
+          // Process results with early returns for better performance
+          let hasNewData = false;
+          if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
+            const newData = contributionsResult.value.data || [];
+            setContributions(newData);
+            hasNewData = true;
+          }
+          if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
+            const newData = teamMembersResult.value.data || [];
+            setTeamMembers(newData);
+            hasNewData = true;
+          }
+          if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
+            const newData = galleryResult.value.data || [];
+            setGallery(newData);
+            hasNewData = true;
+          }
+          if (vlogsResult.status === 'fulfilled' && !vlogsResult.value.error) {
+            const newData = vlogsResult.value.data || [];
+            setVlogs(newData);
+            hasNewData = true;
+          }
+          if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
+            const newData = suggestionsResult.value.data || [];
+            setSuggestions(newData);
+            hasNewData = true;
+          }
+          if (userVotesResult.status === 'fulfilled' && !userVotesResult.value.error && userVotesResult.value.data) {
+            const votesMap: Record<string, 'like' | 'dislike'> = {};
+            userVotesResult.value.data.forEach((vote: any) => {
+              votesMap[vote.suggestion_id] = vote.vote_type;
+            });
+            setUserVotes(votesMap);
+          }
+          if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
+            const newData = eventsResult.value.data || [];
+            setEvents(newData);
+            hasNewData = true;
+          }
+          if (eventApplicationsResult.status === 'fulfilled' && !eventApplicationsResult.value.error) {
+            const newData = eventApplicationsResult.value.data || [];
+            setEventApplications(newData);
+            hasNewData = true;
+          }
+          if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
+            const newSettings = {
+              showNamesPublicly: settingsResult.value.data.show_names_publicly,
+              showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
+              showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
+              allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
+              festivalName: settingsResult.value.data.festival_name
+            };
+            setSettings(newSettings);
+            hasNewData = true;
+          }
+
+          // Cache only if we have new data
+          if (hasNewData) {
+            const dataToCache = {
+              contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
+              teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
+              gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
+              vlogs: vlogsResult.status === 'fulfilled' ? vlogsResult.value.data : [],
+              suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
+              events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
+              eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
+              settings: settingsResult.status === 'fulfilled' ? {
+                showNamesPublicly: settingsResult.value.data?.show_names_publicly,
+                showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
+                showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
+                allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
+                festivalName: settingsResult.value.data?.festival_name
+              } : defaultSettings
+            };
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+              localStorage.setItem(cacheTimestamp, Date.now().toString());
+              // Set gallery cache freshness to 2 minutes
+              localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
+            } catch (e) {
+              // Handle quota exceeded gracefully
+              console.warn('Failed to cache data:', e);
+            }
+          }
+        } else {
+          // Public pages: only fetch gallery, vlogs, events, and settings to reduce payload and speed up loading
+          const [galleryResult, vlogsResult, eventsResult, settingsResult] = await Promise.allSettled([
+            supabase.from('gallery').select('*').order('created_at', { ascending: false }),
+            supabase.from('vlogs').select('*').order('created_at', { ascending: false }),
+            supabase.from('events').select('*').order('created_at', { ascending: false }),
+            supabase.from('app_settings').select('*').eq('id', 'default').single()
+          ]);
+
+          let hasNewData = false;
+          if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
+            setGallery(galleryResult.value.data || []);
+            hasNewData = true;
+          }
+          if (vlogsResult.status === 'fulfilled' && !vlogsResult.value.error) {
+            setVlogs(vlogsResult.value.data || []);
+            hasNewData = true;
+          }
+          if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
+            setEvents(eventsResult.value.data || []);
+            hasNewData = true;
+          }
+          if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
+            const newSettings = {
+              showNamesPublicly: settingsResult.value.data.show_names_publicly,
+              showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
+              showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
+              allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
+              festivalName: settingsResult.value.data.festival_name
+            };
+            setSettings(newSettings);
+            hasNewData = true;
+          }
+
+          if (hasNewData) {
+            const dataToCache: any = {
+              gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
+              vlogs: vlogsResult.status === 'fulfilled' ? vlogsResult.value.data : [],
+              events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
+              settings: settingsResult.status === 'fulfilled' ? {
+                showNamesPublicly: settingsResult.value.data?.show_names_publicly,
+                showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
+                showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
+                allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
+                festivalName: settingsResult.value.data?.festival_name
+              } : defaultSettings
+            };
+            try {
+              localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
+              localStorage.setItem(cacheTimestamp, Date.now().toString());
+              localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
+            } catch (e) {
+              console.warn('Failed to cache data:', e);
+            }
           }
         }
 
@@ -418,6 +503,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       })
       .subscribe();
 
+    const vlogsSubscription = supabase
+      .channel('vlogs-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'vlogs' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setVlogs(prev => prev.map(v => v.id === payload.new.id ? payload.new as Vlog : v));
+        } else if (payload.eventType === 'INSERT') {
+          setVlogs(prev => [payload.new as Vlog, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setVlogs(prev => prev.filter(v => v.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
       try {
@@ -436,6 +534,10 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         if (e.key === 'egb_gallery' && e.newValue) {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setGallery(parsed);
+        }
+        if (e.key === 'egb_vlogs' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setVlogs(parsed);
         }
         if (e.key === 'egb_suggestions' && e.newValue) {
           const parsed = JSON.parse(e.newValue);
@@ -456,6 +558,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       eventsSubscription.unsubscribe();
       teamMembersSubscription.unsubscribe();
       gallerySubscription.unsubscribe();
+      vlogsSubscription.unsubscribe();
     };
   }, []);
 
@@ -501,6 +604,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [gallery, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
+      try {
+        localStorage.setItem('egb_vlogs', JSON.stringify(vlogs));
+      } catch (e) {
+        console.warn('Failed to save vlogs to localStorage', e);
+      }
+    }
+  }, [vlogs, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
@@ -691,6 +804,30 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     } else if (data) {
       // Update the local list with the real database UUID so delete works
       setGallery(prev => prev.map(p => p.id === photo.id ? { ...p, id: data.id } : p));
+    }
+  };
+
+  const addVlog = async (vlog: Omit<Vlog, 'id' | 'created_at'>) => {
+    // Optimistic UI
+    const tempId = `VLOG-${Date.now()}`;
+    const entry: Vlog = { id: tempId, ...vlog, created_at: new Date().toISOString() } as Vlog;
+    setVlogs(prev => [entry, ...prev]);
+
+    const { data, error } = await supabase.from('vlogs').insert([vlog]).select().single();
+    if (error) {
+      console.error('Supabase Insert Error (vlogs):', error.message);
+      alert(`Failed to save vlog: ${error.message}`);
+    } else if (data) {
+      setVlogs(prev => prev.map(v => v.id === tempId ? data : v));
+    }
+  };
+
+  const deleteVlog = async (id: string) => {
+    setVlogs(prev => prev.filter(v => v.id !== id));
+    const { error } = await supabase.from('vlogs').delete().eq('id', id);
+    if (error) {
+      console.error('Supabase Delete Error (vlogs):', error.message);
+      alert(`Failed to delete vlog: ${error.message}`);
     }
   };
 
@@ -908,6 +1045,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       expenditures,
       teamMembers,
       gallery,
+      vlogs,
       suggestions,
       events,
       eventApplications,
@@ -931,6 +1069,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       applyForEvent,
       deleteEventApplication,
       updateSettings,
+      addVlog,
+      deleteVlog,
       totalCollection,
       totalExpenditure,
       balance

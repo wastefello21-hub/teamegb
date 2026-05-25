@@ -9,11 +9,7 @@ import { useAuth } from '@/context/AuthContext';
 import Image from 'next/image';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
-export default function TeamLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function TeamLayout({ children }: any) {
   const pathname = usePathname();
   const router = useRouter();
   const isLoginPage = pathname === '/team/login';

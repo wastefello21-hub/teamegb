@@ -13,11 +13,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 // Force dynamic rendering to prevent caching
 export const dynamic = 'force-dynamic';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: any) {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -60,6 +56,7 @@ export default function AdminLayout({
     { name: 'Contributions', href: '/admin/contributions', icon: <Wallet size={20} /> },
     { name: 'Expenditures', href: '/admin/expenditure', icon: <Wallet size={20} /> },
     { name: 'Gallery', href: '/admin/gallery', icon: <ImageIcon size={20} /> },
+    { name: 'Vlogs', href: '/admin/vlogs', icon: <ImageIcon size={20} /> },
     { name: 'Events', href: '/admin/events', icon: <Calendar size={20} /> },
     { name: 'Suggestions', href: '/admin/suggestions', icon: <MessageSquare size={20} /> },
     { name: 'Settings', href: '/admin/settings', icon: <Settings size={20} /> },

@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/Button';
-import { useData, Photo } from '@/context/DataContext';
+import { useData, Photo, Vlog } from '@/context/DataContext';
 import { Play, X, Video, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 
@@ -165,7 +165,7 @@ export default function GalleryPage() {
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const { gallery } = useData();
+  const { gallery, vlogs } = useData();
 
   // Memoize expensive computations
   const availableYears = useMemo(
@@ -293,6 +293,35 @@ export default function GalleryPage() {
           "Witness the grandeur and devotion of our journey through the years."
         </p>
       </div>
+
+      {/* Vlogs Section */}
+      {vlogs && vlogs.length > 0 && (
+        <div className="mb-12">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-3xl font-black text-orange-600">Vlogs</h2>
+            <p className="text-sm text-muted-foreground">Watch highlights and vlogs</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            {vlogs.map((v) => (
+              <div key={v.id} className="group cursor-pointer rounded-2xl overflow-hidden shadow-lg bg-black/10 border border-white/5">
+                  <div className="relative aspect-video w-full h-40 bg-zinc-900">
+                    <Image src={v.thumbnail_url || `https://img.youtube.com/vi/${(v.youtube_url || '').match(/v=([^&]+)/)?.[1] || ''}/hqdefault.jpg`} alt={v.title || 'Vlog thumbnail'} fill className="object-cover" />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white border border-white/20">
+                      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="currentColor"/></svg>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-3">
+                  <h3 className="text-sm font-bold line-clamp-2">{v.title}</h3>
+                  {v.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.description}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex justify-center flex-wrap gap-3 mb-16">

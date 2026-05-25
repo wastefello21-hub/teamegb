@@ -2,11 +2,7 @@ import React from 'react';
 import { PublicNavbar } from '@/components/layout/PublicNavbar';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
-export default function PublicLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PublicLayout({ children }: any) {
   return (
     <div className="flex flex-col min-h-screen">
       <PublicNavbar />
