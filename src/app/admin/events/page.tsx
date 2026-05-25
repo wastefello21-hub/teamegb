@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Plus, Trash2, Calendar, Clock, MapPin, Image as ImageIcon, X, Upload } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -182,15 +181,15 @@ export default function AdminEventsPage() {
       {/* Header - Always visible */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-orange-600 dark:text-orange-400">Events</h1>
-          <p className="text-foreground/60 text-sm">Create and manage festival events</p>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-slate-950 dark:text-slate-50">Events</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">Create and manage festival events</p>
         </div>
         <div className="flex flex-wrap gap-2 w-full sm:w-auto">
           <Button 
             variant="outline" 
             size="sm"
             onClick={() => setShowApplications(!showApplications)}
-            className={showApplications ? 'bg-orange-500 text-white' : ''}
+            className={showApplications ? 'bg-slate-950 text-white dark:bg-amber-400 dark:text-slate-950' : ''}
           >
             {showApplications ? 'Back' : `Applications (${eventApplications.length})`}
           </Button>
@@ -206,20 +205,20 @@ export default function AdminEventsPage() {
 
       {showApplications ? (
         <div className="space-y-4">
-          <h2 className="text-xl font-bold mb-4">Event Applications</h2>
+          <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-50">Event Applications</h2>
           {eventApplications.length === 0 ? (
-            <GlassCard className="p-8 text-center">
-              <p className="text-foreground/60">No applications yet</p>
+            <GlassCard className="p-8 text-center border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+              <p className="text-slate-500 dark:text-slate-400">No applications yet</p>
             </GlassCard>
           ) : (
             <div className="grid gap-4">
               {eventApplications.map((app) => (
-                <GlassCard key={app.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <GlassCard key={app.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
                   <div className="flex-1">
-                    <h3 className="font-bold text-lg">{app.name}</h3>
-                    <p className="text-sm text-foreground/60">Phone: {app.phone} | Age: {app.age}</p>
-                    <p className="text-sm text-orange-600 dark:text-orange-400">Activity: {app.activity}</p>
-                    <p className="text-xs text-foreground/40 mt-1">Event ID: {app.event_id}</p>
+                    <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-50">{app.name}</h3>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Phone: {app.phone} | Age: {app.age}</p>
+                    <p className="text-sm text-slate-700 dark:text-amber-300">Activity: {app.activity}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Event ID: {app.event_id}</p>
                   </div>
                   <Button 
                     variant="ghost" 
@@ -236,17 +235,11 @@ export default function AdminEventsPage() {
       ) : (
         <>
           {/* Bulk Add Form */}
-          <AnimatePresence>
-            {showForm && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                className="mb-6"
-              >
-                <GlassCard className="p-4 sm:p-6 border-t-4 border-t-orange-500">
+          {showForm && (
+              <div className="mb-6">
+                <GlassCard className="p-4 sm:p-6 border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
                   <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-bold">Add Events</h2>
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-50">Add Events</h2>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -259,7 +252,7 @@ export default function AdminEventsPage() {
                   
                   <form onSubmit={handleSubmit} className="space-y-6">
                     {eventsList.map((eventData, index) => (
-                      <div key={index} className="relative p-4 bg-background/50 rounded-lg border border-border-color">
+                      <div key={index} className="relative p-4 bg-slate-50/80 rounded-lg border border-slate-200/80 dark:bg-white/5 dark:border-white/10">
                         {eventsList.length > 1 && (
                           <button
                             type="button"
@@ -270,7 +263,7 @@ export default function AdminEventsPage() {
                           </button>
                         )}
                         
-                        <div className="text-sm font-semibold text-orange-600 dark:text-orange-400 mb-3">
+                        <div className="text-sm font-semibold text-slate-700 dark:text-amber-300 mb-3">
                           Event {index + 1}
                         </div>
 
@@ -282,7 +275,7 @@ export default function AdminEventsPage() {
                               name="name"
                               value={eventData.name}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
                               placeholder="e.g. Fancy Dress Competition"
                               required
                             />
@@ -290,15 +283,15 @@ export default function AdminEventsPage() {
                           <div>
                             <label className="block text-xs font-semibold mb-1">Poster Image</label>
                             <div className="flex items-center gap-2">
-                              <label className={`flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color hover:bg-orange-500/10 hover:border-orange-500 transition-colors flex items-center justify-center gap-2 ${uploadingPoster === index ? 'opacity-50 cursor-wait' : ''}`}>
+                              <label className={`flex-1 cursor-pointer px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 hover:bg-amber-50 hover:border-amber-300 transition-colors flex items-center justify-center gap-2 dark:bg-white/5 dark:border-white/10 dark:hover:bg-white/10 ${uploadingPoster === index ? 'opacity-50 cursor-wait' : ''}`}>
                                 {uploadingPoster === index ? (
                                   <>
-                                    <div className="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
                                     <span>Uploading...</span>
                                   </>
                                 ) : (
                                   <>
-                                    <ImageIcon size={16} className="text-orange-500" />
+                                    <ImageIcon size={16} className="text-amber-500" />
                                     <span className="truncate max-w-[120px]">
                                       {eventData.poster_url ? 'Change Image' : 'Upload Poster'}
                                     </span>
@@ -327,7 +320,7 @@ export default function AdminEventsPage() {
                               )}
                             </div>
                             {eventData.poster_url && (
-                              <div className="mt-2 relative w-full h-24 rounded-lg overflow-hidden bg-background/50">
+                              <div className="mt-2 relative w-full h-24 rounded-lg overflow-hidden bg-slate-50 dark:bg-white/5">
                                 <img 
                                   src={eventData.poster_url} 
                                   alt="Poster preview" 
@@ -348,7 +341,7 @@ export default function AdminEventsPage() {
                             name="description"
                             value={eventData.description}
                             onChange={(e) => handleChange(index, e)}
-                            className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500 min-h-[60px]"
+                            className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 min-h-[60px] dark:bg-white/5 dark:border-white/10"
                             placeholder="Describe the event details..."
                             required
                           />
@@ -362,7 +355,7 @@ export default function AdminEventsPage() {
                               name="date"
                               value={eventData.date}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
                               placeholder="e.g. Sep 7"
                               required
                             />
@@ -374,7 +367,7 @@ export default function AdminEventsPage() {
                               name="time"
                               value={eventData.time}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
                               placeholder="e.g. 4:00 PM"
                               required
                             />
@@ -386,7 +379,7 @@ export default function AdminEventsPage() {
                               name="venue"
                               value={eventData.venue}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
                               placeholder="e.g. Hall"
                               required
                             />
@@ -401,7 +394,7 @@ export default function AdminEventsPage() {
                               name="application_last_date"
                               value={eventData.application_last_date}
                               onChange={(e) => handleChange(index, e)}
-                              className="w-full px-3 py-2 text-sm rounded-lg bg-background/50 border border-border-color focus:outline-none focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 text-sm rounded-lg bg-white border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 dark:bg-white/5 dark:border-white/10"
                               placeholder="e.g. Sep 5"
                             />
                           </div>
@@ -412,7 +405,7 @@ export default function AdminEventsPage() {
                               id={`is_registration_open_${index}`}
                               checked={eventData.is_registration_open}
                               onChange={(e) => handleCheckboxChange(index, e.target.checked)}
-                              className="w-4 h-4 rounded border-border-color text-orange-500 focus:ring-orange-500"
+                              className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
                             />
                             <label htmlFor={`is_registration_open_${index}`} className="text-xs font-semibold">
                               Allow Registrations
@@ -446,16 +439,15 @@ export default function AdminEventsPage() {
                     </div>
                   </form>
                 </GlassCard>
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
 
           {/* Events List */}
           {events.length === 0 ? (
-            <GlassCard className="p-8 text-center">
-              <ImageIcon className="w-12 h-12 mx-auto mb-3 text-foreground/30" />
-              <h3 className="text-lg font-medium">No events yet</h3>
-              <p className="text-sm text-foreground/60 mb-4">Create your first event to get started</p>
+            <GlassCard className="p-8 text-center border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+              <ImageIcon className="w-12 h-12 mx-auto mb-3 text-slate-400" />
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-50">No events yet</h3>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Create your first event to get started</p>
               <Button onClick={() => setShowForm(true)}>
                 <Plus size={18} className="mr-2" />
                 Add Event
@@ -464,7 +456,7 @@ export default function AdminEventsPage() {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {events.map((event) => (
-                <GlassCard key={event.id} className="overflow-hidden">
+                <GlassCard key={event.id} className="overflow-hidden border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
                   <div className="aspect-[4/3] relative bg-background">
                     {event.poster_url ? (
                       <img 
@@ -473,8 +465,8 @@ export default function AdminEventsPage() {
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-orange-100 to-red-100 dark:from-orange-900 dark:to-red-900">
-                        <ImageIcon className="w-12 h-12 text-orange-500/30" />
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-slate-100 dark:from-white/5 dark:to-white/[0.02]">
+                        <ImageIcon className="w-12 h-12 text-amber-500/30" />
                       </div>
                     )}
                     {/* Delete button always visible on mobile */}
@@ -492,19 +484,19 @@ export default function AdminEventsPage() {
                     )}
                   </div>
                   <div className="p-3 sm:p-4">
-                    <h3 className="font-bold text-base sm:text-lg mb-1 line-clamp-1">{event.name}</h3>
-                    <p className="text-xs sm:text-sm text-foreground/70 line-clamp-2 mb-2">{event.description}</p>
-                    <div className="space-y-1 text-xs text-foreground/60">
+                    <h3 className="font-semibold text-base sm:text-lg mb-1 line-clamp-1 text-slate-900 dark:text-slate-50">{event.name}</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 line-clamp-2 mb-2">{event.description}</p>
+                    <div className="space-y-1 text-xs text-slate-500 dark:text-slate-400">
                       <div className="flex items-center gap-2">
-                        <Calendar size={12} className="text-orange-500" />
+                        <Calendar size={12} className="text-amber-500" />
                         <span>{event.date}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Clock size={12} className="text-orange-500" />
+                        <Clock size={12} className="text-amber-500" />
                         <span>{event.time}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <MapPin size={12} className="text-orange-500" />
+                        <MapPin size={12} className="text-amber-500" />
                         <span>{event.venue}</span>
                       </div>
                       {event.application_last_date && (

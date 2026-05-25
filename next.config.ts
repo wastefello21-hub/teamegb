@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['sharp'],
   images: {
     remotePatterns: [
       {
@@ -17,7 +18,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
   },
   turbopack: {
-    root: process.cwd(),
+    root: 'C:\\Users\\mythr\\.gemini\\antigravity\\scratch\\ganesha-festival',
   },
 };
 

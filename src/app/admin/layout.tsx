@@ -36,7 +36,7 @@ export default function AdminLayout({ children }: any) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900 dark:border-amber-400"></div>
       </div>
     );
   }
@@ -64,8 +64,8 @@ export default function AdminLayout({ children }: any) {
 
   const SidebarContent = () => (
     <>
-      <div className="h-24 flex items-center px-6 border-b border-border-color shrink-0 gap-4">
-        <div className="relative w-12 h-12 rounded-full overflow-hidden border border-yellow-500/50">
+      <div className="h-24 flex items-center px-6 border-b border-slate-200/80 dark:border-white/10 shrink-0 gap-4">
+        <div className="relative w-12 h-12 rounded-full overflow-hidden border border-amber-500/30">
           <Image 
             src="/logo_v2.jpg" 
             alt="TEAM EGB Logo" 
@@ -74,8 +74,8 @@ export default function AdminLayout({ children }: any) {
           />
         </div>
         <div>
-          <h1 className="font-bold text-lg text-orange-600 dark:text-yellow-500">Admin Panel</h1>
-          <p className="text-[10px] text-foreground/60 uppercase tracking-widest font-bold">
+          <h1 className="font-semibold text-lg text-slate-950 dark:text-slate-50">Admin Panel</h1>
+          <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase tracking-[0.22em] font-semibold">
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'TEAM EGB')}
           </p>
         </div>
@@ -88,8 +88,8 @@ export default function AdminLayout({ children }: any) {
             href={item.href}
             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
               pathname === item.href 
-                ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-md' 
-                : 'text-foreground/70 hover:bg-orange-500/10 hover:text-orange-600 dark:hover:text-orange-400'
+                ? 'bg-slate-950 text-white shadow-md dark:bg-amber-400 dark:text-slate-950' 
+                : 'text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-white/5 dark:hover:text-white'
             }`}
           >
             {item.icon}
@@ -98,16 +98,16 @@ export default function AdminLayout({ children }: any) {
         ))}
       </div>
 
-      <div className="p-4 border-t border-border-color shrink-0 flex flex-col gap-4">
+      <div className="p-4 border-t border-slate-200/80 dark:border-white/10 shrink-0 flex flex-col gap-4">
         <div className="flex items-center justify-between px-4">
-          <span className="text-sm font-medium text-foreground/60">Theme</span>
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400">Theme</span>
           <ThemeToggle />
         </div>
         {/* Call logout then navigate to login to ensure session is cleared */}
         <button
           type="button"
           onClick={() => { logout(); router.push('/admin/login'); }}
-          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-500 hover:bg-red-500/10 transition-colors"
+          className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-red-600 hover:bg-red-50 dark:text-red-300 dark:hover:bg-red-500/10 transition-colors"
         >
           <LogOut size={20} />
           <span className="font-medium">Logout</span>
@@ -119,7 +119,7 @@ export default function AdminLayout({ children }: any) {
   return (
     <div className="flex h-[100dvh] bg-background overflow-hidden relative">
       {/* Desktop Sidebar */}
-      <aside className="w-64 flex-shrink-0 glass border-r border-border-color hidden md:flex flex-col z-20">
+      <aside className="w-64 flex-shrink-0 glass border-r border-slate-200/80 dark:border-white/10 hidden md:flex flex-col z-20">
         <SidebarContent />
       </aside>
 
@@ -131,7 +131,7 @@ export default function AdminLayout({ children }: any) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="md:hidden fixed inset-0 bg-black/60 z-40 backdrop-blur-sm"
+              className="md:hidden fixed inset-0 bg-black/50 z-40 backdrop-blur-sm"
               onClick={() => setIsMobileMenuOpen(false)}
             />
             <motion.aside 
@@ -139,7 +139,7 @@ export default function AdminLayout({ children }: any) {
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="md:hidden fixed inset-y-0 left-0 w-64 glass border-r border-border-color flex flex-col z-50"
+              className="md:hidden fixed inset-y-0 left-0 w-64 glass border-r border-slate-200/80 dark:border-white/10 flex flex-col z-50"
             >
               <SidebarContent />
             </motion.aside>
@@ -150,9 +150,9 @@ export default function AdminLayout({ children }: any) {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 h-full">
         {/* Mobile Header */}
-        <header className="md:hidden glass h-16 flex items-center justify-between px-4 border-b border-border-color shrink-0 z-30">
+        <header className="md:hidden glass h-16 flex items-center justify-between px-4 border-b border-slate-200/80 dark:border-white/10 shrink-0 z-30">
           <div className="flex items-center gap-3">
-            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-yellow-500/50">
+            <div className="relative w-10 h-10 rounded-full overflow-hidden border border-amber-500/30">
               <Image 
                 src="/logo_v2.jpg" 
                 alt="TEAM EGB Logo" 
@@ -160,12 +160,12 @@ export default function AdminLayout({ children }: any) {
                 className="object-cover"
               />
             </div>
-            <h1 className="font-bold text-lg text-orange-600 dark:text-yellow-500">Admin</h1>
+            <h1 className="font-semibold text-lg text-slate-950 dark:text-slate-50">Admin</h1>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <button 
-              className="p-2 text-foreground/70 hover:text-orange-600 transition-colors"
+              className="p-2 text-slate-600 hover:text-slate-950 dark:text-slate-300 dark:hover:text-white transition-colors"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             >
                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
@@ -173,7 +173,7 @@ export default function AdminLayout({ children }: any) {
           </div>
         </header>
         
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-background/50 p-4 md:p-8">
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-slate-50/70 p-4 md:p-8 dark:bg-slate-950/20">
           {children}
         </main>
       </div>

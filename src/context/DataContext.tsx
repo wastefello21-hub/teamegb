@@ -540,6 +540,14 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setGallery(parsed);
         }
+        if (e.key === 'egb_events' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setEvents(parsed);
+        }
+        if (e.key === 'egb_eventApplications' && e.newValue) {
+          const parsed = JSON.parse(e.newValue);
+          if (Array.isArray(parsed)) setEventApplications(parsed);
+        }
         if (e.key === 'egb_vlogs' && e.newValue) {
           const parsed = JSON.parse(e.newValue);
           if (Array.isArray(parsed)) setVlogs(parsed);
@@ -609,6 +617,42 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       }
     }
   }, [gallery, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
+      try {
+        localStorage.setItem('egb_events', JSON.stringify(events));
+        const cacheKey = 'egb_data_cache';
+        const cacheTimestamp = 'egb_data_timestamp';
+        const existingCacheRaw = localStorage.getItem(cacheKey);
+        if (existingCacheRaw) {
+          const existingCache = JSON.parse(existingCacheRaw);
+          localStorage.setItem(cacheKey, JSON.stringify({ ...existingCache, events }));
+          localStorage.setItem(cacheTimestamp, Date.now().toString());
+        }
+      } catch (e) {
+        console.warn('Failed to save events to localStorage', e);
+      }
+    }
+  }, [events, isMounted]);
+
+  useEffect(() => {
+    if (isMounted) {
+      try {
+        localStorage.setItem('egb_eventApplications', JSON.stringify(eventApplications));
+        const cacheKey = 'egb_data_cache';
+        const cacheTimestamp = 'egb_data_timestamp';
+        const existingCacheRaw = localStorage.getItem(cacheKey);
+        if (existingCacheRaw) {
+          const existingCache = JSON.parse(existingCacheRaw);
+          localStorage.setItem(cacheKey, JSON.stringify({ ...existingCache, eventApplications }));
+          localStorage.setItem(cacheTimestamp, Date.now().toString());
+        }
+      } catch (e) {
+        console.warn('Failed to save eventApplications to localStorage', e);
+      }
+    }
+  }, [eventApplications, isMounted]);
 
   useEffect(() => {
     if (isMounted) {

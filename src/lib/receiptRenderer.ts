@@ -1,7 +1,12 @@
-import fs from 'node:fs';
-import path from 'node:path';
 import sharp from 'sharp';
 import { format } from 'date-fns';
+import {
+  devanagariBoldFontBase64,
+  devanagariRegularFontBase64,
+  latinBoldFontBase64,
+  latinRegularFontBase64,
+  receiptTemplateBase64,
+} from './receiptAssets';
 
 const BASE_RECEIPT_WIDTH = 1200;
 const BASE_RECEIPT_HEIGHT = 840;
@@ -19,14 +24,6 @@ const FIELD_POSITIONS = {
   collector: { x: 272, y: 718, size: 26 },
 } as const;
 
-type FontFiles = {
-  latinRegular: string;
-  latinBold: string;
-  devanagariRegular: string;
-  devanagariBold: string;
-};
-
-let loadedFontFiles: FontFiles | null = null;
 let embeddedFontCss: string | null = null;
 
 const hasDevanagariText = (text: string) => /[\u0900-\u097F]/.test(text);
@@ -40,72 +37,9 @@ const escapeXml = (value: string) => value
   .replace(/"/g, '&quot;')
   .replace(/'/g, '&apos;');
 
-const loadTemplateBuffer = () => {
-  const templatePath = path.join(/*turbopackIgnore: true*/ process.cwd(), 'public', 'receipt-template.png');
+const loadTemplateBuffer = () => Buffer.from(receiptTemplateBase64, 'base64');
 
-  if (!fs.existsSync(templatePath)) {
-    throw new Error('Receipt template image not found at public/receipt-template.png. Please save the template image there.');
-  }
-
-  return fs.readFileSync(templatePath);
-};
-
-const resolveFontPath = (fontsDir: string, candidates: string[]) => {
-  for (const candidate of candidates) {
-    const fullPath = path.join(fontsDir, candidate);
-    if (fs.existsSync(fullPath)) {
-      return fullPath;
-    }
-  }
-
-  return null;
-};
-
-const loadFontFiles = (): FontFiles => {
-  if (loadedFontFiles !== null) {
-    return loadedFontFiles;
-  }
-
-  const fontsDir = path.join(/*turbopackIgnore: true*/ process.cwd(), 'public', 'fonts', 'receipt');
-
-  const latinRegular = resolveFontPath(fontsDir, [
-    'noto-serif-devanagari-latin-400-normal.woff',
-    'noto-serif-latin-400-normal.woff',
-    'noto-serif-latin-400-normal.woff2',
-  ]);
-  const latinBold = resolveFontPath(fontsDir, [
-    'noto-serif-devanagari-latin-700-normal.woff',
-    'noto-serif-latin-700-normal.woff',
-    'noto-serif-latin-700-normal.woff2',
-  ]);
-  const devanagariRegular = resolveFontPath(fontsDir, [
-    'noto-serif-devanagari-devanagari-400-normal.woff',
-    'noto-serif-devanagari-devanagari-400-normal.woff2',
-  ]);
-  const devanagariBold = resolveFontPath(fontsDir, [
-    'noto-serif-devanagari-devanagari-700-normal.woff',
-    'noto-serif-devanagari-devanagari-700-normal.woff2',
-  ]);
-
-  if (!latinRegular || !latinBold) {
-    throw new Error('Receipt Latin font files are missing in public/fonts/receipt.');
-  }
-
-  if (!devanagariRegular || !devanagariBold) {
-    throw new Error('Receipt Devanagari font files are missing in public/fonts/receipt.');
-  }
-
-  loadedFontFiles = {
-    latinRegular,
-    latinBold,
-    devanagariRegular,
-    devanagariBold,
-  };
-
-  return loadedFontFiles;
-};
-
-const getFontFormat = (filePath: string) => (filePath.endsWith('.woff2') ? 'woff2' : 'woff');
+const getFontFormat = (isWoff2: boolean) => (isWoff2 ? 'woff2' : 'woff');
 
 const getMimeType = (format: 'woff' | 'woff2') => (format === 'woff2' ? 'font/woff2' : 'font/woff');
 
@@ -114,16 +48,15 @@ const loadEmbeddedFontCss = (): string => {
     return embeddedFontCss;
   }
 
-  const fontFiles = loadFontFiles();
-  const latinRegularBuffer = fs.readFileSync(fontFiles.latinRegular).toString('base64');
-  const latinBoldBuffer = fs.readFileSync(fontFiles.latinBold).toString('base64');
-  const devRegularBuffer = fs.readFileSync(fontFiles.devanagariRegular).toString('base64');
-  const devBoldBuffer = fs.readFileSync(fontFiles.devanagariBold).toString('base64');
+  const latinRegularBuffer = latinRegularFontBase64;
+  const latinBoldBuffer = latinBoldFontBase64;
+  const devRegularBuffer = devanagariRegularFontBase64;
+  const devBoldBuffer = devanagariBoldFontBase64;
 
-  const latinRegularFormat = getFontFormat(fontFiles.latinRegular);
-  const latinBoldFormat = getFontFormat(fontFiles.latinBold);
-  const devRegularFormat = getFontFormat(fontFiles.devanagariRegular);
-  const devBoldFormat = getFontFormat(fontFiles.devanagariBold);
+  const latinRegularFormat = getFontFormat(false);
+  const latinBoldFormat = getFontFormat(false);
+  const devRegularFormat = getFontFormat(false);
+  const devBoldFormat = getFontFormat(false);
 
   embeddedFontCss = `
     @font-face {

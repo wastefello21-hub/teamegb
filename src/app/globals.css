@@ -18,8 +18,8 @@
 :root {
   --background: #fffdf5; /* Off-white silk */
   --foreground: #2d1b00;
-  --card: rgba(255, 255, 255, 0.9);
-  --border-color: rgba(184, 134, 11, 0.2); /* Dark Goldenrod */
+  --card: rgba(255, 255, 255, 0.96);
+  --border-color: rgba(184, 134, 11, 0.12); /* Dark Goldenrod */
 }
 
 .dark {
@@ -35,16 +35,20 @@ body {
   font-family: var(--font-sans), sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
   background-image:
+    radial-gradient(circle at top left, rgba(244, 127, 22, 0.08), transparent 24%),
+    radial-gradient(circle at top right, rgba(251, 192, 45, 0.06), transparent 22%),
+    radial-gradient(circle at bottom center, rgba(208, 47, 47, 0.04), transparent 30%),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.36) 36%, rgba(255, 252, 244, 0.96));
+}
+
+.dark body {
+  background-image:
     radial-gradient(circle at top left, rgba(244, 127, 22, 0.16), transparent 30%),
     radial-gradient(circle at top right, rgba(251, 192, 45, 0.12), transparent 28%),
     radial-gradient(circle at bottom center, rgba(208, 47, 47, 0.1), transparent 35%),
     linear-gradient(to bottom, rgba(255, 255, 255, 0.55), transparent 30%),
     url("https://www.transparenttextures.com/patterns/silk.png");
   background-attachment: fixed;
-  background-size: cover;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 html {
@@ -54,9 +58,9 @@ html {
 .glass {
   background: var(--card);
   backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
   border: 1px solid var(--border-color);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+  border-radius: 1.25rem;
 }
 
 .glass-hover {
@@ -65,7 +69,7 @@ html {
 
 .glass-hover:hover {
   transform: translateY(-4px);
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
 }
 
 /* Skeleton shimmer animation for loading */
@@ -382,7 +386,7 @@ html {
 
 /* Smooth link hover effects */
 a, button {
-  transition: all 0.3s ease;
+  transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 /* Image loading transition */

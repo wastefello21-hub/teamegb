@@ -61,20 +61,20 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Dashboard Overview</h2>
-        <p className="text-sm text-foreground/60">Welcome to the central management console.</p>
+        <h2 className="text-2xl font-semibold text-slate-950 dark:text-slate-50">Dashboard Overview</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400">Welcome to the central management console.</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, i) => (
-          <GlassCard key={i} className="flex items-center gap-4 p-4">
-            <div className="p-3 bg-background rounded-lg shadow-inner">
+          <GlassCard key={i} className="flex items-center gap-4 p-4 border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+            <div className="p-3 bg-slate-50 rounded-lg border border-slate-200/80 dark:bg-white/5 dark:border-white/10">
               {stat.icon}
             </div>
             <div>
-              <p className="text-sm text-foreground/60 font-medium">{stat.label}</p>
-              <p className="text-xl font-bold">{stat.value}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{stat.label}</p>
+              <p className="text-xl font-semibold text-slate-950 dark:text-slate-50">{stat.value}</p>
             </div>
           </GlassCard>
         ))}
@@ -82,8 +82,8 @@ export default function AdminDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
         {/* Daily Collections Chart */}
-        <GlassCard className="h-96 flex flex-col">
-          <h3 className="text-lg font-semibold mb-4">Collections by Date</h3>
+        <GlassCard className="h-96 flex flex-col border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-50">Collections by Date</h3>
           <div className="flex-1 w-full min-h-0">
             {mounted && dailyData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%" minHeight={260}>
@@ -115,8 +115,8 @@ export default function AdminDashboard() {
         </GlassCard>
 
         {/* Team Performance Chart */}
-        <GlassCard className="h-96 flex flex-col">
-          <h3 className="text-lg font-semibold mb-4">Team Performance</h3>
+        <GlassCard className="h-96 flex flex-col border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
+          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-slate-50">Team Performance</h3>
           <div className="flex-1 w-full min-h-0">
             {mounted && teamPerformance.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%" minHeight={260}>

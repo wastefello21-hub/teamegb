@@ -2,15 +2,21 @@
 
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { Cormorant_Garamond } from 'next/font/google';
 import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, X, Image as ImageIcon } from 'lucide-react';
+import { Users, TrendingUp, Heart, Wallet, Play, Video, MessageSquarePlus, ThumbsUp, ThumbsDown, Phone, Mail, Image as ImageIcon } from 'lucide-react';
 import { YoutubeIcon, InstagramIcon } from '@/components/ui/SocialIcons';
 import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
+
+const headingFont = Cormorant_Garamond({
+  subsets: ['latin'],
+  weight: ['500', '600', '700'],
+});
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -123,7 +129,6 @@ export default function HomePage() {
   const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
   const [selectedMedia, setSelectedMedia] = useState<typeof gallery[0] | null>(null);
   const [revealedCount, setRevealedCount] = useState(0);
-  const [isLogoViewerOpen, setIsLogoViewerOpen] = useState(false);
 
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
@@ -157,6 +162,8 @@ export default function HomePage() {
 
   const showcaseItems = [...gallery].sort((a, b) => Number(b.year) - Number(a.year)).slice(0, 8);
   const showcaseKey = showcaseItems.map(item => item.id).join('|');
+  const sectionTitleClass = `${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50`;
+  const sectionSubtitleClass = 'text-sm md:text-base text-slate-600 dark:text-slate-300';
 
   useEffect(() => {
     setRevealedCount(showcaseItems.length > 0 ? 1 : 0);
@@ -174,21 +181,6 @@ export default function HomePage() {
     return () => window.clearTimeout(timeoutId);
   }, [revealedCount, showcaseItems.length]);
 
-  useEffect(() => {
-    if (!isLogoViewerOpen) {
-      return;
-    }
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsLogoViewerOpen(false);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isLogoViewerOpen]);
-
   return (
     <div className="flex flex-col items-center w-full scroll-smooth">
       {/* Hero Section */}
@@ -201,55 +193,34 @@ export default function HomePage() {
             className="object-cover opacity-60 md:opacity-70 scale-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-background/35 via-background/10 to-background" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/80 via-slate-900/35 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.18),transparent_30%),radial-gradient(circle_at_bottom,rgba(15,23,42,0.25),transparent_40%)]" />
         </div>
 
         <div 
-          className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-black/10 backdrop-blur-md border border-white/10 shadow-2xl shadow-black/20 glass-hover"
+          className="text-center px-6 md:px-12 max-w-5xl z-10 py-12 rounded-[2rem] bg-white/75 backdrop-blur-xl border border-white/40 shadow-[0_24px_80px_rgba(15,23,42,0.16)] glass-hover dark:bg-slate-950/35 dark:border-white/10"
         >
-          {/* Interactive Logo Section */}
-          <div className="flex justify-center mb-6">
-            <motion.button
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setIsLogoViewerOpen(true)}
-              className="focus:outline-none group relative"
-              type="button"
-              aria-label="View festival logo"
-            >
-            <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-2xl overflow-hidden border-4 border-yellow-400 shadow-2xl shadow-yellow-500/30 transition-all duration-300 group-hover:shadow-3xl group-hover:shadow-yellow-500/50">
-              <Image
-                src="/logo_v2.jpg"
-                alt="TEAM EGB Logo"
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-110"
-                priority
-              />
-            </div>
-          </motion.button>
-          </div>
-
           <div
-            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-white/15 dark:bg-white/10 border border-white/15 text-xs md:text-sm font-bold uppercase tracking-[0.28em] text-white/90 backdrop-blur-md"
+            className="inline-flex items-center gap-2 px-4 py-2 mb-6 rounded-full bg-slate-950/5 dark:bg-white/10 border border-slate-900/10 dark:border-white/10 text-xs md:text-sm font-semibold uppercase tracking-[0.28em] text-slate-700 dark:text-slate-200 backdrop-blur-md"
           >
             Ganesha Chaturthi Celebration
           </div>
           <h1
-            className="text-5xl md:text-8xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-orange-600 [filter:drop-shadow(0_4px_8px_rgba(0,0,0,0.5))] tracking-tight leading-tight"
+            className={`${headingFont.className} text-5xl md:text-8xl font-semibold mb-4 tracking-tight leading-[0.92] text-slate-950 dark:text-white`}
           >
             {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0].trim() : (settings?.festivalName || 'TEAM EGB')}
             <br />
             <span
-              className="text-4xl md:text-6xl text-white dark:text-yellow-400 font-bold block mt-2 [text-shadow:0_2px_10px_rgba(0,0,0,0.5)] opacity-95"
+              className={`${headingFont.className} text-4xl md:text-6xl block mt-3 font-medium text-amber-700 dark:text-amber-300`}
             >
               {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[1].trim() : 'Ganesha Chaturthi Celebrations'}
             </span>
           </h1>
           
           <p
-            className="text-xl md:text-2xl font-bold mb-12 text-foreground dark:text-white max-w-2xl mx-auto italic [text-shadow:0_2px_4px_rgba(0,0,0,0.3)]"
+            className="text-lg md:text-2xl font-medium mb-12 text-slate-700 dark:text-slate-200 max-w-2xl mx-auto"
           >
-            "Celebrating Devotion, Faith, and Youth Unity"
+            Celebrating devotion, faith, and youth unity.
           </p>
           
           <div
@@ -258,7 +229,7 @@ export default function HomePage() {
             <Link href="#contributions" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-lg shadow-orange-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-semibold"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-slate-950 text-white hover:bg-slate-800 shadow-lg shadow-slate-950/15 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] font-semibold"
               >
                 View Contributions
               </Button>
@@ -266,7 +237,7 @@ export default function HomePage() {
             <Link href="/gallery" className="w-full sm:w-auto">
               <Button
                 size="lg"
-                className="w-full text-lg px-8 py-4 rounded-2xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 shadow-lg shadow-red-500/25 border-0 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] font-semibold text-white"
+                className="w-full text-lg px-8 py-4 rounded-2xl bg-amber-500 text-slate-950 hover:bg-amber-400 shadow-lg shadow-amber-500/20 border-0 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98] font-semibold"
               >
                 View Gallery
               </Button>
@@ -275,73 +246,18 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Logo Viewer Modal */}
-      <AnimatePresence>
-        {isLogoViewerOpen && (
-          <motion.div
-            className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-md px-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsLogoViewerOpen(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.82, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 12 }}
-              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              onClick={(event) => event.stopPropagation()}
-              className="relative w-full max-w-md sm:max-w-lg"
-            >
-              <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-yellow-400/20 via-orange-300/10 to-transparent blur-2xl" />
-              <div className="relative overflow-hidden rounded-[2rem] border border-white/20 bg-white/90 dark:bg-neutral-950/90 shadow-[0_30px_80px_rgba(0,0,0,0.45)]">
-                <button
-                  type="button"
-                  onClick={() => setIsLogoViewerOpen(false)}
-                  className="absolute right-3 top-3 z-10 rounded-full bg-black/55 p-2 text-white backdrop-blur-md transition-transform hover:scale-105"
-                  aria-label="Close logo preview"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-                <div className="relative aspect-square w-full bg-gradient-to-br from-yellow-100 via-white to-orange-50 dark:from-neutral-900 dark:via-neutral-950 dark:to-black">
-                  <Image
-                    src="/logo_v2.jpg"
-                    alt="TEAM EGB logo enlarged"
-                    fill
-                    sizes="(max-width: 640px) 90vw, 560px"
-                    className="object-cover"
-                    priority
-                  />
-                </div>
-                <div className="px-6 py-8 text-center">
-                  <h2 className="text-3xl md:text-4xl font-black text-foreground">
-                    Team EGB
-                  </h2>
-                  <p className="mt-3 text-base font-semibold text-foreground/70">
-                    Ganesha Chaturthi Celebrations
-                  </p>
-                  <p className="mt-4 text-sm text-foreground/60">
-                    Tap outside or press Escape to close
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Analytics Dashboard */}
       <section className="section-shell w-full px-4 py-20" id="contributions">
         <div
           className="text-center mb-12"
         >
           <h2
-            className="section-title text-3xl md:text-4xl font-bold mb-4 glow-text text-orange-600 dark:text-orange-400"
+            className={`${sectionTitleClass} mb-4`}
           >
             Transparency Matters
           </h2>
           <p
-            className="text-foreground/70 max-w-2xl mx-auto"
+            className={`max-w-2xl mx-auto ${sectionSubtitleClass}`}
           >
             We believe in complete transparency. Every rupee contributed by you is accounted for and utilized for the divine celebration.
           </p>
@@ -350,87 +266,63 @@ export default function HomePage() {
         <div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
         >
-          <div
-          >
-            <Link href="/analytics" className="block group">
-              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-orange-500/20 rounded-full blur-xl group-hover:bg-orange-500/40 transition-all duration-300" />
+          <div>
+            <Link href="/analytics" className="block">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
                 <div className="flex items-center gap-4 mb-4">
-                  <div
-                    className="p-3 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl shadow-lg"
-                  >
-                    <Wallet className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-amber-50 rounded-xl border border-amber-100 dark:bg-amber-500/10 dark:border-amber-400/20">
+                    <Wallet className="w-6 h-6 text-amber-700 dark:text-amber-300" />
                   </div>
-                  <h3 className="font-semibold text-foreground/80 group-hover:text-orange-500 transition-colors">Total Collection</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Total Collection</h3>
                 </div>
-                <p
-                  className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-red-600"
-                >
+                <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.totalContributions}
                 </p>
               </GlassCard>
             </Link>
           </div>
 
-          <div
-          >
-            <Link href="/contributors" className="block group">
-              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-blue-500/20 rounded-full blur-xl group-hover:bg-blue-500/40 transition-all duration-300" />
+          <div>
+            <Link href="/contributors" className="block">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
                 <div className="flex items-center gap-4 mb-4">
-                  <div
-                    className="p-3 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl shadow-lg"
-                  >
-                    <Users className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-sky-50 rounded-xl border border-sky-100 dark:bg-sky-500/10 dark:border-sky-400/20">
+                    <Users className="w-6 h-6 text-sky-700 dark:text-sky-300" />
                   </div>
-                  <h3 className="font-semibold text-foreground/80 group-hover:text-blue-500 transition-colors">Contributors</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Contributors</h3>
                 </div>
-                <p
-                  className="text-3xl font-bold text-blue-600 dark:text-blue-400"
-                >
+                <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.contributors}
                 </p>
               </GlassCard>
             </Link>
           </div>
 
-          <div
-          >
-            <Link href="/expenditure" className="block group">
-              <GlassCard variant="interactive" glow className="relative overflow-hidden group h-full">
-                <div className="absolute -right-6 -top-6 w-24 h-24 bg-red-500/20 rounded-full blur-xl group-hover:bg-red-500/40 transition-all duration-300" />
+          <div>
+            <Link href="/expenditure" className="block">
+              <GlassCard variant="default" className="relative overflow-hidden h-full border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
                 <div className="flex items-center gap-4 mb-4">
-                  <div
-                    className="p-3 bg-gradient-to-br from-red-400 to-red-600 rounded-xl shadow-lg"
-                  >
-                    <TrendingUp className="w-6 h-6 text-white" />
+                  <div className="p-3 bg-rose-50 rounded-xl border border-rose-100 dark:bg-rose-500/10 dark:border-rose-400/20">
+                    <TrendingUp className="w-6 h-6 text-rose-700 dark:text-rose-300" />
                   </div>
-                  <h3 className="font-semibold text-foreground/80 group-hover:text-red-500 transition-colors">Expenditure</h3>
+                  <h3 className="font-semibold text-slate-700 dark:text-slate-200">Expenditure</h3>
                 </div>
-                <p
-                  className="text-3xl font-bold text-red-600 dark:text-red-400"
-                >
+                <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                   {analytics.expenditure}
                 </p>
               </GlassCard>
             </Link>
           </div>
 
-          <div
-          >
-            <GlassCard variant="elevated" className="relative overflow-hidden group hover:-translate-y-1 transition-all duration-300">
-              <div className="absolute -right-6 -top-6 w-24 h-24 bg-green-500/20 rounded-full blur-xl group-hover:bg-green-500/30 transition-all duration-300" />
+          <div>
+            <GlassCard variant="default" className="relative overflow-hidden border border-slate-200/80 bg-white/90 shadow-sm dark:bg-slate-950/55 dark:border-white/10">
               <div className="flex items-center gap-4 mb-4">
-                <div
-                  className="p-3 bg-gradient-to-br from-green-400 to-green-600 rounded-xl shadow-lg"
-                >
-                  <Heart className="w-6 h-6 text-white" />
+                <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-400/20">
+                  <Heart className="w-6 h-6 text-emerald-700 dark:text-emerald-300" />
                 </div>
-                <h3 className="font-semibold text-foreground/80">Balance</h3>
+                <h3 className="font-semibold text-slate-700 dark:text-slate-200">Balance</h3>
               </div>
-              <p
-                className="text-3xl font-bold text-green-600 dark:text-green-400"
-              >
+              <p className="text-3xl font-semibold text-slate-950 dark:text-white">
                 {analytics.balance}
               </p>
             </GlassCard>
@@ -446,12 +338,12 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-center md:justify-center gap-6">
             <div className="text-center">
               <h2
-                className="section-title text-3xl font-black glow-text text-orange-600 dark:text-orange-400 leading-tight"
+                className={`${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50 leading-tight`}
               >
                 Glimpses of Devotion
               </h2>
               <p
-                className="mt-2 text-foreground/70 text-sm md:text-base max-w-2xl mx-auto"
+                className={`mt-2 max-w-2xl mx-auto ${sectionSubtitleClass}`}
               >
                 Beautiful moments captured during our celebrations.
               </p>
@@ -459,7 +351,7 @@ export default function HomePage() {
             <div
             >
               <Link href="/gallery" className="w-full md:w-auto md:ml-8">
-                <Button className="w-full md:w-auto bg-gradient-to-r from-orange-500 via-red-500 to-red-600 hover:from-orange-600 hover:via-red-600 hover:to-red-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-orange-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+                <Button className="w-full md:w-auto bg-slate-950 text-white hover:bg-slate-800 font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-slate-950/15 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]">
                   View All Gallery
                 </Button>
               </Link>
@@ -496,33 +388,33 @@ export default function HomePage() {
 
       {/* Recent Contributions */}
       <section className="w-full max-w-7xl px-4 pb-20">
-        <GlassCard className="max-w-3xl mx-auto border-t-4 border-t-orange-500">
-          <h3 className="text-2xl font-bold mb-6 text-center">Recent Devotees</h3>
+        <GlassCard className="max-w-3xl mx-auto border-t-4 border-t-amber-500 bg-white/90 dark:bg-slate-950/55">
+          <h3 className={`${headingFont.className} text-2xl md:text-3xl font-semibold mb-6 text-center text-slate-900 dark:text-slate-50`}>Recent Devotees</h3>
           <div className="space-y-4">
             {recentContributions.map((contribution, index) => (
               <div
                 key={contribution.id}
-                className="flex justify-between items-center p-4 rounded-xl bg-background/50 border border-border-color hover:border-orange-500/50 transition-colors"
+                className="flex justify-between items-center p-4 rounded-xl bg-slate-50/80 border border-slate-200/80 hover:border-amber-400/60 transition-colors dark:bg-white/5 dark:border-white/10"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-200 to-red-200 dark:from-orange-900 dark:to-red-900 flex items-center justify-center text-orange-800 dark:text-orange-200 font-bold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-100 to-amber-200 dark:from-amber-500/20 dark:to-amber-600/20 flex items-center justify-center text-amber-800 dark:text-amber-200 font-semibold">
                     {settings.showNamesPublicly ? (contribution?.name?.charAt?.(0) || '?') : '?'}
                   </div>
                   <div>
-                    <p className="font-semibold">{settings.showNamesPublicly ? (contribution?.name || 'Anonymous') : 'Anonymous Devotee'}</p>
-                    <p className="text-xs text-foreground/50">{contribution.date}</p>
+                    <p className="font-medium text-slate-900 dark:text-slate-100">{settings.showNamesPublicly ? (contribution?.name || 'Anonymous') : 'Anonymous Devotee'}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{contribution.date}</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-bold text-orange-600 dark:text-orange-400">{settings.showAmountsPublicly ? `₹${contribution.amount}` : '✓ Contributed'}</p>
-                  <p className="text-xs text-foreground/50">Contributed</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{settings.showAmountsPublicly ? `₹${contribution.amount}` : '✓ Contributed'}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Contributed</p>
                 </div>
               </div>
             ))}
           </div>
           <div className="mt-8 text-center">
             <Link href="/contributors" className="w-full sm:w-auto inline-block">
-              <Button variant="outline" className="w-full sm:w-auto px-6 py-3">View All Contributions</Button>
+              <Button variant="outline" className="w-full sm:w-auto px-6 py-3 border-slate-300 text-slate-800 hover:bg-slate-100 dark:border-white/15 dark:text-slate-100 dark:hover:bg-white/5">View All Contributions</Button>
             </Link>
           </div>
         </GlassCard>
@@ -533,13 +425,13 @@ export default function HomePage() {
         <div className="mb-10 px-4">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h2 className="text-3xl font-black glow-text text-orange-600 dark:text-orange-400">
+              <h2 className={`${headingFont.className} text-3xl md:text-4xl font-semibold tracking-tight text-slate-900 dark:text-slate-50`}>
                 Community Voice
               </h2>
-              <p className="text-foreground/70">See what others are suggesting for the festival.</p>
+              <p className={sectionSubtitleClass}>See what others are suggesting for the festival.</p>
             </div>
             <Link href="/suggestions" className="w-full md:w-auto">
-              <Button className="w-full md:w-auto bg-gradient-to-r from-purple-500 via-fuchsia-500 to-pink-500 hover:from-purple-600 hover:via-fuchsia-600 hover:to-pink-700 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-purple-500/25 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]">
+              <Button className="w-full md:w-auto bg-slate-950 text-white hover:bg-slate-800 font-semibold px-6 py-3 rounded-2xl shadow-lg shadow-slate-950/15 transition-all duration-300 hover:scale-[1.01] active:scale-[0.98]">
                 View All & Submit
               </Button>
             </Link>
@@ -547,32 +439,32 @@ export default function HomePage() {
         </div>
 
         {suggestions.length === 0 ? (
-          <div className="text-center py-12 p-6 border border-dashed border-border-color rounded-xl opacity-70">
-            <MessageSquarePlus className="h-12 w-12 mx-auto mb-3 text-foreground/30" />
+          <div className="text-center py-12 p-6 border border-dashed border-slate-300 rounded-xl opacity-80 dark:border-white/10">
+            <MessageSquarePlus className="h-12 w-12 mx-auto mb-3 text-slate-400 dark:text-slate-500" />
             <h3 className="text-lg font-medium">No suggestions yet!</h3>
-            <p className="text-sm">Be the first to share your ideas with us.</p>
+            <p className="text-sm text-slate-600 dark:text-slate-300">Be the first to share your ideas with us.</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {suggestions.slice(0, 6).map((suggestion) => (
-              <GlassCard key={suggestion.id} className="p-6 flex flex-col h-full hover:border-orange-500/30 transition-colors">
+              <GlassCard key={suggestion.id} className="p-6 flex flex-col h-full hover:border-amber-400/30 transition-colors bg-white/90 dark:bg-slate-950/55">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-red-500 flex items-center justify-center text-white font-bold">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-amber-600 flex items-center justify-center text-slate-950 font-semibold">
                     {suggestion?.name?.charAt?.(0)?.toUpperCase() || '?'}
                   </div>
                   <div>
-                    <h3 className="font-bold text-foreground">{suggestion?.name || 'Anonymous'}</h3>
-                    <p className="text-xs text-foreground/50">
+                    <h3 className="font-semibold text-slate-900 dark:text-slate-100">{suggestion?.name || 'Anonymous'}</h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                       {suggestion.created_at ? new Date(suggestion.created_at).toLocaleDateString() : 'Recently'}
                     </p>
                   </div>
                 </div>
                 
-                <p className="text-foreground/80 flex-1 mb-4 line-clamp-3">
+                <p className="text-slate-700 dark:text-slate-300 flex-1 mb-4 line-clamp-3">
                   {suggestion.suggestion}
                 </p>
 
-                <div className="flex items-center justify-between pt-4 border-t border-border-color">
+                <div className="flex items-center justify-between pt-4 border-t border-slate-200/80 dark:border-white/10">
                   <div className="flex items-center gap-3">
                     <button 
                       onClick={() => handleVote(suggestion.id, 'up')}
@@ -580,7 +472,7 @@ export default function HomePage() {
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                         votedItems[suggestion.id] === 'up' 
                           ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' 
-                          : 'hover:bg-green-50 dark:hover:bg-green-900/20 text-foreground/60'
+                            : 'hover:bg-green-50 dark:hover:bg-green-900/20 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <ThumbsUp size={16} />
@@ -592,7 +484,7 @@ export default function HomePage() {
                       className={`flex items-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                         votedItems[suggestion.id] === 'down' 
                           ? 'bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400' 
-                          : 'hover:bg-red-50 dark:hover:bg-red-900/20 text-foreground/60'
+                            : 'hover:bg-red-50 dark:hover:bg-red-900/20 text-slate-600 dark:text-slate-300'
                       }`}
                     >
                       <ThumbsDown size={16} />
@@ -610,12 +502,9 @@ export default function HomePage() {
       <section className="w-full max-w-7xl px-4 pb-20 overflow-hidden">
         <div
         >
-          <GlassCard className="border-t-4 border-t-orange-500 shadow-2xl relative overflow-hidden">
-            {/* Background elements for cool effect */}
-            <div className="absolute top-0 left-0 w-64 h-64 bg-orange-500/10 rounded-full blur-[80px] -z-10" />
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-[80px] -z-10" />
+          <GlassCard className="border-t-4 border-t-amber-500 shadow-2xl relative overflow-hidden bg-white/90 dark:bg-slate-950/55">
             
-            <h3 className="text-3xl font-black mb-10 text-center glow-text text-orange-600 dark:text-orange-400">
+            <h3 className={`${headingFont.className} text-3xl md:text-4xl font-semibold mb-10 text-center text-slate-900 dark:text-slate-50`}>
               Get In Touch
             </h3>
             
@@ -679,14 +568,14 @@ export default function HomePage() {
                   href={contact.href} 
                   target={contact.href.startsWith("http") ? "_blank" : undefined}
                   rel={contact.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className={`flex items-center gap-4 p-5 rounded-2xl bg-gradient-to-r ${contact.bgHover} transition-all duration-300 group border ${contact.border} shadow-sm hover:shadow-xl relative z-10 bg-background/50 dark:bg-background/20 backdrop-blur-sm hover:scale-[1.02] active:scale-[0.98]`}
+                  className="flex items-center gap-4 p-5 rounded-2xl transition-all duration-300 group border border-slate-200/80 dark:border-white/10 shadow-sm hover:shadow-xl relative z-10 bg-white/80 dark:bg-white/5 backdrop-blur-sm hover:scale-[1.01] active:scale-[0.98]"
                 >
-                  <div className={`p-4 bg-gradient-to-br ${contact.color} rounded-2xl shadow-lg shadow-black/10 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
+                  <div className={`p-4 bg-gradient-to-br ${contact.color} rounded-2xl shadow-lg shadow-black/10 group-hover:scale-[1.02] transition-all duration-300`}>
                     <contact.icon className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-foreground/60 font-medium uppercase tracking-wider mb-1">{contact.name}</p>
-                    <p className={`font-black ${contact.text} truncate text-lg`}>{contact.value}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium uppercase tracking-[0.2em] mb-1">{contact.name}</p>
+                    <p className={`font-semibold ${contact.text} truncate text-lg`}>{contact.value}</p>
                   </div>
                 </a>
               ))}

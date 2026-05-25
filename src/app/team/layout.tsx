@@ -60,7 +60,7 @@ export default function TeamLayout({ children }: any) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-slate-900 dark:border-amber-400"></div>
       </div>
     );
   }
@@ -69,7 +69,7 @@ export default function TeamLayout({ children }: any) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
         {statusMessage && (
-          <div className="mb-4 rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700 shadow-sm">
+          <div className="mb-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
             {statusMessage}
           </div>
         )}
@@ -86,10 +86,10 @@ export default function TeamLayout({ children }: any) {
   return (
     <div className="flex flex-col min-h-screen bg-background pb-20">
       {/* Top Header */}
-      <header className="glass sticky top-0 z-50 w-full border-b border-border-color shadow-sm bg-background/90 backdrop-blur-md">
+      <header className="glass sticky top-0 z-50 w-full border-b border-slate-200/80 shadow-sm bg-background/90 backdrop-blur-md dark:border-white/10">
         <div className="max-w-7xl mx-auto flex flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-orange-300/40 shadow-md bg-white/10">
+            <div className="relative w-12 h-12 rounded-2xl overflow-hidden border border-amber-300/30 shadow-md bg-white/10">
               <Image 
                 src="/logo_v2.jpg" 
                 alt="TEAM EGB Logo" 
@@ -98,8 +98,8 @@ export default function TeamLayout({ children }: any) {
               />
             </div>
             <div className="flex flex-col">
-              <span className="text-base font-bold text-orange-600 dark:text-yellow-500">TEAM EGB</span>
-              <span className="text-xs text-foreground/70 uppercase tracking-[0.2em] font-semibold">
+              <span className="text-base font-semibold text-slate-950 dark:text-slate-50">TEAM EGB</span>
+              <span className="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-[0.22em] font-semibold">
                 {settings?.festivalName?.includes('-') ? settings.festivalName.split('-')[0] : (settings?.festivalName || 'Ganesha Chaturthi')}
               </span>
             </div>
@@ -113,7 +113,7 @@ export default function TeamLayout({ children }: any) {
                 logout();
                 router.push('/team/login');
               }}
-              className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-500/10 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-500/15 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-300"
+              className="inline-flex items-center gap-2 rounded-full border border-red-500/20 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100 dark:border-red-400/20 dark:bg-red-500/10 dark:text-red-300 dark:hover:bg-red-500/15"
             >
               <LogOut size={18} />
               Logout
@@ -124,7 +124,7 @@ export default function TeamLayout({ children }: any) {
 
       {statusMessage && (
         <div className="mx-auto w-full max-w-6xl px-4 mt-4">
-          <div className="rounded-2xl border border-orange-200 bg-orange-50 px-4 py-3 text-sm font-medium text-orange-700 shadow-sm">
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800 shadow-sm dark:border-amber-400/20 dark:bg-amber-500/10 dark:text-amber-200">
             {statusMessage}
           </div>
         </div>
@@ -136,12 +136,12 @@ export default function TeamLayout({ children }: any) {
       </main>
 
       {/* Bottom Navigation for Mobile */}
-      <nav className="fixed bottom-0 left-0 w-full glass border-t border-border-color flex justify-around p-3 pb-safe z-50">
-        <Link href="/team/dashboard" className={`flex flex-col items-center gap-1 ${pathname === '/team/dashboard' ? 'text-orange-600' : 'text-foreground/60'}`}>
+      <nav className="fixed bottom-0 left-0 w-full glass border-t border-slate-200/80 flex justify-around p-3 pb-safe z-50 dark:border-white/10">
+        <Link href="/team/dashboard" className={`flex flex-col items-center gap-1 ${pathname === '/team/dashboard' ? 'text-slate-950 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
           <Wallet size={24} />
           <span className="text-[10px] font-medium">Collect</span>
         </Link>
-        <Link href="/team/my-collections" className={`flex flex-col items-center gap-1 ${pathname === '/team/my-collections' ? 'text-orange-600' : 'text-foreground/60'}`}>
+        <Link href="/team/my-collections" className={`flex flex-col items-center gap-1 ${pathname === '/team/my-collections' ? 'text-slate-950 dark:text-white' : 'text-slate-500 dark:text-slate-400'}`}>
           <List size={24} />
           <span className="text-[10px] font-medium">My Entries</span>
         </Link>

@@ -107,38 +107,36 @@ export default function AnalyticsPage() {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-12"
       >
-        <span className="inline-flex items-center px-4 py-2 rounded-full bg-orange-500/10 text-orange-700 dark:text-orange-300 text-xs font-bold uppercase tracking-[0.25em] mb-5 border border-orange-500/15">
+        <span className="inline-flex items-center px-4 py-2 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 text-xs font-semibold uppercase tracking-[0.25em] mb-5 border border-amber-500/15">
           Live Overview
         </span>
-        <h1 className="text-4xl md:text-5xl font-black text-orange-600 dark:text-orange-400 mb-4 section-title">Collection Analytics</h1>
-        <p className="text-foreground/70 max-w-2xl mx-auto">
+        <h1 className="text-4xl md:text-5xl font-semibold text-slate-950 dark:text-slate-50 mb-4 section-title">Collection Analytics</h1>
+        <p className="text-slate-600 dark:text-slate-300 max-w-2xl mx-auto">
           Explore the trends of devotion and contribution towards the Ganesha Festival. Our transparent ledger updates in real-time.
         </p>
       </motion.div>
 
-      <GlassCard className="p-4 md:p-8 relative overflow-hidden glass-hover">
-        {/* Decorative background glow */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-orange-500/10 rounded-full blur-3xl -z-10" />
+      <GlassCard className="p-4 md:p-8 relative overflow-hidden glass-hover border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
         
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <h2 className="text-2xl font-bold">Contribution Trends</h2>
+          <h2 className="text-2xl font-semibold text-slate-900 dark:text-slate-50">Contribution Trends</h2>
           
-          <div className="flex bg-background/50 p-1 rounded-xl border border-border-color">
+          <div className="flex bg-slate-50 p-1 rounded-xl border border-slate-200/80 dark:bg-white/5 dark:border-white/10">
             <button 
               onClick={() => setView('daily')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'daily' ? 'bg-orange-500 text-white shadow-md' : 'hover:bg-foreground/5'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'daily' ? 'bg-slate-950 text-white shadow-md dark:bg-amber-400 dark:text-slate-950' : 'hover:bg-slate-100 dark:hover:bg-white/10'}`}
             >
               Daily
             </button>
             <button 
               onClick={() => setView('weekly')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'weekly' ? 'bg-orange-500 text-white shadow-md' : 'hover:bg-foreground/5'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'weekly' ? 'bg-slate-950 text-white shadow-md dark:bg-amber-400 dark:text-slate-950' : 'hover:bg-slate-100 dark:hover:bg-white/10'}`}
             >
               Weekly
             </button>
             <button 
               onClick={() => setView('monthly')}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'monthly' ? 'bg-orange-500 text-white shadow-md' : 'hover:bg-foreground/5'}`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${view === 'monthly' ? 'bg-slate-950 text-white shadow-md dark:bg-amber-400 dark:text-slate-950' : 'hover:bg-slate-100 dark:hover:bg-white/10'}`}
             >
               Monthly
             </button>
