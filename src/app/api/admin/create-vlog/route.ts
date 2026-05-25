@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabaseAdmin } from '@/lib/supabase';
+import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 const getYouTubeId = (url: string) => {
   const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
@@ -8,8 +8,6 @@ const getYouTubeId = (url: string) => {
 };
 
 export async function POST(request: Request) {
-  if (!supabaseAdmin) return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 });
-
   const body = await request.json();
   const { youtube_url, title, description, is_public } = body || {};
 
@@ -22,14 +20,19 @@ export async function POST(request: Request) {
 
   const thumbnail_url = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
 
-  const { data, error } = await supabaseAdmin
+  // Prefer the admin client when available, but fall back to the anon client so
+  // local/dev environments without SUPABASE_SERVICE_ROLE_KEY still work.
+  const db = supabaseAdmin || supabase;
+
+  const { data, error } = await db
     .from('vlogs')
     .insert([{ youtube_url, title, description, thumbnail_url, is_public: !!is_public }])
     .select()
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('create-vlog error:', error.message || error);
+    return NextResponse.json({ error: error.message || 'Failed to insert vlog' }, { status: 500 });
   }
 
   return NextResponse.json({ vlog: data }, { status: 201 });

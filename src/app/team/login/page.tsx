@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import Link from 'next/link';
 import { useData } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext'; // Import Auth
+import { supabase } from '@/lib/supabase';
 
 export default function TeamLogin() {
   const [teamId, setTeamId] = useState('');
@@ -44,8 +45,25 @@ export default function TeamLogin() {
       const normalizedTeamId = teamId.trim().toLowerCase();
       const normalizedPassword = password.trim();
       
-      const member = teamMembers.find(m => m.id.trim().toLowerCase() === normalizedTeamId);
-      
+      let member = teamMembers.find(m => m.id.trim().toLowerCase() === normalizedTeamId);
+
+      // If not found in local cache, fetch directly from Supabase to avoid
+      // race conditions when DataContext hasn't populated teamMembers yet.
+      if (!member) {
+        try {
+          const { data, error } = await supabase
+            .from('team_members')
+            .select('*')
+            .ilike('id', normalizedTeamId)
+            .limit(1)
+            .single();
+
+          if (!error && data) member = data as any;
+        } catch (err) {
+          console.error('team login lookup error', err);
+        }
+      }
+
       if (member) {
         // Check if member is disabled
         if (member.is_enabled === false) {
