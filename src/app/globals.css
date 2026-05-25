@@ -467,10 +467,8 @@ img {
   transform: translateZ(0);
 }
 
-/* Stronger styling for large headings and brand */
-.gradient-heading,
-h1.gradient-heading,
-h1, h2, h3 {
+/* Stronger styling for large headings and brand (apply only when class is present) */
+.gradient-heading, h1.gradient-heading {
   background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-mid), var(--gradient-text-end));
   -webkit-background-clip: text;
   background-clip: text;
@@ -478,12 +476,21 @@ h1, h2, h3 {
   color: transparent;
   font-weight: 800;
   letter-spacing: -0.02em;
-  -webkit-text-stroke: 0.2px rgba(0,0,0,0.18);
-  text-shadow: 0 6px 18px rgba(2,6,23,0.55), 0 1px 0 rgba(255,255,255,0.02);
+  /* Thin complementary maroon outline for contrast */
+  -webkit-text-stroke: 0.6px rgba(127,29,29,0.92);
+  /* Layered text-shadow to create a subtle outer stroke and depth */
+  text-shadow:
+    0 0 0 rgba(0,0,0,0),
+    0 1px 0 rgba(0,0,0,0.35),
+    1px 0 0 rgba(0,0,0,0.35),
+    -1px 0 0 rgba(0,0,0,0.35),
+    0 -1px 0 rgba(0,0,0,0.35),
+    0 6px 18px rgba(2,6,23,0.55),
+    0 1px 0 rgba(255,255,255,0.02);
 }
 
-/* Slightly subtler for smaller headings */
-h4, h5, h6 {
+/* Slightly subtler for smaller headings when applied explicitly */
+.gradient-subheading {
   background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-end));
   -webkit-background-clip: text;
   background-clip: text;
@@ -498,13 +505,50 @@ h4, h5, h6 {
 }
 
 /* Dark theme tweak: keep vibrancy but increase contrast */
-.dark .gradient-heading, .dark .gradient-text, .dark h1, .dark h2, .dark h3 {
+.dark .gradient-heading, .dark .gradient-text {
   text-shadow: 0 6px 22px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Light theme tweak: improve legibility on pale backgrounds */
+html:not(.dark) .gradient-heading,
+body:not(.dark) .gradient-heading {
+  -webkit-text-stroke: 0.8px rgba(0,0,0,0.36);
+  text-shadow: 0 6px 20px rgba(0,0,0,0.32), 0 1px 0 rgba(255,255,255,0.02);
+  filter: drop-shadow(0 6px 20px rgba(0,0,0,0.14));
+}
+
+/* Add a subtle translucent backdrop behind gradient headings for legibility */
+.gradient-heading {
+  position: relative;
+  z-index: 1;
+  display: inline-block;
+}
+
+.gradient-heading::before {
+  content: "";
+  position: absolute;
+  left: -0.28em;
+  right: -0.28em;
+  top: -0.18em;
+  bottom: -0.18em;
+  background: rgba(0,0,0,0.18);
+  border-radius: 0.45rem;
+  filter: blur(6px);
+  z-index: -1;
+  transition: background 160ms ease, opacity 160ms ease;
+}
+
+/* Lighter/darker tweaks per theme */
+html:not(.dark) .gradient-heading::before {
+  background: rgba(0,0,0,0.32);
+}
+.dark .gradient-heading::before {
+  background: rgba(0,0,0,0.12);
 }
 
 /* Accessibility fallback for print or older browsers */
 @supports not (-webkit-background-clip: text) {
-  .gradient-text, .gradient-heading, h1, h2, h3 {
+  .gradient-text, .gradient-heading {
     color: var(--gradient-text-start);
     -webkit-text-fill-color: initial;
   }
