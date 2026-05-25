@@ -234,7 +234,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const isGeneralCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
         const isGalleryCacheFresh = galleryFreshTime && Date.now() < parseInt(galleryFreshTime);
 
-        if (cachedData && isGeneralCacheValid) {
+        // Use cached data for public pages only. For admin routes we want fresh server data
+        // so skip early return and perform live fetches to show recent submissions immediately.
+        if (cachedData && isGeneralCacheValid && !isAdminRoute) {
           const parsed = JSON.parse(cachedData);
           if (parsed.contributions) setContributions(parsed.contributions);
           if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
@@ -527,6 +529,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       })
       .subscribe();
 
+    const eventApplicationsSubscription = supabase
+      .channel('event_applications-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_applications' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setEventApplications(prev => prev.map(a => a.id === payload.new.id ? payload.new as EventApplication : a));
+        } else if (payload.eventType === 'INSERT') {
+          setEventApplications(prev => [payload.new as EventApplication, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setEventApplications(prev => prev.filter(a => a.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     // Cross-tab synchronization
     const handleStorageChange = (e: StorageEvent) => {
       try {
@@ -578,6 +593,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       teamMembersSubscription.unsubscribe();
       gallerySubscription.unsubscribe();
       vlogsSubscription.unsubscribe();
+      eventApplicationsSubscription.unsubscribe();
     };
   }, []);
 

@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Plus, Trash2, Calendar, Clock, MapPin, Image as ImageIcon, X, Upload } from 'lucide-react';
 import { useData } from '@/context/DataContext';
+import type { EventApplication } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/lib/supabase';
 
@@ -34,6 +35,12 @@ const initialFormData: EventFormData = {
 export default function AdminEventsPage() {
   const router = useRouter();
   const { events, addEvent, updateEvent, deleteEvent, eventApplications, deleteEventApplication } = useData();
+  const [freshApplications, setFreshApplications] = useState<EventApplication[] | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [unseenCount, setUnseenCount] = useState(0);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const prevAppIdsRef = React.useRef<Set<string>>(new Set());
   const { user, loading } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -164,8 +171,53 @@ export default function AdminEventsPage() {
   const handleDeleteApplication = async (id: string) => {
     if (confirm('Are you sure you want to delete this application?')) {
       await deleteEventApplication(id);
+      // Also remove from local refreshed list if present
+      setFreshApplications(prev => prev ? prev.filter(a => a.id !== id) : prev);
     }
   };
+
+  const refreshApplications = async () => {
+    setRefreshing(true);
+    try {
+      const { data, error } = await supabase.from('event_applications').select('*').order('created_at', { ascending: false });
+      if (error) {
+        console.error('Failed to refresh applications:', error);
+      } else {
+        setFreshApplications(data || []);
+      }
+    } catch (err) {
+      console.error('Refresh error:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // Track new applications and show indicator/toast
+  React.useEffect(() => {
+    const prevIds = prevAppIdsRef.current;
+    const current = (freshApplications ?? eventApplications) || [];
+    const currentIds = new Set(current.map(a => a.id));
+
+    // Find newly added IDs that weren't present before
+    const newIds: string[] = [];
+    for (const id of currentIds) {
+      if (!prevIds.has(id)) newIds.push(id);
+    }
+
+    // Update prev ids for next check
+    prevAppIdsRef.current = currentIds;
+
+    if (newIds.length > 0) {
+      // If applications panel is open, assume admin is seeing them and don't increment unseen count
+      if (!showApplications) {
+        setUnseenCount(prev => prev + newIds.length);
+        setToastMessage(`${newIds.length} new application${newIds.length > 1 ? 's' : ''} received`);
+        setShowToast(true);
+        // auto-dismiss toast
+        window.setTimeout(() => setShowToast(false), 4000);
+      }
+    }
+  }, [eventApplications, freshApplications, showApplications]);
 
   const handleToggleRegistration = async (event: typeof events[0]) => {
     const newStatus = !event.is_registration_open;
@@ -189,15 +241,27 @@ export default function AdminEventsPage() {
               Create and manage event listings, registrations, and application timelines from one polished dashboard.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 w-full lg:w-auto">
+          <div className="flex flex-wrap gap-2 w-full lg:w-auto items-center">
           <Button 
             variant="outline" 
             size="sm"
-            onClick={() => setShowApplications(!showApplications)}
+            onClick={() => {
+              // opening applications clears unseen counter
+              if (!showApplications) setUnseenCount(0);
+              setShowApplications(!showApplications);
+            }}
             className={showApplications ? 'bg-slate-950 text-white dark:bg-amber-400 dark:text-slate-950' : ''}
           >
             {showApplications ? 'Back' : `Applications (${eventApplications.length})`}
+            {unseenCount > 0 && (
+              <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-semibold">{unseenCount}</span>
+            )}
           </Button>
+          {showApplications && (
+            <Button variant="secondary" size="sm" onClick={refreshApplications} className="ml-1">
+              {refreshing ? 'Refreshing...' : 'Refresh applications'}
+            </Button>
+          )}
           {!showApplications && (
             <Button onClick={() => setShowForm(!showForm)} size="sm" variant="gradient">
               <Plus size={16} className="mr-1" />
@@ -212,13 +276,13 @@ export default function AdminEventsPage() {
       {showApplications ? (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold mb-4 text-slate-900 dark:text-slate-50">Event Applications</h2>
-          {eventApplications.length === 0 ? (
+          {((freshApplications ?? eventApplications).length) === 0 ? (
             <GlassCard className="p-8 text-center border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
               <p className="text-slate-500 dark:text-slate-400">No applications yet</p>
             </GlassCard>
           ) : (
             <div className="grid gap-4">
-              {eventApplications.map((app) => (
+              {(freshApplications ?? eventApplications).map((app) => (
                 <GlassCard key={app.id} className="p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border border-slate-200/80 bg-white/90 dark:bg-slate-950/55 dark:border-white/10">
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg text-slate-900 dark:text-slate-50">{app.name}</h3>
@@ -529,6 +593,14 @@ export default function AdminEventsPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* Toast for new applications */}
+      {showToast && (
+        <div className="admin-toast" role="status" aria-live="polite">
+          <div className="dot" />
+          <div className="text-sm font-medium">{toastMessage}</div>
+        </div>
       )}
     </div>
   );
