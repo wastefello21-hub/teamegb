@@ -39,7 +39,7 @@ export default function AdminVlogsPage() {
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">YouTube URL</label>
-          <input value={url} onChange={e => setUrl(e.target.value)} className="w-full px-3 py-2 rounded-md bg-input" placeholder="https://www.youtube.com/watch?v=..." />
+          <input value={url} onChange={e => setUrl(e.target.value)} className="w-full px-3 py-2 rounded-md bg-input" placeholder="https://www.youtube.com/watch?v=... or https://www.youtube.com/shorts/..." />
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">Description</label>

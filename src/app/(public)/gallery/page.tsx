@@ -13,9 +13,38 @@ const isYouTubeUrl = (url: string) => {
 };
 
 const getYouTubeId = (url: string) => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+  try {
+    const parsedUrl = new URL(url.trim());
+    const host = parsedUrl.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
+      const shortId = parsedUrl.pathname.split('/').filter(Boolean)[0];
+      return shortId && shortId.length === 11 ? shortId : null;
+    }
+
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+      const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
+
+      if (parsedUrl.pathname === '/watch') {
+        const watchId = parsedUrl.searchParams.get('v');
+        return watchId && watchId.length === 11 ? watchId : null;
+      }
+
+      if (pathParts[0] === 'shorts' || pathParts[0] === 'embed' || pathParts[0] === 'live' || pathParts[0] === 'v') {
+        const pathId = pathParts[1];
+        return pathId && pathId.length === 11 ? pathId : null;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+const getYouTubeWatchUrl = (url: string) => {
+  const videoId = getYouTubeId(url);
+  return videoId ? `https://www.youtube.com/watch?v=${videoId}` : url;
 };
 
 const ITEMS_PER_PAGE = 8;
@@ -166,6 +195,10 @@ export default function GalleryPage() {
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const { gallery, vlogs } = useData();
+  const publicVlogs = useMemo(
+    () => (vlogs || []).filter(v => v.is_public !== false && !!getYouTubeId(v.youtube_url || '')),
+    [vlogs]
+  );
 
   // Memoize expensive computations
   const availableYears = useMemo(
@@ -268,13 +301,13 @@ export default function GalleryPage() {
     };
   }, [hasAnyMore, isLoadingMore, yearsToDisplay, hasMoreForYear, loadMoreForYear]);
 
-  if (!gallery || gallery.length === 0) {
+  if ((!gallery || gallery.length === 0) && publicVlogs.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-12 pb-32 text-center">
         <h1 className="text-4xl md:text-6xl font-black mb-6 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500">
           Divine Memories
         </h1>
-        <p className="text-foreground/70">Loading gallery...</p>
+        <p className="text-foreground/70">No gallery media or vlogs have been published yet.</p>
       </div>
     );
   }
@@ -295,18 +328,30 @@ export default function GalleryPage() {
       </div>
 
       {/* Vlogs Section */}
-      {vlogs && vlogs.length > 0 && (
+      {publicVlogs.length > 0 && (
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-3xl font-black text-orange-600">Vlogs</h2>
-            <p className="text-sm text-muted-foreground">Watch highlights and vlogs</p>
+            <p className="text-sm text-muted-foreground">Watch highlights and vlogs on YouTube</p>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
-            {vlogs.map((v) => (
-              <div key={v.id} className="group cursor-pointer rounded-2xl overflow-hidden shadow-lg bg-black/10 border border-white/5">
+            {publicVlogs.map((v) => {
+              const videoId = getYouTubeId(v.youtube_url || '');
+              const thumbnail = v.thumbnail_url || `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+              const watchUrl = getYouTubeWatchUrl(v.youtube_url || '');
+
+              return (
+              <a
+                key={v.id}
+                href={watchUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block cursor-pointer rounded-2xl overflow-hidden shadow-lg bg-black/10 border border-white/5"
+                aria-label={`Watch vlog ${v.title || 'video'} on YouTube`}
+              >
                   <div className="relative aspect-video w-full h-40 bg-zinc-900">
-                    <Image src={v.thumbnail_url || `https://img.youtube.com/vi/${(v.youtube_url || '').match(/v=([^&]+)/)?.[1] || ''}/hqdefault.jpg`} alt={v.title || 'Vlog thumbnail'} fill className="object-cover" />
+                    <Image src={thumbnail} alt={v.title || 'Vlog thumbnail'} fill className="object-cover" />
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white border border-white/20">
                       <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7L8 5z" fill="currentColor"/></svg>
@@ -316,9 +361,10 @@ export default function GalleryPage() {
                 <div className="p-3">
                   <h3 className="text-sm font-bold line-clamp-2">{v.title}</h3>
                   {v.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{v.description}</p>}
+                  <p className="text-xs text-orange-600 mt-2 font-semibold">Watch on YouTube</p>
                 </div>
-              </div>
-            ))}
+              </a>
+            );})}
           </div>
         </div>
       )}
@@ -339,6 +385,11 @@ export default function GalleryPage() {
 
       {/* Grid Layout - Paginated by Year */}
       <div className="space-y-20">
+        {yearsToDisplay.length === 0 && (
+          <div className="rounded-2xl border border-border-color bg-background/40 p-8 text-center text-foreground/65">
+            No gallery items yet. Please check back soon.
+          </div>
+        )}
         {yearsToDisplay.map(year => {
           const yearItems = getVisibleItemsForYear(year);
           const totalItems = getFilteredItemsForYear(year).length;

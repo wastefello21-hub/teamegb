@@ -220,6 +220,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
     setIsMounted(true);
     const initializeData = async () => {
       try {
+        const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+
         // Check cache first with shorter validity for faster updates on photo upload
         const cacheKey = 'egb_data_cache';
         const cacheTimestamp = 'egb_data_timestamp';
@@ -244,6 +246,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             parsed.gallery = null;
           }
           if (parsed.suggestions) setSuggestions(parsed.suggestions);
+          if (parsed.vlogs) {
+            setVlogs(isAdminRoute ? parsed.vlogs : parsed.vlogs.filter((v: Vlog) => v.is_public !== false));
+          }
           if (parsed.events) setEvents(parsed.events);
           if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
           if (parsed.settings) setSettings({ ...defaultSettings, ...parsed.settings });
@@ -267,7 +272,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         }
 
         // Determine whether we are on an admin route — avoid heavy queries for public pages
-        const isAdmin = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+        const isAdmin = isAdminRoute;
 
         if (isAdmin) {
           // Full data fetch for admin users
@@ -285,7 +290,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             supabase.from('contributions').select('*').order('date', { ascending: false }),
             supabase.from('team_members').select('*'),
             supabase.from('gallery').select('*').order('created_at', { ascending: false }),
-            supabase.from('vlogs').select('*').order('created_at', { ascending: false }),
+            supabase.from('vlogs').select('*').eq('is_public', true).order('created_at', { ascending: false }),
             supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
             (async () => {
               const userId = localStorage.getItem('egb_user_id');

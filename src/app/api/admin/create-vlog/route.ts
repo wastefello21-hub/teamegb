@@ -2,9 +2,33 @@ import { NextResponse } from 'next/server';
 import { supabase, supabaseAdmin } from '@/lib/supabase';
 
 const getYouTubeId = (url: string) => {
-  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-  const match = url.match(regExp);
-  return (match && match[2].length === 11) ? match[2] : null;
+  try {
+    const parsedUrl = new URL(url.trim());
+    const host = parsedUrl.hostname.replace(/^www\./, '');
+
+    if (host === 'youtu.be') {
+      const shortId = parsedUrl.pathname.split('/').filter(Boolean)[0];
+      return shortId && shortId.length === 11 ? shortId : null;
+    }
+
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'music.youtube.com') {
+      const pathParts = parsedUrl.pathname.split('/').filter(Boolean);
+
+      if (parsedUrl.pathname === '/watch') {
+        const watchId = parsedUrl.searchParams.get('v');
+        return watchId && watchId.length === 11 ? watchId : null;
+      }
+
+      if (pathParts[0] === 'shorts' || pathParts[0] === 'embed' || pathParts[0] === 'live' || pathParts[0] === 'v') {
+        const pathId = pathParts[1];
+        return pathId && pathId.length === 11 ? pathId : null;
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
 };
 
 export async function POST(request: Request) {
