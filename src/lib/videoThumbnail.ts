@@ -8,7 +8,10 @@ export const extractVideoThumbnail = (
 ): Promise<string> => {
   return new Promise((resolve, reject) => {
     let objectUrl: string | null = null;
-    let timeoutId: NodeJS.Timeout;
+    const timeoutId = setTimeout(() => {
+      cleanup();
+      reject(new Error('Thumbnail extraction timeout'));
+    }, 10000);
 
     const cleanup = (video?: HTMLVideoElement) => {
       if (timeoutId) clearTimeout(timeoutId);
@@ -76,12 +79,6 @@ export const extractVideoThumbnail = (
       cleanup(video);
       reject(new Error(`Failed to load video: ${video?.error?.message || 'Unknown error'}`));
     };
-
-    // Set timeout
-    timeoutId = setTimeout(() => {
-      cleanup();
-      reject(new Error('Thumbnail extraction timeout'));
-    }, 10000);
 
     // Try direct URL first
     const loadVideo = (url: string) => {

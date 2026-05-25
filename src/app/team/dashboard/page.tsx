@@ -45,13 +45,6 @@ export default function TeamDashboard() {
   }, [user, loading, router]);
 
   useEffect(() => {
-    // Fetch ID card when component mounts
-    if (user?.teamMemberId && showIdCard) {
-      fetchIdCard();
-    }
-  }, [user?.teamMemberId, showIdCard]);
-
-  useEffect(() => {
     if (!showFullscreenIdCard) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -166,31 +159,53 @@ export default function TeamDashboard() {
     }
   };
 
-  const fetchIdCard = async () => {
-    if (!user?.teamMemberId) return;
-    
-    setIdCardLoading(true);
-    setIdCardError(null);
-    try {
-      const response = await fetch(`/api/get-id-card?memberId=${user.teamMemberId}`);
-      const data = await response.json();
-      
-      if (response.ok) {
-        if (data.idCardUrl) {
-          setIdCardUrl(data.idCardUrl);
-        } else {
-          setIdCardError('No ID card has been uploaded yet. Please contact your administrator.');
-        }
-      } else {
-        setIdCardError(data.error || 'Failed to fetch ID card');
-      }
-    } catch (error) {
-      console.error('Error fetching ID card:', error);
-      setIdCardError('Failed to load ID card');
-    } finally {
-      setIdCardLoading(false);
+  useEffect(() => {
+    // Fetch ID card when component mounts
+    if (!user?.teamMemberId || !showIdCard) {
+      return;
     }
-  };
+
+    let cancelled = false;
+
+    const fetchIdCard = async () => {
+      setIdCardLoading(true);
+      setIdCardError(null);
+
+      try {
+        const response = await fetch(`/api/get-id-card?memberId=${user.teamMemberId}`);
+        const data = await response.json();
+
+        if (cancelled) {
+          return;
+        }
+
+        if (response.ok) {
+          if (data.idCardUrl) {
+            setIdCardUrl(data.idCardUrl);
+          } else {
+            setIdCardError('No ID card has been uploaded yet. Please contact your administrator.');
+          }
+        } else {
+          setIdCardError(data.error || 'Failed to fetch ID card');
+        }
+      } catch (error) {
+        if (!cancelled) {
+          console.error('Error fetching ID card:', error);
+          setIdCardError('Failed to load ID card');
+        }
+      } finally {
+        if (!cancelled) {
+          setIdCardLoading(false);
+        }
+      }
+    };
+
+    fetchIdCard();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [showIdCard, user?.teamMemberId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -50,8 +50,10 @@ export async function POST(req: Request) {
       await pipeline(res.body as any, dest);
 
       // Lazy-load ffmpeg libs to avoid bundling issues when not used
-      const ffmpegPath = require('ffmpeg-static');
-      const ffmpeg = require('fluent-ffmpeg');
+      const ffmpegPathModule = await import('ffmpeg-static');
+      const ffmpegModule = await import('fluent-ffmpeg');
+      const ffmpegPath = ffmpegPathModule.default || ffmpegPathModule;
+      const ffmpeg = (ffmpegModule as any).default || ffmpegModule;
       ffmpeg.setFfmpegPath(ffmpegPath);
 
       const framePath = `${tmpImagePath}-frame.jpg`;
@@ -74,7 +76,8 @@ export async function POST(req: Request) {
     if (!imageBuffer) throw new Error('Failed to generate image buffer');
 
     // Process with sharp to crop/resize to 4:5 (width x height)
-    const sharp = require('sharp');
+    const sharpModule = await import('sharp');
+    const sharp = sharpModule.default;
     const targetWidth = 1200; // high-res thumbnail width
     const targetHeight = Math.round((targetWidth / 4) * 5); // 4:5 -> height
 

@@ -469,7 +469,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         console.warn('Failed to save contributions to localStorage', e);
       }
     }
-  }, [contributions, isMounted]);
+  }, [contributions, teamMembers, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
@@ -490,7 +490,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         console.warn('Failed to save teamMembers to localStorage', e);
       }
     }
-  }, [teamMembers, isMounted]);
+  }, [teamMembers, contributions, isMounted]);
 
   useEffect(() => {
     if (isMounted) {
