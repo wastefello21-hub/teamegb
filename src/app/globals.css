@@ -448,3 +448,64 @@ img {
   border-color: rgba(251, 191, 36, 0.16);
   box-shadow: 0 32px 90px rgba(2, 6, 23, 0.42);
 }
+
+/* Gradient heading / brand text styling (warm festival gradient) */
+:root {
+  --gradient-text-start: #ff6b2e; /* warm orange */
+  --gradient-text-mid: #ff4b3a;   /* vivid coral */
+  --gradient-text-end: #ff2b2b;   /* deep red */
+}
+
+/* Re-usable gradient text utility */
+.gradient-text {
+  background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-mid), var(--gradient-text-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  display: inline-block;
+  transform: translateZ(0);
+}
+
+/* Stronger styling for large headings and brand */
+.gradient-heading,
+h1.gradient-heading,
+h1, h2, h3 {
+  background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-mid), var(--gradient-text-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  -webkit-text-stroke: 0.2px rgba(0,0,0,0.18);
+  text-shadow: 0 6px 18px rgba(2,6,23,0.55), 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Slightly subtler for smaller headings */
+h4, h5, h6 {
+  background: linear-gradient(90deg, var(--gradient-text-start), var(--gradient-text-end));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  font-weight: 700;
+}
+
+/* Brand/logo helpers — common classes used in navbar and site header */
+.brand, .site-brand, .nav-brand, .logo, .site-logo {
+  display: inline-block;
+}
+
+/* Dark theme tweak: keep vibrancy but increase contrast */
+.dark .gradient-heading, .dark .gradient-text, .dark h1, .dark h2, .dark h3 {
+  text-shadow: 0 6px 22px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.02);
+}
+
+/* Accessibility fallback for print or older browsers */
+@supports not (-webkit-background-clip: text) {
+  .gradient-text, .gradient-heading, h1, h2, h3 {
+    color: var(--gradient-text-start);
+    -webkit-text-fill-color: initial;
+  }
+}
