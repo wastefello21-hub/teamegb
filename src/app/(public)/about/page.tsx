@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
-import { Heart, Sparkles, Users, Flame, Landmark, Star, Zap, Award } from 'lucide-react';
+import { Heart, Sparkles, Users, Flame, Landmark, Award } from 'lucide-react';
 
 // Custom hook for typing effect
 function useTypingEffect(text: string, speed: number = 80, startDelay: number = 500) {
@@ -54,20 +54,6 @@ export default function AboutPage() {
   // Typing effect for main heading
   const headingText = useTypingEffect("Team EGB", 120, 300);
   const subheadingText = useTypingEffect("Celebrating Devotion, Unity, and Culture", 50, 1200);
-
-  const values = [
-    { icon: Heart, title: "Devotion", description: "Pure faith and commitment to Lord Ganesha", color: "from-red-500 to-pink-500" },
-    { icon: Users, title: "Unity", description: "Coming together as one family", color: "from-blue-500 to-cyan-500" },
-    { icon: Sparkles, title: "Culture", description: "Preserving our rich heritage", color: "from-yellow-500 to-orange-500" },
-    { icon: Zap, title: "Energy", description: "Vibrant spirit and enthusiasm", color: "from-purple-500 to-pink-500" },
-  ];
-
-  const stats = [
-    { number: "15+", label: "Years of Excellence" },
-    { number: "1000+", label: "Team Members" },
-    { number: "10K+", label: "Lives Touched" },
-    { number: "∞", label: "Devotion & Faith" },
-  ];
 
   return (
     <div className="flex flex-col items-center w-full min-h-screen pt-28 pb-20 px-4 relative overflow-hidden">
@@ -139,99 +125,6 @@ export default function AboutPage() {
           animate={{ scaleX: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
         />
-      </motion.div>
-
-      {/* Highlights Section */}
-      <motion.div 
-        className="w-full section-shell max-w-6xl mb-16"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-black/20 via-white/5 to-orange-500/10 backdrop-blur-xl shadow-2xl shadow-black/10">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(251,191,36,0.20),transparent_32%),radial-gradient(circle_at_bottom_right,rgba(239,68,68,0.14),transparent_28%)]" />
-          <div className="relative grid gap-0 md:grid-cols-[1.15fr_1fr] items-stretch">
-            <div className="p-8 md:p-12 lg:p-14 border-b md:border-b-0 md:border-r border-white/10">
-              <motion.span
-                variants={itemVariants}
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-[0.28em] bg-white/10 text-foreground/80 border border-white/10"
-              >
-                <Award size={14} /> Our Impact
-              </motion.span>
-              <motion.h2
-                variants={itemVariants}
-                className="mt-5 text-3xl md:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-orange-600 via-red-500 to-yellow-500"
-              >
-                A tradition built on devotion and community
-              </motion.h2>
-              <motion.p
-                variants={itemVariants}
-                className="mt-4 text-base md:text-lg leading-8 text-foreground/75 max-w-2xl"
-              >
-                Team EGB has grown through years of shared effort, cultural pride, and service to the community. These numbers reflect the energy behind our celebrations and the people who make them possible.
-              </motion.p>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10">
-              {stats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  variants={itemVariants}
-                  className="group relative bg-black/10 p-6 md:p-8 text-center hover:bg-white/5 transition-colors duration-300"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 via-orange-500/0 to-yellow-500/0 group-hover:from-orange-500/10 group-hover:to-yellow-500/10 transition-all duration-300" />
-                  <div className="relative z-10 flex h-full flex-col items-center justify-center gap-2 min-h-[130px]">
-                    <motion.p 
-                      className="text-3xl md:text-4xl lg:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 via-orange-600 to-yellow-500"
-                      animate={{ y: [0, -1, 0] }}
-                      transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                    >
-                      {stat.number}
-                    </motion.p>
-                    <p className="text-sm md:text-base font-semibold text-foreground/75 leading-snug">{stat.label}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Values Section */}
-      <motion.div 
-        className="w-full section-shell max-w-5xl mb-16"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        transition={{ duration: 0.8 }}
-      >
-        <h2 className="text-4xl md:text-5xl font-black text-center mb-12 bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-yellow-500">
-          Our Core Values
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {values.map((value, index) => {
-            const Icon = value.icon;
-            return (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="group"
-              >
-                <GlassCard className="p-6 h-full hover:border-orange-500/50 transition-all duration-300 relative overflow-hidden">
-                  <div className={`absolute inset-0 bg-gradient-to-r ${value.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`} />
-                  <div className="relative z-10">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${value.color} flex items-center justify-center mb-4 shadow-lg`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-foreground">{value.title}</h3>
-                    <p className="text-foreground/70 font-medium">{value.description}</p>
-                  </div>
-                </GlassCard>
-              </motion.div>
-            );
-          })}
-        </div>
       </motion.div>
 
       {/* Content Cards */}
