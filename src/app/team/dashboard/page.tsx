@@ -11,6 +11,7 @@ import { useAuth } from '@/context/AuthContext';
 
 export default function TeamDashboard() {
   const router = useRouter();
+  const whatsappPosterUrl = '/ganesha_hero_bg.png';
   const [formData, setFormData] = useState({
     houseNumber: '',
     contributorName: '',
@@ -83,6 +84,11 @@ export default function TeamDashboard() {
     return `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
   };
 
+  const buildWhatsAppWebUrl = (phone: string, message: string) => {
+    const encodedMessage = encodeURIComponent(message);
+    return `https://wa.me/${phone}?text=${encodedMessage}`;
+  };
+
   const buildContributionMessage = (contribution: Contribution) => {
     const amountText = `₹${Number(contribution.amount).toLocaleString('en-IN')}`;
     const formatWhatsappDate = () => {
@@ -149,6 +155,42 @@ export default function TeamDashboard() {
   const whatsappUrl = whatsappNumber && shareMessage
     ? buildWhatsAppUrl(whatsappNumber, shareMessage)
     : '';
+
+  const sharePosterToWhatsApp = async () => {
+    if (!shareMessage || !whatsappNumber) return;
+
+    const fallbackUrl = buildWhatsAppWebUrl(whatsappNumber, shareMessage);
+
+    try {
+      const posterResponse = await fetch(whatsappPosterUrl);
+      if (!posterResponse.ok) {
+        throw new Error(`Failed to load poster asset: ${posterResponse.status}`);
+      }
+
+      const posterBlob = await posterResponse.blob();
+      const posterFile = new File([posterBlob], 'team-egb-ganesha-poster.png', {
+        type: posterBlob.type || 'image/png',
+      });
+
+      const shareData: ShareData & { files?: File[] } = {
+        title: 'Team EGB Ganesh Chaturthi',
+        text: shareMessage,
+        url: window.location.origin,
+        files: [posterFile],
+      };
+
+      const canShareFiles = typeof navigator.canShare === 'function' && navigator.canShare(shareData);
+
+      if (navigator.share && canShareFiles) {
+        await navigator.share(shareData);
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to share WhatsApp poster:', error);
+    }
+
+    window.open(fallbackUrl, '_blank', 'noopener,noreferrer');
+  };
 
   const handleCopyMessage = async () => {
     if (!shareMessage) return;
@@ -321,18 +363,21 @@ export default function TeamDashboard() {
             />
 
             <div className="mt-4 flex flex-col sm:flex-row gap-3">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
+              <button
+                type="button"
+                onClick={sharePosterToWhatsApp}
+                disabled={!whatsappUrl}
                 className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-colors ${whatsappUrl ? 'bg-green-600 hover:bg-green-700' : 'pointer-events-none bg-green-400/50'}`}
               >
-                <MessageCircle size={16} /> Send on WhatsApp
-              </a>
+                <MessageCircle size={16} /> Send Poster on WhatsApp
+              </button>
               {!whatsappNumber && (
                 <p className="text-xs text-foreground/50 self-center">Enter a valid contributor phone number to open WhatsApp.</p>
               )}
             </div>
+            <p className="mt-3 text-xs text-foreground/55">
+              On supported phones, this shares the poster image with the WhatsApp message. On other devices, it opens WhatsApp with the text message.
+            </p>
           </div>
         )}
         {generatedReceipt && (
