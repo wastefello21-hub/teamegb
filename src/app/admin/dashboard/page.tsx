@@ -15,6 +15,7 @@ import {
   Line
 } from 'recharts';
 import { useData } from '@/context/DataContext';
+import { formatINR } from '@/lib/money';
 
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
@@ -24,18 +25,18 @@ export default function AdminDashboard() {
     setMounted(true);
   }, []);
 
-  const formatCurrency = (val: number) => `₹ ${val.toLocaleString('en-IN')}`;
-
   const stats = [
-    { label: 'Total Collections', value: formatCurrency(totalCollection), icon: <IndianRupee className="w-5 h-5 text-green-500" /> },
-    { label: 'Total Expenditures', value: formatCurrency(totalExpenditure), icon: <TrendingUp className="w-5 h-5 text-red-500" /> },
-    { label: 'Net Balance', value: formatCurrency(balance), icon: <Wallet className="w-5 h-5 text-orange-500" /> },
+    { label: 'Total Collections', value: formatINR(totalCollection), icon: <IndianRupee className="w-5 h-5 text-green-500" /> },
+    { label: 'Total Expenditures', value: formatINR(totalExpenditure), icon: <TrendingUp className="w-5 h-5 text-red-500" /> },
+    { label: 'Net Balance', value: formatINR(balance), icon: <Wallet className="w-5 h-5 text-orange-500" /> },
     { label: 'Total Contributors', value: String(contributions.length), icon: <Users className="w-5 h-5 text-blue-500" /> },
   ];
 
+  const activeContributions = contributions.filter(c => c.id);
+
   // Group contributions by date for the daily chart
   const dailyMap = new Map<string, number>();
-  contributions.forEach(c => {
+  activeContributions.forEach(c => {
     const existing = dailyMap.get(c.date) || 0;
     dailyMap.set(c.date, existing + Number(c.amount));
   });
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
 
   // Dynamically calculate team performance from real Contribution data
   const colMap = new Map<string, number>();
-  contributions.forEach(c => {
+  activeContributions.forEach(c => {
     if (c.collector) {
       const existing = colMap.get(c.collector) || 0;
       colMap.set(c.collector, existing + Number(c.amount));
@@ -55,7 +56,7 @@ export default function AdminDashboard() {
 
   const teamPerformance = teamMembers.map(m => ({
     name: `${m.name.split(' ')[0]}`,
-    collections: Number(colMap.get(m.id) || m.collections || 0)
+    collections: Number(colMap.get(m.id) || 0)
   }));
 
   return (

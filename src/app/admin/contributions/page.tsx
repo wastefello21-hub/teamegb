@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Search, Download, Filter, Trash2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/context/DataContext';
+import { formatINR } from '@/lib/money';
 
 export default function ManageContributionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -117,7 +118,7 @@ export default function ManageContributionsPage() {
                         <span className="text-sm text-foreground/40">Not generated</span>
                       )}
                     </td>
-                    <td className="p-4 font-bold text-green-600 dark:text-green-400">₹{tx.amount}</td>
+                    <td className="p-4 font-bold text-green-600 dark:text-green-400">{formatINR(tx.amount)}</td>
                     <td className="p-4">
                       <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
                         {tx.mode}

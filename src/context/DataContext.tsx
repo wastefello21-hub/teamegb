@@ -234,9 +234,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
         const isGeneralCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
         const isGalleryCacheFresh = galleryFreshTime && Date.now() < parseInt(galleryFreshTime);
 
-        // Use cached data for public pages only. For admin routes we want fresh server data
-        // so skip early return and perform live fetches to show recent submissions immediately.
-        if (cachedData && isGeneralCacheValid && !isAdminRoute) {
+        // Hydrate from cache first on any route so the UI renders immediately.
+        // Admin routes still refresh from Supabase in the background for freshness.
+        if (cachedData && isGeneralCacheValid) {
           const parsed = JSON.parse(cachedData);
           if (parsed.contributions) setContributions(parsed.contributions);
           if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
@@ -270,37 +270,27 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
               }
             }
           }
-          return;
+          if (!isAdminRoute) {
+            return;
+          }
         }
 
         // Determine whether we are on an admin route — avoid heavy queries for public pages
         const isAdmin = isAdminRoute;
 
         if (isAdmin) {
-          // Full data fetch for admin users
+          // Fetch the most relevant admin data first; keep the payload smaller and faster.
           const [
             contributionsResult,
             teamMembersResult,
-            galleryResult,
-            vlogsResult,
-            suggestionsResult,
-            userVotesResult,
             eventsResult,
             eventApplicationsResult,
             settingsResult
           ] = await Promise.allSettled([
-            supabase.from('contributions').select('*').order('date', { ascending: false }),
-            supabase.from('team_members').select('*'),
-            supabase.from('gallery').select('*').order('created_at', { ascending: false }),
-            supabase.from('vlogs').select('*').eq('is_public', true).order('created_at', { ascending: false }),
-            supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
-            (async () => {
-              const userId = localStorage.getItem('egb_user_id');
-              if (!userId) return { data: null, error: null };
-              return await supabase.from('suggestion_votes').select('*').eq('user_id', userId);
-            })(),
-            supabase.from('events').select('*').order('created_at', { ascending: false }),
-            supabase.from('event_applications').select('*').order('created_at', { ascending: false }),
+            supabase.from('contributions').select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at').order('date', { ascending: false }),
+            supabase.from('team_members').select('id,name,role,collections,status,password,is_enabled,is_online,id_card_url'),
+            supabase.from('events').select('id,name,description,poster_url,date,time,venue,application_last_date,is_registration_open,created_at').order('created_at', { ascending: false }),
+            supabase.from('event_applications').select('id,event_id,name,phone,age,activity,created_at').order('created_at', { ascending: false }),
             supabase.from('app_settings').select('*').eq('id', 'default').single()
           ]);
 
@@ -315,28 +305,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             const newData = teamMembersResult.value.data || [];
             setTeamMembers(newData);
             hasNewData = true;
-          }
-          if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
-            const newData = galleryResult.value.data || [];
-            setGallery(newData);
-            hasNewData = true;
-          }
-          if (vlogsResult.status === 'fulfilled' && !vlogsResult.value.error) {
-            const newData = vlogsResult.value.data || [];
-            setVlogs(newData);
-            hasNewData = true;
-          }
-          if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
-            const newData = suggestionsResult.value.data || [];
-            setSuggestions(newData);
-            hasNewData = true;
-          }
-          if (userVotesResult.status === 'fulfilled' && !userVotesResult.value.error && userVotesResult.value.data) {
-            const votesMap: Record<string, 'like' | 'dislike'> = {};
-            userVotesResult.value.data.forEach((vote: any) => {
-              votesMap[vote.suggestion_id] = vote.vote_type;
-            });
-            setUserVotes(votesMap);
           }
           if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
             const newData = eventsResult.value.data || [];
@@ -365,9 +333,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             const dataToCache = {
               contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
               teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
-              gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
-              vlogs: vlogsResult.status === 'fulfilled' ? vlogsResult.value.data : [],
-              suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
               events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
               eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
               settings: settingsResult.status === 'fulfilled' ? {
@@ -381,8 +346,6 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
             try {
               localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
               localStorage.setItem(cacheTimestamp, Date.now().toString());
-              // Set gallery cache freshness to 2 minutes
-              localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
             } catch (e) {
               // Handle quota exceeded gracefully
               console.warn('Failed to cache data:', e);
@@ -529,6 +492,19 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       })
       .subscribe();
 
+    const contributionsSubscription = supabase
+      .channel('contributions-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'contributions' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setContributions(prev => prev.map(contribution => contribution.id === payload.new.id ? payload.new as Contribution : contribution));
+        } else if (payload.eventType === 'INSERT') {
+          setContributions(prev => [payload.new as Contribution, ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setContributions(prev => prev.filter(contribution => contribution.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     const eventApplicationsSubscription = supabase
       .channel('event_applications-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_applications' }, (payload) => {
@@ -593,6 +569,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       teamMembersSubscription.unsubscribe();
       gallerySubscription.unsubscribe();
       vlogsSubscription.unsubscribe();
+      contributionsSubscription.unsubscribe();
       eventApplicationsSubscription.unsubscribe();
     };
   }, []);

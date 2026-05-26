@@ -34,6 +34,7 @@ export default function TeamDashboard() {
   } | null>(null);
   const [savedContribution, setSavedContribution] = useState<Contribution | null>(null);
   const [copyStatus, setCopyStatus] = useState<'idle' | 'copied' | 'failed'>('idle');
+  const [whatsappSendStatus, setWhatsappSendStatus] = useState<'idle' | 'sending' | 'sent' | 'failed'>('idle');
   const { addContribution, settings } = useData();
   const canDownloadReceipt = settings.allowReceiptDownload !== false;
   const { user, logout, loading } = useAuth(); // Import the logged-in user
@@ -76,11 +77,6 @@ export default function TeamDashboard() {
     if (digits.length === 10) return `91${digits}`;
     if (digits.length === 12 && digits.startsWith('91')) return digits;
     return digits;
-  };
-
-  const buildWhatsAppUrl = (phone: string, message: string) => {
-    const encodedMessage = encodeURIComponent(message);
-    return `whatsapp://send?phone=${phone}&text=${encodedMessage}`;
   };
 
   const buildContributionMessage = (contribution: Contribution) => {
@@ -146,9 +142,45 @@ export default function TeamDashboard() {
 
   const shareMessage = savedContribution ? buildContributionMessage(savedContribution) : '';
   const whatsappNumber = savedContribution ? normalizeWhatsAppNumber(savedContribution.phone) : '';
-  const whatsappUrl = whatsappNumber && shareMessage
-    ? buildWhatsAppUrl(whatsappNumber, shareMessage)
-    : '';
+
+  const sendPosterOnWhatsApp = async (contribution: Contribution) => {
+    const phone = normalizeWhatsAppNumber(contribution.phone);
+    const message = buildContributionMessage(contribution);
+
+    if (!phone || !message) {
+      throw new Error('A valid phone number and message are required to send WhatsApp media.');
+    }
+
+    setWhatsappSendStatus('sending');
+
+    try {
+      const response = await fetch('/api/send-whatsapp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          phone,
+          message,
+          imagePath: '/ganesha_hero_bg.png',
+          receiptNumber: contribution.receipt_number,
+          contributorName: contribution.name,
+        }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to send WhatsApp image.');
+      }
+
+      setWhatsappSendStatus('sent');
+      return data;
+    } catch (error) {
+      setWhatsappSendStatus('failed');
+      throw error;
+    }
+  };
 
   const handleCopyMessage = async () => {
     if (!shareMessage) return;
@@ -244,14 +276,10 @@ export default function TeamDashboard() {
         return;
       }
 
-      const autoWhatsAppUrl = (() => {
-        const phone = normalizeWhatsAppNumber(createdContribution.phone);
-        const message = buildContributionMessage(createdContribution);
-        return phone && message ? buildWhatsAppUrl(phone, message) : '';
-      })();
-
-      if (autoWhatsAppUrl) {
-        window.location.href = autoWhatsAppUrl;
+      try {
+        await sendPosterOnWhatsApp(createdContribution);
+      } catch (whatsappError) {
+        console.error('Automatic WhatsApp image send failed:', whatsappError);
       }
 
       setGeneratedReceipt({
@@ -268,6 +296,7 @@ export default function TeamDashboard() {
         setGeneratedReceipt(null);
         setSavedContribution(null);
         setCopyStatus('idle');
+        setWhatsappSendStatus('idle');
         setFormData({
           houseNumber: '',
           contributorName: '',
@@ -321,18 +350,21 @@ export default function TeamDashboard() {
             />
 
             <div className="mt-4 flex flex-col sm:flex-row gap-3">
-              <a
-                href={whatsappUrl}
-                target="_blank"
-                rel="noreferrer"
-                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-colors ${whatsappUrl ? 'bg-green-600 hover:bg-green-700' : 'pointer-events-none bg-green-400/50'}`}
+              <button
+                type="button"
+                onClick={() => savedContribution && sendPosterOnWhatsApp(savedContribution).catch((error) => console.error('Manual WhatsApp image send failed:', error))}
+                disabled={!whatsappNumber || whatsappSendStatus === 'sending'}
+                className={`inline-flex items-center justify-center gap-2 rounded-2xl px-4 py-3 text-sm font-semibold text-white transition-colors ${whatsappNumber && whatsappSendStatus !== 'sending' ? 'bg-green-600 hover:bg-green-700' : 'pointer-events-none bg-green-400/50'}`}
               >
-                <MessageCircle size={16} /> Send on WhatsApp
-              </a>
+                <MessageCircle size={16} /> {whatsappSendStatus === 'sending' ? 'Sending Poster...' : whatsappSendStatus === 'sent' ? 'Poster Sent' : 'Send Poster on WhatsApp'}
+              </button>
               {!whatsappNumber && (
                 <p className="text-xs text-foreground/50 self-center">Enter a valid contributor phone number to open WhatsApp.</p>
               )}
             </div>
+            <p className="mt-3 text-xs text-foreground/55">
+              This sends the poster image and contribution message through WhatsApp when the provider is configured.
+            </p>
           </div>
         )}
         {generatedReceipt && (
