@@ -76,7 +76,7 @@ export const extractVideoThumbnail = (
 
     const onError = (event: Event) => {
       const video = event.currentTarget as HTMLVideoElement | null;
-      cleanup(video);
+      cleanup(video ?? undefined);
       reject(new Error(`Failed to load video: ${video?.error?.message || 'Unknown error'}`));
     };
 
