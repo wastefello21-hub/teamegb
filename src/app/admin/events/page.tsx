@@ -234,7 +234,10 @@ export default function AdminEventsPage() {
         <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-3">
             <span className="section-kicker">Festival management</span>
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-950 dark:text-white">
+            <h1
+              className="text-3xl sm:text-4xl font-semibold tracking-tight text-slate-950 dark:text-slate-50"
+              style={{ background: 'none', WebkitBackgroundClip: 'initial', WebkitTextFillColor: 'initial' }}
+            >
               Events
             </h1>
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300">

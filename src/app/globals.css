@@ -502,6 +502,24 @@ h4, h5, h6 {
   text-shadow: 0 6px 22px rgba(0,0,0,0.7), 0 1px 0 rgba(255,255,255,0.02);
 }
 
+/* Light theme fallback: keep headings readable even when gradient clipping is applied globally */
+.light .gradient-heading,
+.light .gradient-text,
+.light h1,
+.light h2,
+.light h3,
+.light h4,
+.light h5,
+.light h6 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: var(--foreground) !important;
+  text-shadow: none !important;
+  -webkit-text-stroke: 0 !important;
+}
+
 /* Accessibility fallback for print or older browsers */
 @supports not (-webkit-background-clip: text) {
   .gradient-text, .gradient-heading, h1, h2, h3 {

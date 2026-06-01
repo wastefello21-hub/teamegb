@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/Button";
 import { motion, AnimatePresence } from "framer-motion";
 
 export function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
+  const { theme, resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = React.useState(false);
+  const activeTheme = resolvedTheme ?? theme;
 
   // Avoid hydration mismatch
   React.useEffect(() => {
@@ -38,7 +39,7 @@ export function ThemeToggle() {
         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-400/20 to-yellow-400/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
         <AnimatePresence mode="wait">
-          {theme === "dark" ? (
+          {activeTheme === "dark" ? (
             <motion.div
               key="sun"
               initial={{ opacity: 0, rotate: -90, scale: 0.5 }}

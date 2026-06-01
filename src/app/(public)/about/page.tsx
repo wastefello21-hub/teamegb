@@ -81,61 +81,61 @@ export default function AboutPage() {
 
       {/* Enhanced Hero Section */}
       <motion.div 
-        className="section-shell mb-16 w-full text-center"
+        className="section-shell mb-16 w-full max-w-6xl text-center"
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8 }}
       >
-        <motion.span 
-          className="section-kicker mb-6"
-          whileHover={{ scale: 1.08, translateY: -2 }}
-        >
-          Established with Devotion
-        </motion.span>
-        
-        <h1 className="text-5xl md:text-8xl font-black mb-8 relative">
-          <span className="absolute -inset-3 rounded-xl bg-gradient-to-r from-amber-500 to-sky-500 opacity-20 blur-3xl"></span>
-          <span className="relative bg-clip-text text-transparent bg-gradient-to-r from-slate-950 via-amber-700 to-rose-600 dark:from-white dark:via-amber-300 dark:to-rose-300 drop-shadow-lg">
+        <div className="surface-panel relative overflow-hidden border border-white/20 bg-white/80 px-6 py-10 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-2xl dark:border-white/10 dark:bg-slate-950/70 md:px-10 md:py-14">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.15),transparent_42%),radial-gradient(circle_at_bottom_right,rgba(59,130,246,0.08),transparent_24%)]" />
+          <motion.span 
+            className="section-kicker mb-6 relative z-10"
+            whileHover={{ scale: 1.08, translateY: -2 }}
+          >
+            Established with Devotion
+          </motion.span>
+          
+          <h1 className="relative z-10 text-5xl md:text-8xl font-black mb-6 tracking-tight text-slate-950 dark:text-white">
             {headingText}
             <motion.span
               animate={{ opacity: [1, 0] }}
               transition={{ duration: 0.7, repeat: Infinity, repeatType: "reverse" }}
               className="ml-2 inline-block h-16 w-1 align-middle bg-gradient-to-b from-amber-500 to-rose-500 md:h-20"
             />
-          </span>
-        </h1>
-        
-        <p className="text-xl md:text-2xl text-foreground/80 max-w-3xl mx-auto font-medium min-h-[2.5rem] mb-8">
-          {subheadingText}
-          {subheadingText === "Celebrating Devotion, Unity, and Culture" && (
-            <motion.span 
-              className="inline-block ml-3"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1.5, repeat: Infinity }}
-            >
-              <Heart className="h-8 w-8 fill-rose-500 text-rose-500" />
-            </motion.span>
-          )}
-        </p>
+          </h1>
+          
+          <p className="relative z-10 mx-auto mb-8 min-h-[2.5rem] max-w-3xl text-xl font-medium text-slate-700 dark:text-slate-200 md:text-2xl">
+            {subheadingText}
+            {subheadingText === "Celebrating Devotion, Unity, and Culture" && (
+              <motion.span 
+                className="inline-block ml-3"
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <Heart className="h-8 w-8 fill-rose-500 text-rose-500" />
+              </motion.span>
+            )}
+          </p>
 
-        {/* Decorative line */}
-        <motion.div 
-          className="mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent via-amber-500 to-transparent"
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        />
+          <motion.div 
+            className="relative z-10 mx-auto h-1 w-20 rounded-full bg-gradient-to-r from-transparent via-amber-500 to-transparent"
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+          />
+        </div>
       </motion.div>
 
       {/* Content Cards */}
       <motion.div 
-        className="w-full section-shell max-w-4xl space-y-8"
+        className="w-full section-shell max-w-6xl space-y-8"
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
       >
-        {/* English Content Card */}
-        <motion.div variants={itemVariants}>
+        <div className="grid gap-8 lg:grid-cols-2">
+          {/* English Content Card */}
+          <motion.div variants={itemVariants}>
           <GlassCard className="surface-panel p-8 md:p-12 relative overflow-hidden border-t-4 border-t-amber-500 shadow-2xl transition-all duration-300 group glass-hover">
             <div className="absolute -right-8 -top-8 text-amber-500/10 group-hover:text-amber-500/20 transition-colors">
               <Users size={140} />
@@ -191,7 +191,7 @@ export default function AboutPage() {
         </motion.div>
 
         {/* Developer Credit Card - Enhanced */}
-        <motion.div variants={itemVariants}>
+        <motion.div variants={itemVariants} className="lg:col-span-2">
           <GlassCard className="surface-panel p-8 md:p-12 text-center relative overflow-hidden bg-gradient-to-br from-amber-500/10 via-sky-500/10 to-rose-500/10 glass-hover border border-amber-500/20 transition-all duration-300">
             <div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300">
               <div className="absolute top-0 left-1/2 h-1 w-64 -translate-x-1/2 bg-gradient-to-r from-transparent via-amber-500 to-transparent blur-lg" />
@@ -216,6 +216,7 @@ export default function AboutPage() {
             <p className="mt-6 font-medium text-foreground/70">Building digital experiences with precision and devotion.</p>
           </GlassCard>
         </motion.div>
+        </div>
       </motion.div>
     </div>
   );

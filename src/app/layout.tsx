@@ -20,6 +20,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "TEAM EGB Ganesha Chaturthi Celebrations",
   description: "Devotion • Faith • Unity - TEAM EGB",
+  icons: {
+    icon: [
+      { url: "/logo_v2.jpg", type: "image/jpeg" },
+    ],
+    apple: "/logo_v2.jpg",
+  },
   other: {
     "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-capable": "yes",
@@ -41,6 +47,8 @@ export default function RootLayout({ children }: any) {
         <link rel="preconnect" href="https://img.youtube.com" />
         <link rel="preconnect" href="https://vitals.vercel-analytics.com" />
         <link rel="dns-prefetch" href="https://supabase.co" />
+        <link rel="icon" href="/logo_v2.jpg" type="image/jpeg" />
+        <link rel="apple-touch-icon" href="/logo_v2.jpg" />
         
         {/* Performance optimizations */}
         <meta name="format-detection" content="telephone=no" />
