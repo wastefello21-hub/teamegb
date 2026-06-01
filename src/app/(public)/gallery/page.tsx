@@ -106,13 +106,11 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
   const displayVideoSrc = (item as any).thumbnail_url ?? (youtubeThumb ?? videoThumbnail ?? item.url);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 18, scale: 0.94 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }} // Faster animation
-      className={`relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10`}
+    <div
+      className={`relative group cursor-pointer aspect-[4/5] rounded-3xl overflow-hidden shadow-xl border border-white/5 bg-black/10 transition-transform duration-300 ease-out hover:-translate-y-0.5`}
       onClick={onSelect}
       ref={tileRef}
+      style={{ contentVisibility: 'auto', containIntrinsicSize: '320px 400px' }}
     >
       {!isInView ? (
         <div className="absolute inset-0 bg-gradient-to-br from-muted/10 via-muted/20 to-muted/10 animate-pulse" />
@@ -128,6 +126,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             quality={priority ? 80 : 60}
             priority={priority}
             loading={priority ? "eager" : "lazy"}
+            decoding="async"
           />
 
           {/*
@@ -172,8 +171,9 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
             quality={priority ? 85 : 60} // lower quality for non-priority images
             priority={priority}
             loading={priority ? "eager" : "lazy"}
-            placeholder="blur"
+            placeholder={priority ? 'blur' : 'empty'}
             blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAAIAAoDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSXWGaRmknyJckliyjqTzSlT54b6bk+h0R+IRjWjBqO6O2mhP//Z"
+            decoding="async"
           />
           <div className="absolute top-3 right-3 p-1.5 rounded-xl bg-black/40 backdrop-blur-md text-white border border-white/10">
             <ImageIcon size={16} />
@@ -184,7 +184,7 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4">
         <h3 className="text-white text-sm font-bold line-clamp-2">{item.caption}</h3>
       </div>
-    </motion.div>
+    </div>
   );
 });
 

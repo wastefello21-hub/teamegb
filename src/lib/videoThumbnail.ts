@@ -27,8 +27,8 @@ export const extractVideoThumbnail = (
       }
     };
 
-    const onLoadedMetadata = () => {
-      const video = event?.target as HTMLVideoElement;
+    const onLoadedMetadata = (event: Event) => {
+      const video = event.currentTarget as HTMLVideoElement | null;
       if (!video) return;
       
       try {
@@ -38,8 +38,8 @@ export const extractVideoThumbnail = (
       }
     };
 
-    const onSeeked = () => {
-      const video = event?.target as HTMLVideoElement;
+    const onSeeked = (event: Event) => {
+      const video = event.currentTarget as HTMLVideoElement | null;
       if (!video) return;
 
       try {
@@ -74,8 +74,8 @@ export const extractVideoThumbnail = (
       }
     };
 
-    const onError = () => {
-      const video = event?.target as HTMLVideoElement;
+    const onError = (event: Event) => {
+      const video = event.currentTarget as HTMLVideoElement | null;
       cleanup(video);
       reject(new Error(`Failed to load video: ${video?.error?.message || 'Unknown error'}`));
     };
