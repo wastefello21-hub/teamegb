@@ -49,6 +49,7 @@ export default function RootLayout({ children }: any) {
         <link rel="dns-prefetch" href="https://supabase.co" />
         <link rel="icon" href="/logo_v2.jpg" type="image/jpeg" />
         <link rel="apple-touch-icon" href="/logo_v2.jpg" />
+        <meta name="color-scheme" content="light dark" />
         
         {/* Performance optimizations */}
         <meta name="format-detection" content="telephone=no" />

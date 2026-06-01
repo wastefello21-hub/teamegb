@@ -191,11 +191,24 @@ const GalleryMediaTile = React.memo(function GalleryMediaTile({
 export default function GalleryPage() {
   const [selectedYear, setSelectedYear] = useState('All');
   const [selectedMedia, setSelectedMedia] = useState<Photo | null>(null);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchEndX, setTouchEndX] = useState<number | null>(null);
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const swipeStateRef = useRef<{
+    pointerId: number | null;
+    startX: number;
+    startY: number;
+    lastX: number;
+    lastY: number;
+    active: boolean;
+  }>({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    lastX: 0,
+    lastY: 0,
+    active: false,
+  });
   const { gallery, vlogs } = useData();
   const publicVlogs = useMemo(
     () => (vlogs || []).filter(v => v.is_public !== false && !!getYouTubeId(v.youtube_url || '')),
@@ -300,30 +313,63 @@ export default function GalleryPage() {
     goToMediaIndex(selectedMediaIndex - 1);
   }, [goToMediaIndex, selectedMediaIndex]);
 
-  const handleTouchStart = (event: React.TouchEvent) => {
-    setTouchEndX(null);
-    setTouchStartX(event.targetTouches[0].clientX);
-  };
+  const handleSwipePointerDown = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === 'mouse') return;
 
-  const handleTouchMove = (event: React.TouchEvent) => {
-    setTouchEndX(event.targetTouches[0].clientX);
-  };
+    swipeStateRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
+      active: true,
+    };
 
-  const handleTouchEnd = () => {
-    if (touchStartX === null || touchEndX === null) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }, []);
 
-    const deltaX = touchStartX - touchEndX;
+  const handleSwipePointerMove = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const swipeState = swipeStateRef.current;
+    if (!swipeState.active || swipeState.pointerId !== event.pointerId) return;
+
+    swipeState.lastX = event.clientX;
+    swipeState.lastY = event.clientY;
+  }, []);
+
+  const finishSwipe = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    const swipeState = swipeStateRef.current;
+    if (!swipeState.active || swipeState.pointerId !== event.pointerId) return;
+
+    const deltaX = swipeState.startX - swipeState.lastX;
+    const deltaY = Math.abs(swipeState.startY - swipeState.lastY);
     const swipeThreshold = 60;
+    const verticalTolerance = 45;
 
-    if (deltaX > swipeThreshold) {
-      goToNextMedia();
-    } else if (deltaX < -swipeThreshold) {
-      goToPreviousMedia();
+    if (Math.abs(deltaX) >= swipeThreshold && deltaY <= verticalTolerance) {
+      if (deltaX > 0) {
+        goToNextMedia();
+      } else {
+        goToPreviousMedia();
+      }
     }
 
-    setTouchStartX(null);
-    setTouchEndX(null);
-  };
+    swipeStateRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      lastX: 0,
+      lastY: 0,
+      active: false,
+    };
+  }, [goToNextMedia, goToPreviousMedia]);
+
+  const handleSwipePointerUp = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    finishSwipe(event);
+  }, [finishSwipe]);
+
+  const handleSwipePointerCancel = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+    finishSwipe(event);
+  }, [finishSwipe]);
 
   const hasAnyMore = useMemo(
     () => yearsToDisplay.some(year => hasMoreForYear(year)),
@@ -518,9 +564,6 @@ export default function GalleryPage() {
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-10 bg-black/95 backdrop-blur-xl"
           onClick={() => setSelectedMedia(null)}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
         >
           <button 
             className="absolute top-6 right-6 text-white hover:text-orange-500 bg-white/10 hover:bg-white/20 rounded-full p-3 transition-colors z-[110]"
@@ -557,19 +600,30 @@ export default function GalleryPage() {
             className="relative w-full max-w-5xl h-full flex flex-col items-center justify-center gap-6"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="w-full h-full flex items-center justify-center rounded-3xl overflow-hidden bg-black/40 shadow-2xl border border-white/10">
+            <div
+              className="relative w-full h-full flex items-center justify-center rounded-3xl overflow-hidden bg-black/40 shadow-2xl border border-white/10"
+              style={{ touchAction: 'pan-y' }}
+            >
+              <div
+                className="absolute inset-0 z-20 md:hidden"
+                aria-hidden="true"
+                onPointerDown={handleSwipePointerDown}
+                onPointerMove={handleSwipePointerMove}
+                onPointerUp={handleSwipePointerUp}
+                onPointerCancel={handleSwipePointerCancel}
+              />
               {selectedMedia.type === 'video' ? (
                 isYouTubeUrl(selectedMedia.url) ? (
                   <iframe 
                     src={`https://www.youtube.com/embed/${getYouTubeId(selectedMedia.url)}?autoplay=1`} 
-                    className="w-full h-full min-h-[50vh] max-h-[75vh]" 
+                    className="w-full h-full min-h-[50vh] max-h-[75vh] pointer-events-none md:pointer-events-auto" 
                     allow="autoplay; encrypted-media" 
                     allowFullScreen
                   />
                 ) : (
                   <video 
                     src={selectedMedia.url} 
-                    className="w-full max-h-[75vh] object-contain" 
+                    className="w-full max-h-[75vh] object-contain pointer-events-none md:pointer-events-auto" 
                     controls 
                     autoPlay
                   />
