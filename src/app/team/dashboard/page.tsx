@@ -140,7 +140,7 @@ export default function TeamDashboard() {
       '',
       '(Enter this number on our website: Menu → E-Receipt to download your receipt)',
       '',
-      'Website: https://team-egb.vercel.app',
+      'Website: https://teamegb.vercel.app',
       '',
       'We value transparency — visit our website to view collected funds and expenses.',
       '',
