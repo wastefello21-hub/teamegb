@@ -11,12 +11,8 @@ import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Playfair_Display } from 'next/font/google';
 
-const introFont = Playfair_Display({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-});
+const introFontClass = 'font-[Georgia,Times_New_Roman,serif]';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -343,7 +339,7 @@ export default function HomePage() {
               </motion.div>
 
               <div className="min-h-[5.2rem] flex items-center justify-center px-2">
-                <p className={`${introFont.className} text-3xl sm:text-4xl md:text-6xl font-semibold tracking-[0.04em] bg-gradient-to-r from-amber-100 via-amber-50 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(0,0,0,0.62)]`}>
+                <p className={`${introFontClass} text-3xl sm:text-4xl md:text-6xl font-semibold tracking-[0.04em] bg-gradient-to-r from-amber-100 via-amber-50 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(0,0,0,0.62)]`}>
                   {typedText}
                   <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-amber-300 align-middle shadow-[0_0_14px_rgba(251,191,36,0.9)] animate-pulse" />
                 </p>
