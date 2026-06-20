@@ -232,7 +232,7 @@ export default function HomePage() {
             animate={{ opacity: introPhase === 'logo-out' ? 0 : 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 1.05, ease: 'easeInOut' }}
-            className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden"
+            className="intro-overlay-only flex items-center justify-center overflow-hidden"
           >
             <div className="absolute inset-0">
               <Image

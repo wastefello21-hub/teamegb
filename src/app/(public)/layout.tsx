@@ -4,7 +4,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export default function PublicLayout({ children }: any) {
   return (
-    <div className="flex min-h-screen flex-col relative overflow-hidden">
+    <div className="public-shell flex min-h-screen flex-col relative overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-[32rem] bg-[radial-gradient(circle_at_top,rgba(251,191,36,0.16),transparent_42%),radial-gradient(circle_at_left,rgba(59,130,246,0.08),transparent_24%)]" />
       <PublicNavbar />
       <main className="relative z-10 flex-grow pt-20 pb-24 md:pb-0">

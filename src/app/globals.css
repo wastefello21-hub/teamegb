@@ -53,6 +53,25 @@ body {
   background-attachment: fixed;
 }
 
+body:has(.intro-overlay-only) .public-shell > *:not(main) {
+  display: none !important;
+}
+
+body:has(.intro-overlay-only) .public-shell > main {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+body:has(.intro-overlay-only) .public-shell {
+  overflow: hidden;
+}
+
+.intro-overlay-only {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+}
+
 html {
   scroll-behavior: smooth;
 }
