@@ -11,6 +11,12 @@ import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
 import { AnimatePresence, motion } from 'framer-motion';
+import { Playfair_Display } from 'next/font/google';
+
+const introFont = Playfair_Display({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+});
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -230,14 +236,15 @@ export default function HomePage() {
           >
             <div className="absolute inset-0">
               <Image
-                src="/ganesha_hero_bg.png"
+                src="/logo_v2.jpg"
                 alt="Intro background"
                 fill
                 priority
-                className="object-cover object-center scale-105"
+                className="object-cover object-center scale-110 opacity-70 saturate-125 contrast-110"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-900/80 to-slate-950/95" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.18),transparent_34%),radial-gradient(circle_at_top,rgba(248,113,113,0.12),transparent_30%)]" />
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/96 via-slate-900/82 to-slate-950/98" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.22),transparent_30%),radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_28%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_34%)]" />
+              <div className="absolute inset-0 backdrop-blur-[1px]" />
             </div>
 
             <motion.div
@@ -246,11 +253,12 @@ export default function HomePage() {
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="relative z-10 flex flex-col items-center justify-center text-center px-6"
             >
+              <div className="absolute inset-0 -z-10 rounded-[2.5rem] bg-white/6 blur-3xl" />
               <motion.div
                 initial={{ opacity: 0, scale: 0.82 }}
                 animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
                 transition={{ duration: 0.75, ease: 'easeOut' }}
-                className="relative mb-8 h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border border-white/20 bg-white/8 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-md"
+                className="relative mb-8 h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border border-amber-300/25 bg-white/8 shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-md ring-1 ring-white/10"
               >
                 <Image
                   src="/logo_v2.jpg"
@@ -262,13 +270,13 @@ export default function HomePage() {
               </motion.div>
 
               <div className="min-h-[4.5rem] flex items-center justify-center">
-                <p className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-[0.12em] text-amber-50 drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
+                <p className={`${introFont.className} text-2xl sm:text-3xl md:text-5xl font-semibold tracking-[0.06em] text-amber-50 drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]`}>
                   {typedText}
                   <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-amber-300 animate-pulse align-middle" />
                 </p>
               </div>
 
-              <p className="mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-slate-200/80 tracking-[0.18em] uppercase">
+              <p className="mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-slate-200/80 tracking-[0.22em] uppercase">
                 Devotion · Faith · Unity
               </p>
             </motion.div>
