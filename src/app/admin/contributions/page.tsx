@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
-import { Search, Download, Filter, Trash2, X } from 'lucide-react';
+import { Search, Download, Filter, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useData } from '@/context/DataContext';
 import { formatINR } from '@/lib/money';
@@ -11,8 +11,10 @@ import { formatINR } from '@/lib/money';
 export default function ManageContributionsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const { contributions, deleteContribution, settings } = useData();
   const canDownloadReceipt = settings.allowReceiptDownload !== false;
+  const pageSize = 25;
 
   const confirmDelete = () => {
     if (deletingId) {
@@ -49,6 +51,18 @@ export default function ManageContributionsPage() {
     (tx.id || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredContributions.length / pageSize));
+
+  useEffect(() => {
+    setCurrentPage(prev => Math.min(prev, totalPages));
+  }, [totalPages]);
+
+  const visibleContributions = filteredContributions.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
   return (
     <div className="space-y-6 max-w-6xl mx-auto pb-20 md:pb-0 relative">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -80,6 +94,39 @@ export default function ManageContributionsPage() {
           </Button>
         </div>
 
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 text-sm text-foreground/60">
+            <p>
+              Showing {filteredContributions.length === 0 ? 0 : (currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, filteredContributions.length)} of {filteredContributions.length} contributions
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft size={16} />
+                Prev
+              </Button>
+              <span className="min-w-[7rem] text-center font-medium text-foreground/70">
+                Page {currentPage} of {totalPages}
+              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse min-w-[900px]">
             <thead>
@@ -95,7 +142,7 @@ export default function ManageContributionsPage() {
             </thead>
             <tbody className="divide-y divide-border-color">
               <AnimatePresence>
-                {filteredContributions.map((tx) => (
+                {visibleContributions.map((tx) => (
                   <motion.tr 
                     key={tx.id} 
                     initial={{ opacity: 0, y: 10 }}
@@ -165,6 +212,38 @@ export default function ManageContributionsPage() {
             </tbody>
           </table>
         </div>
+
+        {filteredContributions.length > pageSize && (
+          <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-foreground/60">
+            <p>
+              Page {currentPage} of {totalPages}
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+              >
+                <ChevronLeft size={16} />
+                Prev
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="rounded-full"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                Next
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+        )}
       </GlassCard>
 
       {/* Custom Delete Modal */}

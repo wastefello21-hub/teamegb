@@ -251,6 +251,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children, initialData }: { children: ReactNode; initialData?: InitialDataSnapshot }) => {
   const [isMounted, setIsMounted] = useState(false);
+  const hasInitialSnapshot = Boolean(initialData);
 
   // Initial Mock Data Fallbacks
   const defaultContributions: Contribution[] = [];
@@ -502,6 +503,18 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       if (cachedData.eventApplications) setEventApplications(cachedData.eventApplications);
       if (cachedData.settings) setSettings({ ...defaultSettings, ...cachedData.settings });
       if (cachedData.expenditures) setExpenditures(cachedData.expenditures);
+    }
+
+    if (hasInitialSnapshot) {
+      const serverSnapshot = initialData as CachedAppData;
+      writeCachedAppData(serverSnapshot);
+      try {
+        if (serverSnapshot.gallery) {
+          localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString());
+        }
+      } catch (e) {
+        console.warn('Failed to seed cached app data from server snapshot:', e);
+      }
     }
 
     if (isAdminRoute) {
