@@ -280,14 +280,14 @@ export default function HomePage() {
       <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="absolute inset-0 z-[-1]">
           <Image 
-            src="/ganesha_hero_bg.png" 
+            src="/logo_v2.jpg" 
             alt="Festival Background" 
             fill
-            className="object-cover opacity-72 md:opacity-82 scale-105 saturate-110 contrast-105"
+            className="object-cover opacity-72 md:opacity-82 scale-110 saturate-125 contrast-110"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.22),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.14),transparent_38%),radial-gradient(circle_at_left,rgba(251,191,36,0.08),transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/54 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.28),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.18),transparent_38%),radial-gradient(circle_at_left,rgba(251,191,36,0.1),transparent_28%)]" />
         </div>
 
         <div 
