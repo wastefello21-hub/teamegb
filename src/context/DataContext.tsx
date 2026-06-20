@@ -225,6 +225,14 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
     }
   };
 
+  const persistExpendituresCache = (nextExpenditures: Expenditure[]) => {
+    try {
+      localStorage.setItem('egb_expenditures', JSON.stringify(nextExpenditures));
+    } catch (error) {
+      console.warn('Failed to save expenditures to localStorage:', error);
+    }
+  };
+
   // Load from localStorage & Supabase on client side mount
   // Load from localStorage & Supabase on client side mount
   // Optimized: Batch API calls and add caching with improved performance
@@ -438,6 +446,14 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       if (storedExpenditures) {
         const parsed = JSON.parse(storedExpenditures);
         if (Array.isArray(parsed)) setExpenditures(parsed);
+      } else {
+        const cachedData = localStorage.getItem('egb_data_cache');
+        if (cachedData) {
+          const parsedCache = JSON.parse(cachedData);
+          if (Array.isArray(parsedCache.expenditures)) {
+            setExpenditures(parsedCache.expenditures);
+          }
+        }
       }
 
       const storedSettings = localStorage.getItem('egb_settings');
@@ -781,11 +797,19 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
   };
 
   const addExpenditure = (expenditure: Expenditure) => {
-    setExpenditures(prev => [expenditure, ...prev]);
+    setExpenditures(prev => {
+      const nextExpenditures = [expenditure, ...prev];
+      persistExpendituresCache(nextExpenditures);
+      return nextExpenditures;
+    });
   };
 
   const deleteExpenditure = (id: string) => {
-    setExpenditures(prev => prev.filter(e => e.id !== id));
+    setExpenditures(prev => {
+      const nextExpenditures = prev.filter(e => e.id !== id);
+      persistExpendituresCache(nextExpenditures);
+      return nextExpenditures;
+    });
   };
 
   const addTeamMember = async (member: TeamMember) => {
