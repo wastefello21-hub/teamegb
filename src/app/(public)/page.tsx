@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { useData, Photo } from '@/context/DataContext';
 import { useAuth } from '@/context/AuthContext';
 import { extractVideoThumbnail } from '@/lib/videoThumbnail';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 
 const isYouTubeUrl = (url: string) => {
   return url.includes('youtube.com') || url.includes('youtu.be');
@@ -123,6 +123,9 @@ export default function HomePage() {
   const [votedItems, setVotedItems] = useState<Record<string, 'up' | 'down'>>({});
   const [selectedMedia, setSelectedMedia] = useState<typeof gallery[0] | null>(null);
   const [revealedCount, setRevealedCount] = useState(0);
+  const [introVisible, setIntroVisible] = useState(true);
+  const [introPhase, setIntroPhase] = useState<'logo-in' | 'typing' | 'logo-out'>('logo-in');
+  const [typedText, setTypedText] = useState('');
 
   const handleVote = async (id: string, type: 'up' | 'down') => {
     if (votedItems[id] === type) return;
@@ -164,6 +167,45 @@ export default function HomePage() {
   }, [showcaseKey, showcaseItems.length]);
 
   useEffect(() => {
+    const welcomeText = 'Team EGB Welcomes You!';
+
+    const logoInTimer = window.setTimeout(() => {
+      setIntroPhase('typing');
+    }, 900);
+
+    let typingInterval: number | undefined;
+    const typingTimer = window.setTimeout(() => {
+      let index = 0;
+      typingInterval = window.setInterval(() => {
+        index += 1;
+        setTypedText(welcomeText.slice(0, index));
+
+        if (index >= welcomeText.length && typingInterval) {
+          window.clearInterval(typingInterval);
+        }
+      }, 72);
+    }, 1150);
+
+    const fadeOutTimer = window.setTimeout(() => {
+      setIntroPhase('logo-out');
+    }, 3550);
+
+    const hideTimer = window.setTimeout(() => {
+      setIntroVisible(false);
+    }, 4400);
+
+    return () => {
+      window.clearTimeout(logoInTimer);
+      window.clearTimeout(typingTimer);
+      window.clearTimeout(fadeOutTimer);
+      window.clearTimeout(hideTimer);
+      if (typingInterval) {
+        window.clearInterval(typingInterval);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (revealedCount === 0 || revealedCount >= showcaseItems.length) {
       return;
     }
@@ -177,18 +219,75 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col items-center w-full scroll-smooth">
+      <AnimatePresence>
+        {introVisible && (
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: introPhase === 'logo-out' ? 0 : 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.05, ease: 'easeInOut' }}
+            className="fixed inset-0 z-[200] flex items-center justify-center overflow-hidden"
+          >
+            <div className="absolute inset-0">
+              <Image
+                src="/ganesha_hero_bg.png"
+                alt="Intro background"
+                fill
+                priority
+                className="object-cover object-center scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/92 via-slate-900/80 to-slate-950/95" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.18),transparent_34%),radial-gradient(circle_at_top,rgba(248,113,113,0.12),transparent_30%)]" />
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 14 }}
+              animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.03, y: -10 } : { opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="relative z-10 flex flex-col items-center justify-center text-center px-6"
+            >
+              <motion.div
+                initial={{ opacity: 0, scale: 0.82 }}
+                animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
+                transition={{ duration: 0.75, ease: 'easeOut' }}
+                className="relative mb-8 h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border border-white/20 bg-white/8 shadow-[0_20px_80px_rgba(0,0,0,0.35)] backdrop-blur-md"
+              >
+                <Image
+                  src="/logo_v2.jpg"
+                  alt="TEAM EGB logo"
+                  fill
+                  priority
+                  className="object-cover"
+                />
+              </motion.div>
+
+              <div className="min-h-[4.5rem] flex items-center justify-center">
+                <p className="text-2xl sm:text-3xl md:text-5xl font-semibold tracking-[0.12em] text-amber-50 drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]">
+                  {typedText}
+                  <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-amber-300 animate-pulse align-middle" />
+                </p>
+              </div>
+
+              <p className="mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-slate-200/80 tracking-[0.18em] uppercase">
+                Devotion · Faith · Unity
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Hero Section */}
       <section className="relative w-full min-h-[92vh] flex flex-col items-center justify-center overflow-hidden px-4">
         <div className="absolute inset-0 z-[-1]">
           <Image 
-            src="/logo_v2.jpg" 
+            src="/ganesha_hero_bg.png" 
             alt="Festival Background" 
             fill
-            className="object-cover opacity-70 md:opacity-80 scale-110 saturate-125 contrast-110"
+            className="object-cover opacity-72 md:opacity-82 scale-105 saturate-110 contrast-105"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/54 to-background" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.28),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.18),transparent_38%),radial-gradient(circle_at_left,rgba(251,191,36,0.1),transparent_28%)]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/60 to-background" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(251,146,60,0.22),transparent_28%),radial-gradient(circle_at_bottom,rgba(244,63,94,0.14),transparent_38%),radial-gradient(circle_at_left,rgba(251,191,36,0.08),transparent_28%)]" />
         </div>
 
         <div 
