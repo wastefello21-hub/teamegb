@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, ReactNode } from 'react';
 import { supabase } from '@/lib/supabase';
 
 // Types
@@ -172,6 +172,81 @@ export type InitialDataSnapshot = {
   settings?: Partial<AppSettings>;
 };
 
+type CachedAppData = {
+  contributions?: Contribution[];
+  expenditures?: Expenditure[];
+  teamMembers?: TeamMember[];
+  gallery?: Photo[];
+  vlogs?: Vlog[];
+  suggestions?: Suggestion[];
+  events?: Event[];
+  eventApplications?: EventApplication[];
+  settings?: Partial<AppSettings>;
+};
+
+const DATA_CACHE_KEY = 'egb_data_cache';
+const DATA_CACHE_TIMESTAMP_KEY = 'egb_data_timestamp';
+const GALLERY_FRESH_UNTIL_KEY = 'egb_gallery_fresh_until';
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
+const mapContributionRecord = (record: any): Contribution => ({
+  id: record.id,
+  name: record.name ?? '',
+  house: record.house ?? '',
+  phone: record.phone ?? '',
+  amount: Number(record.amount ?? 0),
+  mode: record.mode ?? '',
+  date: record.date ?? '',
+  collector: record.collector ?? '',
+  receipt_number: record.receipt_number ?? undefined,
+  receipt_url: record.receipt_url ?? undefined,
+  receipt_created_at: record.receipt_created_at ?? undefined,
+});
+
+const safeParseJson = <T,>(value: string | null): T | null => {
+  if (!value) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+};
+
+const readCachedAppData = () => {
+  if (typeof window === 'undefined') {
+    return {
+      data: null as CachedAppData | null,
+      cacheTimestamp: null as number | null,
+      galleryFreshUntil: null as number | null,
+    };
+  }
+
+  const rawCache = localStorage.getItem(DATA_CACHE_KEY);
+  const rawTimestamp = localStorage.getItem(DATA_CACHE_TIMESTAMP_KEY);
+  const rawGalleryFreshUntil = localStorage.getItem(GALLERY_FRESH_UNTIL_KEY);
+
+  return {
+    data: safeParseJson<CachedAppData>(rawCache),
+    cacheTimestamp: rawTimestamp ? Number(rawTimestamp) : null,
+    galleryFreshUntil: rawGalleryFreshUntil ? Number(rawGalleryFreshUntil) : null,
+  };
+};
+
+const writeCachedAppData = (updates: Partial<CachedAppData>) => {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const existing = readCachedAppData().data ?? {};
+  const nextCache = { ...existing, ...updates };
+
+  localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(nextCache));
+  localStorage.setItem(DATA_CACHE_TIMESTAMP_KEY, Date.now().toString());
+};
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider = ({ children, initialData }: { children: ReactNode; initialData?: InitialDataSnapshot }) => {
@@ -233,6 +308,31 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
     }
   };
 
+  useIsomorphicLayoutEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const { data, cacheTimestamp, galleryFreshUntil } = readCachedAppData();
+    const isGeneralCacheValid = Boolean(cacheTimestamp && (Date.now() - cacheTimestamp) < 5 * 60 * 1000);
+    const isGalleryCacheFresh = Boolean(galleryFreshUntil && Date.now() < galleryFreshUntil);
+
+    if (!data || !isGeneralCacheValid) {
+      return;
+    }
+
+    if (data.contributions) setContributions(data.contributions.map(mapContributionRecord));
+    if (data.teamMembers) setTeamMembers(data.teamMembers);
+    if (data.gallery && isGalleryCacheFresh) setGallery(data.gallery);
+    if (data.suggestions) setSuggestions(data.suggestions);
+    if (data.vlogs) setVlogs(data.vlogs);
+    if (data.events) setEvents(data.events);
+    if (data.eventApplications) setEventApplications(data.eventApplications);
+    if (data.settings) setSettings({ ...defaultSettings, ...data.settings });
+    if (data.expenditures) setExpenditures(data.expenditures);
+    setIsMounted(true);
+  }, []);
+
   // Load from localStorage & Supabase on client side mount
   // Load from localStorage & Supabase on client side mount
   // Optimized: Batch API calls and add caching with improved performance
@@ -243,29 +343,22 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
         const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 
         // Check cache first with shorter validity for faster updates on photo upload
-        const cacheKey = 'egb_data_cache';
-        const cacheTimestamp = 'egb_data_timestamp';
-        const galleryCacheFreshUntil = 'egb_gallery_fresh_until';
-        const cachedData = localStorage.getItem(cacheKey);
-        const cacheTime = localStorage.getItem(cacheTimestamp);
-        const galleryFreshTime = localStorage.getItem(galleryCacheFreshUntil);
-        
-        // Reduced cache validity to 5 minutes for faster updates, gallery has special 2-minute handling
-        const isGeneralCacheValid = cacheTime && (Date.now() - parseInt(cacheTime)) < 5 * 60 * 1000; // 5 minutes
-        const isGalleryCacheFresh = galleryFreshTime && Date.now() < parseInt(galleryFreshTime);
+        const { data: cachedData, cacheTimestamp, galleryFreshUntil } = readCachedAppData();
+        const isGeneralCacheValid = Boolean(cacheTimestamp && (Date.now() - cacheTimestamp) < 5 * 60 * 1000); // 5 minutes
+        const isGalleryCacheFresh = Boolean(galleryFreshUntil && Date.now() < galleryFreshUntil);
 
         // Hydrate from cache first on any route so the UI renders immediately.
         // Admin routes still refresh from Supabase in the background for freshness.
         if (cachedData && isGeneralCacheValid) {
-          const parsed = JSON.parse(cachedData);
-          if (parsed.contributions) setContributions(parsed.contributions);
+          const parsed = cachedData;
+          if (parsed.contributions) setContributions(parsed.contributions.map(mapContributionRecord));
           if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
           // Only use cached gallery if it's still fresh (2 minutes)
           if (parsed.gallery && isGalleryCacheFresh) {
             setGallery(parsed.gallery);
           } else {
             // Force fresh gallery fetch if cache is stale
-            parsed.gallery = null;
+            // keep the cached snapshot intact and refresh below
           }
           if (parsed.suggestions) setSuggestions(parsed.suggestions);
           if (parsed.vlogs) {
@@ -283,8 +376,8 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
               // Update cache with fresh gallery data
               parsed.gallery = freshGallery;
               try {
-                localStorage.setItem(cacheKey, JSON.stringify(parsed));
-                localStorage.setItem(galleryCacheFreshUntil, (Date.now() + 2 * 60 * 1000).toString()); // 2 minutes
+                writeCachedAppData({ gallery: freshGallery });
+                localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString()); // 2 minutes
               } catch (e) {
                 console.warn('Failed to cache updated gallery:', e);
               }
@@ -317,7 +410,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
           // Process results with early returns for better performance
           let hasNewData = false;
           if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
-            const newData = contributionsResult.value.data || [];
+            const newData = (contributionsResult.value.data || []).map(mapContributionRecord);
             setContributions(newData);
             hasNewData = true;
           }
@@ -351,10 +444,10 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
           // Cache only if we have new data
           if (hasNewData) {
             const dataToCache = {
-              contributions: contributionsResult.status === 'fulfilled' ? contributionsResult.value.data : [],
-              teamMembers: teamMembersResult.status === 'fulfilled' ? teamMembersResult.value.data : [],
-              events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
-              eventApplications: eventApplicationsResult.status === 'fulfilled' ? eventApplicationsResult.value.data : [],
+              contributions: contributionsResult.status === 'fulfilled' ? (contributionsResult.value.data || []).map(mapContributionRecord) : [],
+              teamMembers: teamMembersResult.status === 'fulfilled' ? (teamMembersResult.value.data || []) : [],
+              events: eventsResult.status === 'fulfilled' ? (eventsResult.value.data || []) : [],
+              eventApplications: eventApplicationsResult.status === 'fulfilled' ? (eventApplicationsResult.value.data || []) : [],
               settings: settingsResult.status === 'fulfilled' ? {
                 showNamesPublicly: settingsResult.value.data?.show_names_publicly,
                 showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
@@ -364,8 +457,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
               } : defaultSettings
             };
             try {
-              localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-              localStorage.setItem(cacheTimestamp, Date.now().toString());
+              writeCachedAppData(dataToCache);
             } catch (e) {
               // Handle quota exceeded gracefully
               console.warn('Failed to cache data:', e);
@@ -379,6 +471,10 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
             supabase.from('events').select('*').order('created_at', { ascending: false }),
             supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
             supabase.from('app_settings').select('*').eq('id', 'default').single()
+          ]);
+
+          const [contributionsResult] = await Promise.allSettled([
+            supabase.from('contributions').select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at').order('date', { ascending: false }).limit(500),
           ]);
 
           let hasNewData = false;
@@ -409,13 +505,18 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
             setSettings(newSettings);
             hasNewData = true;
           }
+          if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
+            setContributions((contributionsResult.value.data || []).map(mapContributionRecord));
+            hasNewData = true;
+          }
 
           if (hasNewData) {
             const dataToCache: any = {
-              gallery: galleryResult.status === 'fulfilled' ? galleryResult.value.data : [],
-              vlogs: vlogsResult.status === 'fulfilled' ? vlogsResult.value.data : [],
-              events: eventsResult.status === 'fulfilled' ? eventsResult.value.data : [],
-              suggestions: suggestionsResult.status === 'fulfilled' ? suggestionsResult.value.data : [],
+              gallery: galleryResult.status === 'fulfilled' ? (galleryResult.value.data || []) : [],
+              vlogs: vlogsResult.status === 'fulfilled' ? (vlogsResult.value.data || []) : [],
+              events: eventsResult.status === 'fulfilled' ? (eventsResult.value.data || []) : [],
+              suggestions: suggestionsResult.status === 'fulfilled' ? (suggestionsResult.value.data || []) : [],
+              contributions: contributionsResult.status === 'fulfilled' ? (contributionsResult.value.data || []).map(mapContributionRecord) : [],
               settings: settingsResult.status === 'fulfilled' ? {
                 showNamesPublicly: settingsResult.value.data?.show_names_publicly,
                 showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
@@ -425,9 +526,8 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
               } : defaultSettings
             };
             try {
-              localStorage.setItem(cacheKey, JSON.stringify(dataToCache));
-              localStorage.setItem(cacheTimestamp, Date.now().toString());
-              localStorage.setItem('egb_gallery_fresh_until', (Date.now() + 2 * 60 * 1000).toString());
+              writeCachedAppData(dataToCache);
+              localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString());
             } catch (e) {
               console.warn('Failed to cache data:', e);
             }
@@ -737,6 +837,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       const savedContribution: Contribution = result.contribution;
 
       setContributions(prev => [savedContribution, ...prev]);
+      writeCachedAppData({ contributions: [savedContribution, ...contributions] });
       setTeamMembers(prev => prev.map(member => 
         member.id === savedContribution.collector 
           ? { ...member, collections: member.collections + Number(savedContribution.amount) }
@@ -758,6 +859,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
     // Update local state immediately
     const nextContributions = contributions.filter(c => c.id !== id);
     setContributions(nextContributions);
+    writeCachedAppData({ contributions: nextContributions });
     
     const member = teamMembers.find(m => m.id === toDelete.collector);
     const newTotal = member ? Math.max(0, member.collections - Number(toDelete.amount)) : 0;
@@ -791,7 +893,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       );
       setContributions(restoredContributions);
       setTeamMembers(restoredTeamMembers);
-      persistMainCache(restoredContributions, restoredTeamMembers);
+      writeCachedAppData({ contributions: restoredContributions, teamMembers: restoredTeamMembers });
       alert('Failed to delete contribution. Please try again.');
     }
   };
@@ -814,6 +916,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
 
   const addTeamMember = async (member: TeamMember) => {
     setTeamMembers(prev => [...prev, member]);
+    writeCachedAppData({ teamMembers: [...teamMembers, member] });
     
     // Sync to Supabase
     const { error } = await supabase.from('team_members').insert([{
@@ -852,7 +955,9 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
   };
 
   const deleteTeamMember = async (id: string) => {
-    setTeamMembers(prev => prev.filter(member => member.id !== id));
+    const nextTeamMembers = teamMembers.filter(member => member.id !== id);
+    setTeamMembers(nextTeamMembers);
+    writeCachedAppData({ teamMembers: nextTeamMembers });
     
     const { error } = await supabase
       .from('team_members')

@@ -240,26 +240,78 @@ export default function HomePage() {
                 alt="Intro background"
                 fill
                 priority
-                className="object-cover object-center scale-110 opacity-70 saturate-125 contrast-110"
+                className="object-cover object-center scale-115 opacity-55 saturate-150 contrast-110 blur-[1px]"
               />
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/96 via-slate-900/82 to-slate-950/98" />
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.22),transparent_30%),radial-gradient(circle_at_top,rgba(248,113,113,0.14),transparent_28%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.08),transparent_34%)]" />
+              <div className="absolute inset-0 bg-gradient-to-b from-slate-950/98 via-slate-950/88 to-slate-950/98" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.24),transparent_28%),radial-gradient(circle_at_top,rgba(248,113,113,0.16),transparent_26%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.1),transparent_34%),radial-gradient(circle_at_left,rgba(255,255,255,0.08),transparent_20%)]" />
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-[-20%] opacity-30"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 70, repeat: Infinity, ease: 'linear' }}
+              >
+                <div className="absolute inset-[14%] rounded-full border border-amber-300/18 shadow-[0_0_90px_rgba(251,191,36,0.08)]" />
+                <div className="absolute inset-[24%] rounded-full border border-white/10" />
+                <div className="absolute inset-[34%] rounded-full border border-amber-100/8" />
+              </motion.div>
+
+              {[
+                { top: '14%', left: '12%', size: '1.4rem', delay: 0 },
+                { top: '20%', left: '78%', size: '0.95rem', delay: 0.8 },
+                { top: '68%', left: '16%', size: '0.85rem', delay: 1.4 },
+                { top: '72%', left: '82%', size: '1.1rem', delay: 0.3 },
+                { top: '40%', left: '8%', size: '0.7rem', delay: 1.8 },
+                { top: '34%', left: '88%', size: '0.8rem', delay: 1.1 },
+              ].map((orb) => (
+                <motion.span
+                  key={`${orb.top}-${orb.left}`}
+                  aria-hidden="true"
+                  className="absolute rounded-full bg-amber-200/70 shadow-[0_0_25px_rgba(251,191,36,0.55)]"
+                  style={{ top: orb.top, left: orb.left, width: orb.size, height: orb.size }}
+                  animate={{ opacity: [0.2, 0.95, 0.2], y: [0, -18, 0], scale: [1, 1.2, 1] }}
+                  transition={{ duration: 6.5, repeat: Infinity, delay: orb.delay, ease: 'easeInOut' }}
+                />
+              ))}
+
               <div className="absolute inset-0 backdrop-blur-[1px]" />
             </div>
 
             <motion.div
-              initial={{ opacity: 0, scale: 0.92, y: 14 }}
-              animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.03, y: -10 } : { opacity: 1, scale: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
+              initial={{ opacity: 0, scale: 0.9, y: 18 }}
+              animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.04, y: -12 } : { opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: 0.85, ease: 'easeOut' }}
               className="relative z-10 flex flex-col items-center justify-center text-center px-6"
             >
-              <div className="absolute inset-0 -z-10 rounded-[2.5rem] bg-white/6 blur-3xl" />
+              <motion.div
+                aria-hidden="true"
+                className="absolute inset-0 -z-20 mx-auto my-auto h-[34rem] w-[34rem] max-w-[92vw] rounded-full bg-[radial-gradient(circle,rgba(251,191,36,0.18),transparent_58%)] blur-3xl"
+                animate={{ scale: [1, 1.06, 1] }}
+                transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+              />
+
+              <div className="mb-5 inline-flex items-center gap-3 rounded-full border border-amber-200/20 bg-white/5 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.45em] text-amber-100/90 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.3)]">
+                <span className="h-2 w-2 rounded-full bg-amber-300 shadow-[0_0_18px_rgba(251,191,36,0.8)]" />
+                Ganesha Chaturthi 2026
+              </div>
+
               <motion.div
                 initial={{ opacity: 0, scale: 0.82 }}
                 animate={introPhase === 'logo-out' ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
                 transition={{ duration: 0.75, ease: 'easeOut' }}
                 className="relative mb-8 h-36 w-36 md:h-44 md:w-44 rounded-full overflow-hidden border border-amber-300/25 bg-white/8 shadow-[0_24px_90px_rgba(0,0,0,0.45)] backdrop-blur-md ring-1 ring-white/10"
               >
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute inset-[-12%] rounded-full border border-amber-200/25"
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 22, repeat: Infinity, ease: 'linear' }}
+                />
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute inset-3 rounded-full border border-white/10"
+                  animate={{ rotate: -360 }}
+                  transition={{ duration: 28, repeat: Infinity, ease: 'linear' }}
+                />
                 <Image
                   src="/logo_v2.jpg"
                   alt="TEAM EGB logo"
@@ -269,16 +321,21 @@ export default function HomePage() {
                 />
               </motion.div>
 
-              <div className="min-h-[4.5rem] flex items-center justify-center">
-                <p className={`${introFont.className} text-2xl sm:text-3xl md:text-5xl font-semibold tracking-[0.06em] text-amber-50 drop-shadow-[0_2px_18px_rgba(0,0,0,0.55)]`}>
+              <div className="min-h-[5.2rem] flex items-center justify-center px-2">
+                <p className={`${introFont.className} text-3xl sm:text-4xl md:text-6xl font-semibold tracking-[0.04em] bg-gradient-to-r from-amber-100 via-amber-50 to-amber-300 bg-clip-text text-transparent drop-shadow-[0_2px_24px_rgba(0,0,0,0.62)]`}>
                   {typedText}
-                  <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-amber-300 animate-pulse align-middle" />
+                  <span className="ml-1 inline-block h-[1.1em] w-[2px] translate-y-[2px] bg-amber-300 align-middle shadow-[0_0_14px_rgba(251,191,36,0.9)] animate-pulse" />
                 </p>
               </div>
 
-              <p className="mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-slate-200/80 tracking-[0.22em] uppercase">
+              <motion.p
+                initial={{ opacity: 0, y: 8 }}
+                animate={introPhase === 'logo-out' ? { opacity: 0, y: -4 } : { opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.35 }}
+                className="mt-4 max-w-2xl text-sm sm:text-base md:text-lg text-slate-200/82 tracking-[0.22em] uppercase"
+              >
                 Devotion · Faith · Unity
-              </p>
+              </motion.p>
             </motion.div>
           </motion.div>
         )}
