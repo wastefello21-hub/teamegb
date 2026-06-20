@@ -308,6 +308,154 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
     }
   };
 
+  const hydratePublicData = () => {
+    void supabase
+      .from('contributions')
+      .select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at')
+      .order('date', { ascending: false })
+      .limit(500)
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextContributions = data.map(mapContributionRecord);
+          setContributions(nextContributions);
+          writeCachedAppData({ contributions: nextContributions });
+        }
+      }, (error) => console.warn('Failed to load public contributions:', error));
+
+    void supabase
+      .from('gallery')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setGallery(data);
+          writeCachedAppData({ gallery: data });
+          try {
+            localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString());
+          } catch (e) {
+            console.warn('Failed to refresh gallery freshness marker:', e);
+          }
+        }
+      }, (error) => console.warn('Failed to load gallery:', error));
+
+    void supabase
+      .from('vlogs')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setVlogs(data);
+          writeCachedAppData({ vlogs: data });
+        }
+      }, (error) => console.warn('Failed to load vlogs:', error));
+
+    void supabase
+      .from('events')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setEvents(data);
+          writeCachedAppData({ events: data });
+        }
+      }, (error) => console.warn('Failed to load events:', error));
+
+    void supabase
+      .from('suggestions')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setSuggestions(data);
+          writeCachedAppData({ suggestions: data });
+        }
+      }, (error) => console.warn('Failed to load suggestions:', error));
+
+    void supabase
+      .from('app_settings')
+      .select('*')
+      .eq('id', 'default')
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextSettings = {
+            showNamesPublicly: data.show_names_publicly,
+            showAmountsPublicly: data.show_amounts_publicly,
+            showExpenditurePublicly: data.show_expenditure_publicly,
+            allowReceiptDownload: data.allow_receipt_download ?? true,
+            festivalName: data.festival_name,
+          };
+          setSettings(nextSettings);
+          writeCachedAppData({ settings: nextSettings });
+        }
+      }, (error) => console.warn('Failed to load settings:', error));
+  };
+
+  const hydrateAdminData = () => {
+    void supabase
+      .from('contributions')
+      .select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at')
+      .order('date', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextContributions = data.map(mapContributionRecord);
+          setContributions(nextContributions);
+          writeCachedAppData({ contributions: nextContributions });
+        }
+      }, (error) => console.warn('Failed to load admin contributions:', error));
+
+    void supabase
+      .from('team_members')
+      .select('id,name,role,collections,status,password,is_enabled,is_online,id_card_url')
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setTeamMembers(data);
+          writeCachedAppData({ teamMembers: data });
+        }
+      }, (error) => console.warn('Failed to load team members:', error));
+
+    void supabase
+      .from('events')
+      .select('id,name,description,poster_url,date,time,venue,application_last_date,is_registration_open,created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setEvents(data);
+          writeCachedAppData({ events: data });
+        }
+      }, (error) => console.warn('Failed to load admin events:', error));
+
+    void supabase
+      .from('event_applications')
+      .select('id,event_id,name,phone,age,activity,created_at')
+      .order('created_at', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          setEventApplications(data);
+          writeCachedAppData({ eventApplications: data });
+        }
+      }, (error) => console.warn('Failed to load event applications:', error));
+
+    void supabase
+      .from('app_settings')
+      .select('*')
+      .eq('id', 'default')
+      .single()
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextSettings = {
+            showNamesPublicly: data.show_names_publicly,
+            showAmountsPublicly: data.show_amounts_publicly,
+            showExpenditurePublicly: data.show_expenditure_publicly,
+            allowReceiptDownload: data.allow_receipt_download ?? true,
+            festivalName: data.festival_name,
+          };
+          setSettings(nextSettings);
+          writeCachedAppData({ settings: nextSettings });
+        }
+      }, (error) => console.warn('Failed to load admin settings:', error));
+  };
+
   useIsomorphicLayoutEffect(() => {
     if (typeof window === 'undefined') {
       return;
@@ -338,208 +486,43 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
   // Optimized: Batch API calls and add caching with improved performance
   useEffect(() => {
     setIsMounted(true);
-    const initializeData = async () => {
-      try {
-        const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+    const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
 
-        // Check cache first with shorter validity for faster updates on photo upload
-        const { data: cachedData, cacheTimestamp, galleryFreshUntil } = readCachedAppData();
-        const isGeneralCacheValid = Boolean(cacheTimestamp && (Date.now() - cacheTimestamp) < 5 * 60 * 1000); // 5 minutes
-        const isGalleryCacheFresh = Boolean(galleryFreshUntil && Date.now() < galleryFreshUntil);
+    const { data: cachedData, cacheTimestamp, galleryFreshUntil } = readCachedAppData();
+    const isGeneralCacheValid = Boolean(cacheTimestamp && (Date.now() - cacheTimestamp) < 5 * 60 * 1000);
+    const isGalleryCacheFresh = Boolean(galleryFreshUntil && Date.now() < galleryFreshUntil);
 
-        // Hydrate from cache first on any route so the UI renders immediately.
-        // Admin routes still refresh from Supabase in the background for freshness.
-        if (cachedData && isGeneralCacheValid) {
-          const parsed = cachedData;
-          if (parsed.contributions) setContributions(parsed.contributions.map(mapContributionRecord));
-          if (parsed.teamMembers) setTeamMembers(parsed.teamMembers);
-          // Only use cached gallery if it's still fresh (2 minutes)
-          if (parsed.gallery && isGalleryCacheFresh) {
-            setGallery(parsed.gallery);
-          } else {
-            // Force fresh gallery fetch if cache is stale
-            // keep the cached snapshot intact and refresh below
-          }
-          if (parsed.suggestions) setSuggestions(parsed.suggestions);
-          if (parsed.vlogs) {
-            setVlogs(isAdminRoute ? parsed.vlogs : parsed.vlogs.filter((v: Vlog) => v.is_public !== false));
-          }
-          if (parsed.events) setEvents(parsed.events);
-          if (parsed.eventApplications) setEventApplications(parsed.eventApplications);
-          if (parsed.settings) setSettings({ ...defaultSettings, ...parsed.settings });
-          
-          // If gallery cache is stale, fetch it fresh
-          if (!parsed.gallery || !isGalleryCacheFresh) {
-            const { data: freshGallery } = await supabase.from('gallery').select('*').order('created_at', { ascending: false });
-            if (freshGallery) {
-              setGallery(freshGallery);
-              // Update cache with fresh gallery data
-              parsed.gallery = freshGallery;
-              try {
-                writeCachedAppData({ gallery: freshGallery });
-                localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString()); // 2 minutes
-              } catch (e) {
-                console.warn('Failed to cache updated gallery:', e);
-              }
-            }
-          }
-          if (!isAdminRoute) {
-            return;
+    if (cachedData && isGeneralCacheValid) {
+      if (cachedData.contributions) setContributions(cachedData.contributions.map(mapContributionRecord));
+      if (cachedData.teamMembers) setTeamMembers(cachedData.teamMembers);
+      if (cachedData.gallery && isGalleryCacheFresh) setGallery(cachedData.gallery);
+      if (cachedData.suggestions) setSuggestions(cachedData.suggestions);
+      if (cachedData.vlogs) setVlogs(isAdminRoute ? cachedData.vlogs : cachedData.vlogs.filter((v: Vlog) => v.is_public !== false));
+      if (cachedData.events) setEvents(cachedData.events);
+      if (cachedData.eventApplications) setEventApplications(cachedData.eventApplications);
+      if (cachedData.settings) setSettings({ ...defaultSettings, ...cachedData.settings });
+      if (cachedData.expenditures) setExpenditures(cachedData.expenditures);
+    }
+
+    if (isAdminRoute) {
+      hydrateAdminData();
+    } else {
+      hydratePublicData();
+    }
+
+    if (cachedData && isGeneralCacheValid && !isAdminRoute && (!cachedData.gallery || !isGalleryCacheFresh)) {
+      void supabase.from('gallery').select('*').order('created_at', { ascending: false }).then(({ data, error }) => {
+        if (!error && data) {
+          setGallery(data);
+          writeCachedAppData({ gallery: data });
+          try {
+            localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString());
+          } catch (e) {
+            console.warn('Failed to refresh gallery freshness marker:', e);
           }
         }
-
-        // Determine whether we are on an admin route — avoid heavy queries for public pages
-        const isAdmin = isAdminRoute;
-
-        if (isAdmin) {
-          // Fetch the most relevant admin data first; keep the payload smaller and faster.
-          const [
-            contributionsResult,
-            teamMembersResult,
-            eventsResult,
-            eventApplicationsResult,
-            settingsResult
-          ] = await Promise.allSettled([
-            supabase.from('contributions').select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at').order('date', { ascending: false }),
-            supabase.from('team_members').select('id,name,role,collections,status,password,is_enabled,is_online,id_card_url'),
-            supabase.from('events').select('id,name,description,poster_url,date,time,venue,application_last_date,is_registration_open,created_at').order('created_at', { ascending: false }),
-            supabase.from('event_applications').select('id,event_id,name,phone,age,activity,created_at').order('created_at', { ascending: false }),
-            supabase.from('app_settings').select('*').eq('id', 'default').single()
-          ]);
-
-          // Process results with early returns for better performance
-          let hasNewData = false;
-          if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
-            const newData = (contributionsResult.value.data || []).map(mapContributionRecord);
-            setContributions(newData);
-            hasNewData = true;
-          }
-          if (teamMembersResult.status === 'fulfilled' && !teamMembersResult.value.error) {
-            const newData = teamMembersResult.value.data || [];
-            setTeamMembers(newData);
-            hasNewData = true;
-          }
-          if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
-            const newData = eventsResult.value.data || [];
-            setEvents(newData);
-            hasNewData = true;
-          }
-          if (eventApplicationsResult.status === 'fulfilled' && !eventApplicationsResult.value.error) {
-            const newData = eventApplicationsResult.value.data || [];
-            setEventApplications(newData);
-            hasNewData = true;
-          }
-          if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
-            const newSettings = {
-              showNamesPublicly: settingsResult.value.data.show_names_publicly,
-              showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
-              showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
-              allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
-              festivalName: settingsResult.value.data.festival_name
-            };
-            setSettings(newSettings);
-            hasNewData = true;
-          }
-
-          // Cache only if we have new data
-          if (hasNewData) {
-            const dataToCache = {
-              contributions: contributionsResult.status === 'fulfilled' ? (contributionsResult.value.data || []).map(mapContributionRecord) : [],
-              teamMembers: teamMembersResult.status === 'fulfilled' ? (teamMembersResult.value.data || []) : [],
-              events: eventsResult.status === 'fulfilled' ? (eventsResult.value.data || []) : [],
-              eventApplications: eventApplicationsResult.status === 'fulfilled' ? (eventApplicationsResult.value.data || []) : [],
-              settings: settingsResult.status === 'fulfilled' ? {
-                showNamesPublicly: settingsResult.value.data?.show_names_publicly,
-                showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
-                showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
-                allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
-                festivalName: settingsResult.value.data?.festival_name
-              } : defaultSettings
-            };
-            try {
-              writeCachedAppData(dataToCache);
-            } catch (e) {
-              // Handle quota exceeded gracefully
-              console.warn('Failed to cache data:', e);
-            }
-          }
-        } else {
-          // Public pages: fetch the public-facing content, including suggestions so submissions are visible site-wide
-          const [galleryResult, vlogsResult, eventsResult, suggestionsResult, settingsResult] = await Promise.allSettled([
-            supabase.from('gallery').select('*').order('created_at', { ascending: false }),
-            supabase.from('vlogs').select('*').order('created_at', { ascending: false }),
-            supabase.from('events').select('*').order('created_at', { ascending: false }),
-            supabase.from('suggestions').select('*').order('created_at', { ascending: false }),
-            supabase.from('app_settings').select('*').eq('id', 'default').single()
-          ]);
-
-          const [contributionsResult] = await Promise.allSettled([
-            supabase.from('contributions').select('id,name,house,phone,amount,mode,date,collector,receipt_number,receipt_url,receipt_created_at').order('date', { ascending: false }).limit(500),
-          ]);
-
-          let hasNewData = false;
-          if (galleryResult.status === 'fulfilled' && !galleryResult.value.error) {
-            setGallery(galleryResult.value.data || []);
-            hasNewData = true;
-          }
-          if (vlogsResult.status === 'fulfilled' && !vlogsResult.value.error) {
-            setVlogs(vlogsResult.value.data || []);
-            hasNewData = true;
-          }
-          if (eventsResult.status === 'fulfilled' && !eventsResult.value.error) {
-            setEvents(eventsResult.value.data || []);
-            hasNewData = true;
-          }
-          if (suggestionsResult.status === 'fulfilled' && !suggestionsResult.value.error) {
-            setSuggestions(suggestionsResult.value.data || []);
-            hasNewData = true;
-          }
-          if (settingsResult.status === 'fulfilled' && !settingsResult.value.error && settingsResult.value.data) {
-            const newSettings = {
-              showNamesPublicly: settingsResult.value.data.show_names_publicly,
-              showAmountsPublicly: settingsResult.value.data.show_amounts_publicly,
-              showExpenditurePublicly: settingsResult.value.data.show_expenditure_publicly,
-              allowReceiptDownload: settingsResult.value.data.allow_receipt_download ?? true,
-              festivalName: settingsResult.value.data.festival_name
-            };
-            setSettings(newSettings);
-            hasNewData = true;
-          }
-          if (contributionsResult.status === 'fulfilled' && !contributionsResult.value.error) {
-            setContributions((contributionsResult.value.data || []).map(mapContributionRecord));
-            hasNewData = true;
-          }
-
-          if (hasNewData) {
-            const dataToCache: any = {
-              gallery: galleryResult.status === 'fulfilled' ? (galleryResult.value.data || []) : [],
-              vlogs: vlogsResult.status === 'fulfilled' ? (vlogsResult.value.data || []) : [],
-              events: eventsResult.status === 'fulfilled' ? (eventsResult.value.data || []) : [],
-              suggestions: suggestionsResult.status === 'fulfilled' ? (suggestionsResult.value.data || []) : [],
-              contributions: contributionsResult.status === 'fulfilled' ? (contributionsResult.value.data || []).map(mapContributionRecord) : [],
-              settings: settingsResult.status === 'fulfilled' ? {
-                showNamesPublicly: settingsResult.value.data?.show_names_publicly,
-                showAmountsPublicly: settingsResult.value.data?.show_amounts_publicly,
-                showExpenditurePublicly: settingsResult.value.data?.show_expenditure_publicly,
-                allowReceiptDownload: settingsResult.value.data?.allow_receipt_download ?? true,
-                festivalName: settingsResult.value.data?.festival_name
-              } : defaultSettings
-            };
-            try {
-              writeCachedAppData(dataToCache);
-              localStorage.setItem(GALLERY_FRESH_UNTIL_KEY, (Date.now() + 2 * 60 * 1000).toString());
-            } catch (e) {
-              console.warn('Failed to cache data:', e);
-            }
-          }
-        }
-
-      } catch (error) {
-        console.error('Error initializing data:', error);
-      }
-    };
-
-    initializeData();
+      }, (error) => console.warn('Failed to refresh gallery:', error));
+    }
 
     try {
       const storedExpenditures = localStorage.getItem('egb_expenditures');

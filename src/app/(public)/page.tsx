@@ -246,6 +246,16 @@ export default function HomePage() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(251,191,36,0.24),transparent_28%),radial-gradient(circle_at_top,rgba(248,113,113,0.16),transparent_26%),radial-gradient(circle_at_bottom,rgba(59,130,246,0.1),transparent_34%),radial-gradient(circle_at_left,rgba(255,255,255,0.08),transparent_20%)]" />
               <motion.div
                 aria-hidden="true"
+                className="absolute inset-0 opacity-35"
+                animate={{ x: ['-22%', '22%', '-22%'] }}
+                transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <div className="absolute left-[-18%] top-[14%] h-[1px] w-[50%] bg-gradient-to-r from-transparent via-amber-200/70 to-transparent" />
+                <div className="absolute right-[-18%] top-[78%] h-[1px] w-[52%] bg-gradient-to-r from-transparent via-white/35 to-transparent" />
+              </motion.div>
+
+              <motion.div
+                aria-hidden="true"
                 className="absolute inset-[-20%] opacity-30"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 70, repeat: Infinity, ease: 'linear' }}
@@ -272,6 +282,11 @@ export default function HomePage() {
                   transition={{ duration: 6.5, repeat: Infinity, delay: orb.delay, ease: 'easeInOut' }}
                 />
               ))}
+
+              <div className="absolute left-6 top-6 h-12 w-12 border-l border-t border-amber-200/20" />
+              <div className="absolute right-6 top-6 h-12 w-12 border-r border-t border-amber-200/20" />
+              <div className="absolute left-6 bottom-6 h-12 w-12 border-l border-b border-amber-200/20" />
+              <div className="absolute right-6 bottom-6 h-12 w-12 border-r border-b border-amber-200/20" />
 
               <div className="absolute inset-0 backdrop-blur-[1px]" />
             </div>
@@ -319,6 +334,12 @@ export default function HomePage() {
                   priority
                   className="object-cover"
                 />
+                <motion.div
+                  aria-hidden="true"
+                  className="absolute inset-0 bg-[linear-gradient(115deg,transparent_20%,rgba(255,255,255,0.18)_46%,transparent_62%)] opacity-40"
+                  animate={{ x: ['-110%', '110%'] }}
+                  transition={{ duration: 4.8, repeat: Infinity, ease: 'easeInOut', repeatDelay: 2.5 }}
+                />
               </motion.div>
 
               <div className="min-h-[5.2rem] flex items-center justify-center px-2">
@@ -336,6 +357,15 @@ export default function HomePage() {
               >
                 Devotion · Faith · Unity
               </motion.p>
+
+              <motion.div
+                aria-hidden="true"
+                className="mt-6 h-[2px] w-40 overflow-hidden rounded-full bg-white/10"
+                animate={{ opacity: [0.35, 1, 0.35] }}
+                transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <div className="h-full w-full bg-gradient-to-r from-transparent via-amber-300 to-transparent" />
+              </motion.div>
             </motion.div>
           </motion.div>
         )}
