@@ -12,6 +12,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function TeamDashboard() {
   const router = useRouter();
   const whatsappPosterUrl = '/ganesha_hero_bg.png';
+  const [upiQrVariant, setUpiQrVariant] = useState<'fam' | 'navi'>('fam');
   const [formData, setFormData] = useState({
     houseNumber: '',
     contributorName: '',
@@ -67,6 +68,7 @@ export default function TeamDashboard() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     if (e.target.name === 'paymentMode' && e.target.value === 'UPI') {
       setShowUpi(true);
+      setUpiQrVariant('fam');
     } else if (e.target.name === 'paymentMode') {
       setShowUpi(false);
     }
@@ -583,16 +585,54 @@ export default function TeamDashboard() {
       <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr] items-start">
         <GlassCard className="border-t-4 border-t-orange-500 h-full p-4 sm:p-6 lg:p-8">
         {showUpi && (
-          <div className="mb-6 flex flex-col items-center justify-center">
-            <img
-              src="/upi-qr.png"
-              alt="UPI QR Code for Payment"
-              className="w-full max-w-xs sm:max-w-sm aspect-square object-contain border-2 border-dashed border-orange-400 rounded-3xl bg-white mb-3 p-3 shadow-lg"
-            />
-            <div className="text-center text-xs text-foreground/70">
-              <div className="font-bold text-base text-orange-700">VEMALA PRAJWAL</div>
-              <div>UPI ID: <span className="font-mono">9380753581@naviaxis</span></div>
-              <div className="mt-1 text-[11px]">Scan & pay using any UPI app</div>
+          <div className="mb-6 rounded-3xl border border-orange-500/15 bg-gradient-to-br from-white/90 to-orange-50/50 dark:from-gray-950 dark:to-gray-900 p-4 sm:p-5 shadow-lg">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-[0.24em] text-orange-700 dark:text-orange-300">UPI QR Codes</h3>
+                <p className="text-xs text-foreground/60 mt-1">Choose the recipient QR before scanning.</p>
+              </div>
+              <div className="inline-flex rounded-full bg-orange-500/10 p-1 border border-orange-500/15">
+                <button
+                  type="button"
+                  onClick={() => setUpiQrVariant('fam')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all ${
+                    upiQrVariant === 'fam'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-orange-700 dark:text-orange-200 hover:bg-orange-500/10'
+                  }`}
+                >
+                  FAM
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setUpiQrVariant('navi')}
+                  className={`px-3 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all ${
+                    upiQrVariant === 'navi'
+                      ? 'bg-orange-600 text-white shadow-sm'
+                      : 'text-orange-700 dark:text-orange-200 hover:bg-orange-500/10'
+                  }`}
+                >
+                  NAVI
+                </button>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+              <div className="flex flex-col items-center justify-center">
+                <img
+                  src={upiQrVariant === 'fam' ? '/upi-navi-prajwal.jpg' : '/upi-navi2.jpeg'}
+                  alt={upiQrVariant === 'fam' ? 'FAM UPI QR Code for Payment' : 'NAVI UPI QR Code for Payment'}
+                  className="w-full max-w-xs sm:max-w-sm aspect-square object-contain border-2 border-dashed border-orange-400 rounded-3xl bg-white p-3 shadow-lg"
+                />
+              </div>
+
+              <div className="text-center md:text-left text-xs text-foreground/70 space-y-1.5">
+                <div className="font-bold text-base text-orange-700 dark:text-orange-300">
+                  {upiQrVariant === 'fam' ? 'FAM' : 'NAVI'}
+                </div>
+                <div>UPI ID: <span className="font-mono">9380753581@naviaxis</span></div>
+                <div className="text-[11px]">Scan & pay using any UPI app</div>
+              </div>
             </div>
           </div>
         )}

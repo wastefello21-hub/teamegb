@@ -160,9 +160,21 @@ interface DataContextType {
   balance: number;
 }
 
+export type InitialDataSnapshot = {
+  contributions?: Contribution[];
+  expenditures?: Expenditure[];
+  teamMembers?: TeamMember[];
+  gallery?: Photo[];
+  vlogs?: Vlog[];
+  suggestions?: Suggestion[];
+  events?: Event[];
+  eventApplications?: EventApplication[];
+  settings?: Partial<AppSettings>;
+};
+
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
-export const DataProvider = ({ children }: { children: ReactNode }) => {
+export const DataProvider = ({ children, initialData }: { children: ReactNode; initialData?: InitialDataSnapshot }) => {
   const [isMounted, setIsMounted] = useState(false);
 
   // Initial Mock Data Fallbacks
@@ -178,16 +190,16 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const defaultVlogs: Vlog[] = [];
   const defaultSuggestions: Suggestion[] = [];
 
-  const [contributions, setContributions] = useState<Contribution[]>(defaultContributions);
-  const [expenditures, setExpenditures] = useState<Expenditure[]>(defaultExpenditures);
-  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(defaultTeam);
-  const [gallery, setGallery] = useState<Photo[]>(defaultGallery);
-  const [vlogs, setVlogs] = useState<Vlog[]>(defaultVlogs);
-  const [suggestions, setSuggestions] = useState<Suggestion[]>(defaultSuggestions);
+  const [contributions, setContributions] = useState<Contribution[]>(initialData?.contributions ?? defaultContributions);
+  const [expenditures, setExpenditures] = useState<Expenditure[]>(initialData?.expenditures ?? defaultExpenditures);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>(initialData?.teamMembers ?? defaultTeam);
+  const [gallery, setGallery] = useState<Photo[]>(initialData?.gallery ?? defaultGallery);
+  const [vlogs, setVlogs] = useState<Vlog[]>(initialData?.vlogs ?? defaultVlogs);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>(initialData?.suggestions ?? defaultSuggestions);
   const [userVotes, setUserVotes] = useState<Record<string, 'like' | 'dislike'>>({});
-  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [eventApplications, setEventApplications] = useState<EventApplication[]>([]);
+  const [settings, setSettings] = useState<AppSettings>({ ...defaultSettings, ...(initialData?.settings ?? {}) });
+  const [events, setEvents] = useState<Event[]>(initialData?.events ?? []);
+  const [eventApplications, setEventApplications] = useState<EventApplication[]>(initialData?.eventApplications ?? []);
 
   const persistMainCache = (nextContributions: Contribution[], nextTeamMembers: TeamMember[]) => {
     try {

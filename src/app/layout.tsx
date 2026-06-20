@@ -6,6 +6,7 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import { DataProvider } from "@/context/DataContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { getInitialAppData } from "@/lib/initialAppData";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,7 +34,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({ children }: any) {
+export default async function RootLayout({ children }: any) {
+  const initialData = await getInitialAppData();
+
   return (
     <html
       lang="en"
@@ -60,7 +63,7 @@ export default function RootLayout({ children }: any) {
       <body className="min-h-full flex flex-col relative" suppressHydrationWarning>
         <Analytics />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <DataProvider>
+          <DataProvider initialData={initialData}>
             <AuthProvider>
               {children}
             </AuthProvider>
