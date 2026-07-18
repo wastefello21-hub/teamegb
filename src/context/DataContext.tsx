@@ -129,8 +129,8 @@ interface DataContextType {
   addContribution: (contribution: Contribution) => Promise<Contribution | null>;
   deleteContribution: (id: string) => void;
   
-  addExpenditure: (expenditure: Expenditure) => void;
-  deleteExpenditure: (id: string) => void;
+  addExpenditure: (expenditure: Expenditure) => Promise<void> | void;
+  deleteExpenditure: (id: string) => Promise<void> | void;
   
   addTeamMember: (member: TeamMember) => Promise<void> | void;
   updateTeamMember: (id: string, updates: Partial<TeamMember>) => void;
@@ -201,6 +201,14 @@ const mapContributionRecord = (record: any): Contribution => ({
   receipt_number: record.receipt_number ?? undefined,
   receipt_url: record.receipt_url ?? undefined,
   receipt_created_at: record.receipt_created_at ?? undefined,
+});
+
+const mapExpenditureRecord = (record: any): Expenditure => ({
+  id: record.id,
+  category: record.category ?? '',
+  description: record.description ?? '',
+  amount: Number(record.amount ?? 0),
+  date: record.date ?? '',
 });
 
 const safeParseJson = <T,>(value: string | null): T | null => {
@@ -304,6 +312,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
   const persistExpendituresCache = (nextExpenditures: Expenditure[]) => {
     try {
       localStorage.setItem('egb_expenditures', JSON.stringify(nextExpenditures));
+      writeCachedAppData({ expenditures: nextExpenditures });
     } catch (error) {
       console.warn('Failed to save expenditures to localStorage:', error);
     }
@@ -373,6 +382,18 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       }, (error) => console.warn('Failed to load suggestions:', error));
 
     void supabase
+      .from('expenditures')
+      .select('id,category,description,amount,date')
+      .order('date', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextExpenditures = data.map(mapExpenditureRecord);
+          setExpenditures(nextExpenditures);
+          writeCachedAppData({ expenditures: nextExpenditures });
+        }
+      }, (error) => console.warn('Failed to load public expenditures:', error));
+
+    void supabase
       .from('app_settings')
       .select('*')
       .eq('id', 'default')
@@ -425,6 +446,18 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
           writeCachedAppData({ events: data });
         }
       }, (error) => console.warn('Failed to load admin events:', error));
+
+    void supabase
+      .from('expenditures')
+      .select('id,category,description,amount,date')
+      .order('date', { ascending: false })
+      .then(({ data, error }) => {
+        if (!error && data) {
+          const nextExpenditures = data.map(mapExpenditureRecord);
+          setExpenditures(nextExpenditures);
+          writeCachedAppData({ expenditures: nextExpenditures });
+        }
+      }, (error) => console.warn('Failed to load admin expenditures:', error));
 
     void supabase
       .from('event_applications')
@@ -629,6 +662,19 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       })
       .subscribe();
 
+    const expendituresSubscription = supabase
+      .channel('expenditures-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'expenditures' }, (payload) => {
+        if (payload.eventType === 'UPDATE') {
+          setExpenditures(prev => prev.map(expense => expense.id === payload.new.id ? mapExpenditureRecord(payload.new) : expense));
+        } else if (payload.eventType === 'INSERT') {
+          setExpenditures(prev => [mapExpenditureRecord(payload.new), ...prev]);
+        } else if (payload.eventType === 'DELETE') {
+          setExpenditures(prev => prev.filter(expense => expense.id !== payload.old.id));
+        }
+      })
+      .subscribe();
+
     const eventApplicationsSubscription = supabase
       .channel('event_applications-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'event_applications' }, (payload) => {
@@ -694,6 +740,7 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
       gallerySubscription.unsubscribe();
       vlogsSubscription.unsubscribe();
       contributionsSubscription.unsubscribe();
+      expendituresSubscription.unsubscribe();
       eventApplicationsSubscription.unsubscribe();
     };
   }, []);
@@ -894,20 +941,73 @@ export const DataProvider = ({ children, initialData }: { children: ReactNode; i
     }
   };
 
-  const addExpenditure = (expenditure: Expenditure) => {
+  const addExpenditure = async (expenditure: Expenditure) => {
+    const optimisticId = expenditure.id || `EXP-${Date.now()}`;
+    const optimisticEntry: Expenditure = { ...expenditure, id: optimisticId };
+
     setExpenditures(prev => {
-      const nextExpenditures = [expenditure, ...prev];
+      const nextExpenditures = [optimisticEntry, ...prev];
       persistExpendituresCache(nextExpenditures);
       return nextExpenditures;
     });
+
+    try {
+      const { data, error } = await supabase
+        .from('expenditures')
+        .insert([{
+          category: expenditure.category,
+          description: expenditure.description,
+          amount: Number(expenditure.amount),
+          date: expenditure.date,
+        }])
+        .select('id,category,description,amount,date')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      const savedExpenditure = mapExpenditureRecord(data);
+      setExpenditures(prev => {
+        const nextExpenditures = prev.map(item => item.id === optimisticId ? savedExpenditure : item);
+        persistExpendituresCache(nextExpenditures);
+        return nextExpenditures;
+      });
+    } catch (error) {
+      console.error('Supabase Insert Error (expenditures):', error);
+      setExpenditures(prev => {
+        const nextExpenditures = prev.filter(item => item.id !== optimisticId);
+        persistExpendituresCache(nextExpenditures);
+        return nextExpenditures;
+      });
+      alert(error instanceof Error ? error.message : 'Failed to save expenditure');
+    }
   };
 
-  const deleteExpenditure = (id: string) => {
-    setExpenditures(prev => {
-      const nextExpenditures = prev.filter(e => e.id !== id);
-      persistExpendituresCache(nextExpenditures);
-      return nextExpenditures;
-    });
+  const deleteExpenditure = async (id: string) => {
+    const previousExpenditures = expenditures;
+    const toDelete = previousExpenditures.find(item => item.id === id);
+
+    if (!toDelete) {
+      return;
+    }
+
+    const nextExpenditures = previousExpenditures.filter(item => item.id !== id);
+    setExpenditures(nextExpenditures);
+    persistExpendituresCache(nextExpenditures);
+
+    try {
+      const { error } = await supabase.from('expenditures').delete().eq('id', id);
+      if (error) {
+        throw error;
+      }
+    } catch (error) {
+      console.error('Supabase Delete Error (expenditures):', error);
+      const restoredExpenditures = toDelete ? [toDelete, ...nextExpenditures] : nextExpenditures;
+      setExpenditures(restoredExpenditures);
+      persistExpendituresCache(restoredExpenditures);
+      alert(error instanceof Error ? error.message : 'Failed to delete expenditure');
+    }
   };
 
   const addTeamMember = async (member: TeamMember) => {
